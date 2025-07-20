@@ -162,6 +162,12 @@ export class WorkspaceEdit {
 export interface CodeActionContext {
   diagnostics: any[];
   only?: CodeActionKind[];
+  triggerKind?: CodeActionTriggerKind;
+}
+
+export enum CodeActionTriggerKind {
+  Invoke = 1,
+  Automatic = 2,
 }
 
 export enum DiagnosticSeverity {

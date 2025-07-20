@@ -6,6 +6,7 @@ import {
   ValidationWarning,
   ValidationInfo,
 } from './mapValidator';
+import { DatFileParser } from '../parser/datFileParser';
 
 export function registerValidationCommands(context: vscode.ExtensionContext): void {
   // Run full validation command
@@ -99,17 +100,127 @@ async function fixCommonIssues(editor: vscode.TextEditor): Promise<void> {
   const validator = new MapValidator(editor.document);
   const results = await validator.validate();
 
-  const fixes: string[] = [];
-  const edit = new vscode.WorkspaceEdit();
+  // Show quick pick for fix options
+  const fixOptions: vscode.QuickPickItem[] = [];
+  const fixMap = new Map<string, () => Promise<void>>();
 
-  // Fix invalid tile IDs
-  for (const error of results.errors) {
-    if (
-      error.message.includes('Invalid tile ID') &&
-      error.line !== undefined &&
-      error.column !== undefined
-    ) {
-      // Replace with ground tile (1)
+  // Group errors by type
+  const tileErrors = results.errors.filter(e => e.message.includes('tile'));
+  const missingToolStore = results.errors.some(e => e.message.includes('Tool Store'));
+  const missingGround = results.errors.some(e => e.message.includes('buildable ground'));
+  const resourceErrors = results.errors.filter(
+    e => e.message.includes('objective') && e.message.includes('exceed')
+  );
+  const negativeErrors = results.errors.filter(e => e.message.includes('negative'));
+  const dimensionErrors = results.errors.filter(
+    e =>
+      e.message.includes('expected') &&
+      (e.message.includes('rows') || e.message.includes('columns'))
+  );
+
+  if (tileErrors.length > 0) {
+    const option = {
+      label: '$(symbol-misc) Fix Invalid Tiles',
+      description: `Replace ${tileErrors.length} invalid tile(s) with ground tiles`,
+      detail: 'Replaces unknown or invalid tile IDs with tile ID 1 (ground)',
+    };
+    fixOptions.push(option);
+    fixMap.set(option.label, async () => await fixInvalidTiles(editor, tileErrors));
+  }
+
+  if (missingToolStore) {
+    const option = {
+      label: '$(home) Add Tool Store',
+      description: 'Add a Tool Store to the buildings section',
+      detail: 'Tool Store is required for most levels to function properly',
+    };
+    fixOptions.push(option);
+    fixMap.set(option.label, async () => await addToolStore(editor));
+  }
+
+  if (missingGround) {
+    const option = {
+      label: '$(symbol-namespace) Add Ground Tiles',
+      description: 'Replace center area with buildable ground',
+      detail: 'Adds a 5x5 area of ground tiles in the map center',
+    };
+    fixOptions.push(option);
+    fixMap.set(option.label, async () => await addGroundTiles(editor));
+  }
+
+  if (resourceErrors.length > 0) {
+    const option = {
+      label: '$(target) Adjust Objectives',
+      description: `Fix ${resourceErrors.length} objective(s) to match available resources`,
+      detail: "Reduces resource requirements to match what's available in the map",
+    };
+    fixOptions.push(option);
+    fixMap.set(option.label, async () => await adjustObjectives(editor, resourceErrors));
+  }
+
+  if (negativeErrors.length > 0) {
+    const option = {
+      label: '$(dashboard) Fix Negative Values',
+      description: `Replace ${negativeErrors.length} negative value(s) with 0`,
+      detail: 'Negative values are not allowed in most fields',
+    };
+    fixOptions.push(option);
+    fixMap.set(option.label, async () => await fixNegativeValues(editor, negativeErrors));
+  }
+
+  if (dimensionErrors.length > 0) {
+    const option = {
+      label: '$(table) Fix Grid Dimensions',
+      description: `Adjust ${dimensionErrors.length} row(s) to match expected dimensions`,
+      detail: 'Adds or removes tiles to match rowcount/colcount',
+    };
+    fixOptions.push(option);
+    fixMap.set(option.label, async () => await fixGridDimensions(editor, dimensionErrors));
+  }
+
+  if (fixOptions.length > 0) {
+    fixOptions.push({
+      label: '$(check-all) Fix All Issues',
+      description: 'Apply all available fixes',
+      detail: 'Automatically fixes all issues that have available solutions',
+    });
+
+    const selected = await vscode.window.showQuickPick(fixOptions, {
+      placeHolder: 'Select issues to fix',
+      canPickMany: false,
+    });
+
+    if (selected) {
+      if (selected.label === '$(check-all) Fix All Issues') {
+        // Run all fixes
+        let totalFixes = 0;
+        for (const [label, fix] of fixMap.entries()) {
+          if (label !== '$(check-all) Fix All Issues') {
+            await fix();
+            totalFixes++;
+          }
+        }
+        vscode.window.showInformationMessage(`Applied ${totalFixes} fix categories`);
+      } else {
+        // Run selected fix
+        const fix = fixMap.get(selected.label);
+        if (fix) {
+          await fix();
+        }
+      }
+    }
+  } else {
+    vscode.window.showInformationMessage('No automatic fixes available for current issues.');
+  }
+}
+
+// Helper functions for specific fixes
+async function fixInvalidTiles(editor: vscode.TextEditor, errors: any[]): Promise<void> {
+  const edit = new vscode.WorkspaceEdit();
+  const fixes: string[] = [];
+
+  for (const error of errors) {
+    if (error.line !== undefined && error.column !== undefined) {
       const lines = editor.document.getText().split('\n');
       const tilesStartIndex = lines.findIndex(line => line.trim() === 'tiles{');
 
@@ -127,16 +238,210 @@ async function fixCommonIssues(editor: vscode.TextEditor): Promise<void> {
           newLine
         );
 
-        fixes.push(`Fixed invalid tile at [${error.line}, ${error.column}]`);
+        fixes.push(`[${error.line}, ${error.column}]`);
       }
     }
   }
 
   if (fixes.length > 0) {
     await vscode.workspace.applyEdit(edit);
-    vscode.window.showInformationMessage(`Fixed ${fixes.length} issue(s): ${fixes.join(', ')}`);
+    vscode.window.showInformationMessage(`Fixed ${fixes.length} invalid tile(s)`);
+  }
+}
+
+async function addToolStore(editor: vscode.TextEditor): Promise<void> {
+  const edit = new vscode.WorkspaceEdit();
+  const text = editor.document.getText();
+  const buildingsMatch = text.match(/buildings\s*\{([^}]*)\}/s);
+
+  const toolStoreEntry = `  type: BuildingToolStore_C
+  ID: ToolStore01
+  essential: true
+  coordinates{
+    Translation: X=2250.0 Y=2250.0 Z=0.0 Rotation: P=0.0 Y=0.0 R=0.0 Scale X=1.0 Y=1.0 Z=1.0
+  }
+  Level: 0
+  Teleport: 1
+  HP: MAX
+`;
+
+  if (buildingsMatch) {
+    // Add to existing buildings section
+    const buildingsStart = text.indexOf(buildingsMatch[0]);
+    const insertPos = buildingsStart + buildingsMatch[0].indexOf('{') + 1;
+    const position = editor.document.positionAt(insertPos);
+    edit.insert(editor.document.uri, position, '\n' + toolStoreEntry);
   } else {
-    vscode.window.showInformationMessage('No automatic fixes available for current issues.');
+    // Create new buildings section after info
+    const infoEnd = text.indexOf('}', text.indexOf('info{'));
+    if (infoEnd !== -1) {
+      const position = editor.document.positionAt(infoEnd + 1);
+      const buildingsSection = `\n\nbuildings{\n${toolStoreEntry}}`;
+      edit.insert(editor.document.uri, position, buildingsSection);
+    }
+  }
+
+  await vscode.workspace.applyEdit(edit);
+  vscode.window.showInformationMessage('Added Tool Store to buildings');
+}
+
+async function addGroundTiles(editor: vscode.TextEditor): Promise<void> {
+  const edit = new vscode.WorkspaceEdit();
+  const parser = new DatFileParser(editor.document.getText());
+  const info = parser.getSection('info');
+
+  if (info && info.content) {
+    const rowMatch = info.content.match(/rowcount:\s*(\d+)/);
+    const colMatch = info.content.match(/colcount:\s*(\d+)/);
+
+    if (rowMatch && colMatch) {
+      const numRows = parseInt(rowMatch[1]);
+      const numCols = parseInt(colMatch[1]);
+      const centerRow = Math.floor(numRows / 2);
+      const centerCol = Math.floor(numCols / 2);
+
+      const lines = editor.document.getText().split('\n');
+      const tilesStart = lines.findIndex(line => line.trim() === 'tiles{');
+
+      if (tilesStart !== -1) {
+        // Replace 5x5 area in center with ground tiles
+        for (let r = -2; r <= 2; r++) {
+          const row = centerRow + r;
+          if (row >= 0 && row < numRows) {
+            const actualLine = tilesStart + 1 + row;
+            const lineText = lines[actualLine];
+            const tiles = lineText.split(',');
+
+            for (let c = -2; c <= 2; c++) {
+              const col = centerCol + c;
+              if (col >= 0 && col < numCols) {
+                tiles[col] = '1';
+              }
+            }
+
+            const newLine = tiles.join(',');
+            edit.replace(
+              editor.document.uri,
+              new vscode.Range(actualLine, 0, actualLine, lineText.length),
+              newLine
+            );
+          }
+        }
+      }
+    }
+  }
+
+  await vscode.workspace.applyEdit(edit);
+  vscode.window.showInformationMessage('Added ground tiles to map center');
+}
+
+async function adjustObjectives(editor: vscode.TextEditor, errors: any[]): Promise<void> {
+  const edit = new vscode.WorkspaceEdit();
+  let fixCount = 0;
+
+  for (const error of errors) {
+    const match = error.message.match(/\((\d+)\).*\((\d+)\)/);
+    if (match && error.line !== undefined) {
+      const required = parseInt(match[1]);
+      const available = parseInt(match[2]);
+
+      const lines = editor.document.getText().split('\n');
+      const objectivesStart = lines.findIndex(line => line.trim() === 'objectives{');
+
+      if (objectivesStart !== -1) {
+        const actualLine = objectivesStart + 1 + error.line;
+        const lineText = lines[actualLine];
+        const newLine = lineText.replace(required.toString(), available.toString());
+
+        edit.replace(
+          editor.document.uri,
+          new vscode.Range(actualLine, 0, actualLine, lineText.length),
+          newLine
+        );
+        fixCount++;
+      }
+    }
+  }
+
+  if (fixCount > 0) {
+    await vscode.workspace.applyEdit(edit);
+    vscode.window.showInformationMessage(`Adjusted ${fixCount} objective(s)`);
+  }
+}
+
+async function fixNegativeValues(editor: vscode.TextEditor, errors: any[]): Promise<void> {
+  const edit = new vscode.WorkspaceEdit();
+  let fixCount = 0;
+
+  for (const error of errors) {
+    if (error.line !== undefined && error.section) {
+      const lines = editor.document.getText().split('\n');
+      const sectionStart = lines.findIndex(line => line.trim() === `${error.section}{`);
+
+      if (sectionStart !== -1) {
+        const actualLine = sectionStart + 1 + error.line;
+        const lineText = lines[actualLine];
+        const newLine = lineText.replace(/-\d+(\.\d+)?/g, '0');
+
+        if (newLine !== lineText) {
+          edit.replace(
+            editor.document.uri,
+            new vscode.Range(actualLine, 0, actualLine, lineText.length),
+            newLine
+          );
+          fixCount++;
+        }
+      }
+    }
+  }
+
+  if (fixCount > 0) {
+    await vscode.workspace.applyEdit(edit);
+    vscode.window.showInformationMessage(`Fixed ${fixCount} negative value(s)`);
+  }
+}
+
+async function fixGridDimensions(editor: vscode.TextEditor, errors: any[]): Promise<void> {
+  const edit = new vscode.WorkspaceEdit();
+  let fixCount = 0;
+
+  for (const error of errors) {
+    const match = error.message.match(/expected (\d+)/);
+    if (match && error.section && error.line !== undefined) {
+      const expected = parseInt(match[1]);
+      const lines = editor.document.getText().split('\n');
+      const sectionStart = lines.findIndex(line => line.trim() === `${error.section}{`);
+
+      if (sectionStart !== -1) {
+        const actualLine = sectionStart + 1 + error.line;
+        const lineText = lines[actualLine];
+        const values = lineText.split(',');
+
+        if (values.length !== expected) {
+          // Adjust to match expected count
+          if (values.length < expected) {
+            while (values.length < expected) {
+              values.push(error.section === 'tiles' ? '1' : '0');
+            }
+          } else {
+            values.length = expected;
+          }
+
+          const newLine = values.join(',');
+          edit.replace(
+            editor.document.uri,
+            new vscode.Range(actualLine, 0, actualLine, lineText.length),
+            newLine
+          );
+          fixCount++;
+        }
+      }
+    }
+  }
+
+  if (fixCount > 0) {
+    await vscode.workspace.applyEdit(edit);
+    vscode.window.showInformationMessage(`Fixed ${fixCount} dimension issue(s)`);
   }
 }
 
