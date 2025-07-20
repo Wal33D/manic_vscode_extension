@@ -7,6 +7,7 @@ import {
   isReinforcedTile,
   getBaseTileId,
 } from './data/enhancedTileDefinitions';
+import { getExtendedTileInfo } from './data/extendedTileDefinitions';
 import { BuildingType, VehicleType, CreatureType, BiomeType } from './types/datFileTypes';
 
 // Section descriptions
@@ -515,8 +516,9 @@ export class DatHoverProvider implements vscode.HoverProvider {
         const matchIndex = lineText.indexOf(match, currentPos);
         if (position.character >= matchIndex && position.character <= matchIndex + match.length) {
           const tileId = parseInt(match);
-          // Try enhanced tile info first, fall back to basic if not found
-          const tileInfo = getEnhancedTileInfo(tileId) || getTileInfo(tileId);
+          // Try enhanced tile info first, then basic, then extended
+          const tileInfo =
+            getEnhancedTileInfo(tileId) || getTileInfo(tileId) || getExtendedTileInfo(tileId);
           if (tileInfo) {
             const markdown = new vscode.MarkdownString();
             markdown.supportHtml = true;

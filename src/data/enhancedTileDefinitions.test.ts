@@ -12,8 +12,8 @@ import {
 
 describe('Enhanced Tile Definitions', () => {
   describe('ENHANCED_TILE_DEFINITIONS', () => {
-    it('should contain all 90 tile definitions', () => {
-      expect(ENHANCED_TILE_DEFINITIONS.size).toBe(90);
+    it('should contain all 93 tile definitions', () => {
+      expect(ENHANCED_TILE_DEFINITIONS.size).toBe(93); // Updated to include tiles 163-165
     });
 
     it('should have proper structure for each tile', () => {
