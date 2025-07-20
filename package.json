@@ -135,6 +135,45 @@
         "title": "Convert Objective Format",
         "category": "Manic Miners",
         "icon": "$(sync)"
+      },
+      {
+        "command": "manicMiners.undo",
+        "title": "Undo Map Edit",
+        "category": "Manic Miners",
+        "icon": "$(discard)"
+      },
+      {
+        "command": "manicMiners.redo",
+        "title": "Redo Map Edit",
+        "category": "Manic Miners",
+        "icon": "$(redo)"
+      },
+      {
+        "command": "manicMiners.showUndoRedoHistory",
+        "title": "Show Edit History",
+        "category": "Manic Miners",
+        "icon": "$(history)"
+      },
+      {
+        "command": "manicMiners.clearEditHistory",
+        "title": "Clear Edit History",
+        "category": "Manic Miners",
+        "icon": "$(clear-all)"
+      },
+      {
+        "command": "manicMiners.fillAreaEnhanced",
+        "title": "Fill Area (with Undo)",
+        "category": "Manic Miners"
+      },
+      {
+        "command": "manicMiners.replaceAllEnhanced",
+        "title": "Replace All Tiles (with Undo)",
+        "category": "Manic Miners"
+      },
+      {
+        "command": "manicMiners.replaceWithTileSetEnhanced",
+        "title": "Replace with Tile Set (with Undo)",
+        "category": "Manic Miners"
       }
     ],
     "hoverProviders": [
@@ -194,6 +233,26 @@
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "manicMiners.undo",
+        "key": "ctrl+alt+z",
+        "mac": "cmd+alt+z",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.redo",
+        "key": "ctrl+alt+y",
+        "mac": "cmd+alt+y",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.showUndoRedoHistory",
+        "key": "ctrl+alt+h",
+        "mac": "cmd+alt+h",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      }
+    ],
     "snippets": [
       {
         "language": "manicminers",

@@ -109,7 +109,17 @@ export const window = {
     webview: {
       html: '',
       asWebviewUri: jest.fn(uri => uri),
+      onDidReceiveMessage: jest.fn(),
     },
+    dispose: jest.fn(),
+    onDidDispose: jest.fn(),
+  })),
+  createStatusBarItem: jest.fn(() => ({
+    text: '',
+    tooltip: '',
+    command: '',
+    show: jest.fn(),
+    hide: jest.fn(),
     dispose: jest.fn(),
   })),
 };
@@ -206,6 +216,11 @@ export enum ViewColumn {
   Seven = 7,
   Eight = 8,
   Nine = 9,
+}
+
+export enum StatusBarAlignment {
+  Left = 1,
+  Right = 2,
 }
 
 // Mock TextDocument
