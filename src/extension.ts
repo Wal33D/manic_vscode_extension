@@ -14,6 +14,7 @@ import { MapDiagnosticProvider } from './validation/diagnosticProvider';
 import { registerValidationCommands } from './validation/validationCommands';
 import { ObjectiveBuilderProvider } from './objectiveBuilder/objectiveBuilderProvider';
 import { registerObjectiveCommands } from './objectiveBuilder/objectiveCommands';
+import { AutoFixProvider } from './validation/autoFixProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   // Extension activated successfully
@@ -118,6 +119,16 @@ export function activate(context: vscode.ExtensionContext) {
   // Register Map Validation
   MapDiagnosticProvider.register(context);
   registerValidationCommands(context);
+
+  // Register Auto-Fix Provider
+  const autoFixProvider = vscode.languages.registerCodeActionsProvider(
+    { scheme: 'file', language: 'manicminers' },
+    new AutoFixProvider(),
+    {
+      providedCodeActionKinds: AutoFixProvider.providedCodeActionKinds,
+    }
+  );
+  context.subscriptions.push(autoFixProvider);
 
   // Register Objective Builder Provider
   const objectiveBuilderProvider = new ObjectiveBuilderProvider(context.extensionUri);
