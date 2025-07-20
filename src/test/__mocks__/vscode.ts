@@ -62,6 +62,10 @@ export class Uri {
   static file(path: string): Uri {
     return new Uri(path);
   }
+  static joinPath(base: Uri, ...pathSegments: string[]): Uri {
+    const path = [base.fsPath, ...pathSegments].join('/');
+    return new Uri(path);
+  }
   toString(): string {
     return this.fsPath;
   }
@@ -144,7 +148,7 @@ export class TextDocument {
 
   getWordRangeAtPosition(position: Position, regex?: RegExp): Range | undefined {
     const line = this.lineAt(position).text;
-    const defaultRegex = regex || /[a-zA-Z]+/;
+    const defaultRegex = regex || /[a-zA-Z_0-9]+/;
     const matches = [...line.matchAll(new RegExp(defaultRegex, 'g'))];
 
     for (const match of matches) {
