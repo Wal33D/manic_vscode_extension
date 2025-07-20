@@ -664,4 +664,11 @@ export class DatFileParser {
     }
     return undefined;
   }
+
+  /**
+   * Get a section by name
+   */
+  public getSection(name: string): SectionInfo | undefined {
+    return this.sections.get(name);
+  }
 }

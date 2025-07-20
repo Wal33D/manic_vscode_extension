@@ -56,8 +56,8 @@ describe('Extension', () => {
     it('should add all disposables to subscriptions', () => {
       activate(mockContext);
 
-      // Should have 3 subscriptions: command, completion provider, hover provider
-      expect(mockContext.subscriptions).toHaveLength(3);
+      // Should have 5 subscriptions: command, completion provider, hover provider, definition provider, reference provider
+      expect(mockContext.subscriptions).toHaveLength(5);
     });
 
     it('should activate without errors', () => {
