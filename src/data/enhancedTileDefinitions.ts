@@ -786,6 +786,40 @@ ENHANCED_TILE_DEFINITIONS.set(115, {
   canBuild: false,
 });
 
+// Additional rubble tiles (163-165)
+ENHANCED_TILE_DEFINITIONS.set(163, {
+  id: 163,
+  name: 'Landslide Rubble',
+  description: 'Standard cave-in debris',
+  category: 'rubble',
+  canWalk: false,
+  canDrill: true,
+  canBuild: false,
+  color: { r: 46, g: 23, b: 95 },
+});
+
+ENHANCED_TILE_DEFINITIONS.set(164, {
+  id: 164,
+  name: 'Dense Rubble',
+  description: 'Compacted rubble from major cave-ins',
+  category: 'rubble',
+  canWalk: false,
+  canDrill: true,
+  canBuild: false,
+  color: { r: 65, g: 33, b: 95 },
+});
+
+ENHANCED_TILE_DEFINITIONS.set(165, {
+  id: 165,
+  name: 'Unstable Rubble',
+  description: 'Loose rubble that may shift when disturbed',
+  category: 'rubble',
+  canWalk: false,
+  canDrill: true,
+  canBuild: false,
+  color: { r: 46, g: 23, b: 95, a: 0.5 },
+});
+
 // Helper functions
 export function isReinforcedTile(tileId: number): boolean {
   return (tileId >= 76 && tileId <= 103) || tileId === 114 || tileId === 115;

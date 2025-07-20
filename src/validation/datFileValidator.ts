@@ -5,6 +5,7 @@ import {
   isReinforcedTile,
   getBaseTileId,
 } from '../data/enhancedTileDefinitions';
+import { getExtendedTileInfo } from '../data/extendedTileDefinitions';
 
 export class DatFileValidator {
   private errors: ValidationError[] = [];
@@ -116,7 +117,8 @@ export class DatFileValidator {
     for (let row = 0; row < tiles.length; row++) {
       for (let col = 0; col < tiles[row].length; col++) {
         const tileId = tiles[row][col];
-        const tileInfo = getEnhancedTileInfo(tileId) || getTileInfo(tileId);
+        const tileInfo =
+          getEnhancedTileInfo(tileId) || getTileInfo(tileId) || getExtendedTileInfo(tileId);
 
         if (!tileInfo && !unknownTiles.has(tileId)) {
           unknownTiles.add(tileId);
@@ -169,7 +171,8 @@ export class DatFileValidator {
 
     for (const row of tiles) {
       for (const tileId of row) {
-        const tileInfo = getEnhancedTileInfo(tileId) || getTileInfo(tileId);
+        const tileInfo =
+          getEnhancedTileInfo(tileId) || getTileInfo(tileId) || getExtendedTileInfo(tileId);
         if (tileInfo && tileInfo.canBuild) {
           hasGround = true;
         }
@@ -234,7 +237,8 @@ export class DatFileValidator {
       let hasShore = false;
 
       for (const adjacent of adjacentTiles) {
-        const adjInfo = getEnhancedTileInfo(adjacent) || getTileInfo(adjacent);
+        const adjInfo =
+          getEnhancedTileInfo(adjacent) || getTileInfo(adjacent) || getExtendedTileInfo(adjacent);
         if (adjInfo && (adjInfo.category === 'ground' || adjacent === 14 || adjacent === 114)) {
           hasShore = true;
           break;
