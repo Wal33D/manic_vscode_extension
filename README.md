@@ -1,8 +1,8 @@
 # Manic Miner DAT File Support for Visual Studio Code
 
-[![CI](https://github.com/Wal33D/manic_vscode_extension/actions/workflows/ci.yml/badge.svg)](https://github.com/Wal33D/manic_vscode_extension/actions/workflows/ci.yml)
+[![CI](https://github.com/Wal33D/vscode-manic-miners/actions/workflows/ci.yml/badge.svg)](https://github.com/Wal33D/vscode-manic-miners/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Version](https://img.shields.io/visual-studio-marketplace/v/manic-miners.dat)](https://marketplace.visualstudio.com/items?itemName=manic-miners.dat)
+[![Version](https://img.shields.io/visual-studio-marketplace/v/Wal33D.manic-miners-dat)](https://marketplace.visualstudio.com/items?itemName=Wal33D.manic-miners-dat)
 
 A comprehensive Visual Studio Code extension providing language support for Manic Miner `.dat` level files. Edit game levels with full syntax highlighting, IntelliSense, and helpful tooltips.
 
@@ -56,10 +56,26 @@ Full syntax highlighting for all DAT file sections including:
 - Analyze existing objectives with detailed reports
 - Convert between objective formats easily
 
+### 🔍 Map Validation
+- Advanced pathfinding analysis
+- Resource accessibility checks
+- Objective validation
+- Real-time diagnostics with inline errors and warnings
+- Auto-fix support for common issues
+- Comprehensive validation reports
+
+### 📝 Map Templates
+- Pre-built templates for common level patterns
+- Create custom templates from selection
+- Manage and organize your template library
+- Quick insertion with customizable parameters
+
 ### 🔧 Language Configuration
 - Comment support (line `//` and block `/* */`)
 - Auto-closing pairs for brackets and quotes
 - Smart indentation
+- Go-to-definition for references
+- Find all references for entities
 
 ## Installation
 
@@ -70,7 +86,7 @@ Full syntax highlighting for all DAT file sections including:
 4. Click Install
 
 ### From VSIX Package
-1. Download the `.vsix` file from [Releases](https://github.com/yourusername/manic_vscode_extension/releases)
+1. Download the `.vsix` file from [Releases](https://github.com/Wal33D/vscode-manic-miners/releases)
 2. Open VS Code
 3. Press `Ctrl+Shift+P` / `Cmd+Shift+P`
 4. Type "Install from VSIX" and select the command
@@ -127,12 +143,32 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 ## Known Issues
 
-- IntelliSense currently only works within `info` blocks
-- Additional sections will receive enhanced support in future versions
+- Large maps (200x200+) may experience slight performance lag in preview
+- Some advanced script commands may not have full IntelliSense support
 
 ## Release Notes
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
+
+### 0.3.0 - Phase 3 Complete
+
+Major feature release:
+- **Visual Map Preview** with zoom, multi-selection, and keyboard controls
+- **Objective Builder** interface for creating level objectives
+- **Map Validation** with pathfinding analysis and auto-fix
+- **Quick Actions** for tile manipulation and custom tile sets
+- **Map Templates** system with custom template support
+- Enhanced IntelliSense for all sections
+- Go-to-definition and find references
+- Real-time diagnostics
+- Performance optimizations
+
+### 0.2.5
+
+- Enhanced test coverage
+- Fixed TypeScript and ESLint errors
+- Added game asset images
+- Improved Phase 2 functionality
 
 ### 0.0.1
 
