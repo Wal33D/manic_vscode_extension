@@ -60,16 +60,18 @@ describe('Extension', () => {
     it('should add all disposables to subscriptions', () => {
       activate(mockContext);
 
-      // Should have 39 subscriptions: hello world command, show map preview command, map preview provider,
+      // Should have 42 subscriptions: hello world command, show map preview command, map preview provider,
       // onDidChangeActiveTextEditor, onDidChangeTextDocument, completion provider, hover provider,
       // definition provider, reference provider, code actions provider (original), code actions provider (autoFix),
+      // code actions provider (smart suggestions),
       // fill area command, replace all command, replace with tile set command, create tile set command,
       // insert template command, create template from selection command, manage templates command,
       // diagnostic collection, 3 validation listeners, 3 validation commands,
       // objective builder view, 4 objective commands,
       // undo/redo provider (status bar + onDidChangeActiveTextEditor),
-      // enhanced quick actions (3 commands + 4 undo/redo commands + 1 clear history command)
-      expect(mockContext.subscriptions).toHaveLength(39);
+      // enhanced quick actions (3 commands + 4 undo/redo commands + 1 clear history command),
+      // smart suggestions (2 commands: showSmartSuggestions, analyzeTilePatterns)
+      expect(mockContext.subscriptions).toHaveLength(42);
     });
 
     it('should activate without errors', () => {

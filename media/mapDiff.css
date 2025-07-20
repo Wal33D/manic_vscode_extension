@@ -1,0 +1,143 @@
+body {
+    font-family: var(--vscode-font-family);
+    color: var(--vscode-foreground);
+    background-color: var(--vscode-editor-background);
+    padding: 0;
+    margin: 0;
+}
+
+#diff-container {
+    padding: 20px;
+}
+
+.diff-header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid var(--vscode-panel-border);
+    padding-bottom: 20px;
+}
+
+.diff-header h2 {
+    margin-top: 0;
+}
+
+.version-info {
+    display: flex;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.from-version, .to-version {
+    flex: 1;
+    padding: 15px;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+}
+
+.from-version h3, .to-version h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.version-details p {
+    margin: 5px 0;
+    font-size: 12px;
+}
+
+.diff-statistics {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+}
+
+.diff-statistics h3 {
+    margin-top: 0;
+}
+
+.stats {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stat-label {
+    font-weight: 600;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.stat-item.added .stat-value {
+    color: var(--vscode-gitDecoration-addedResourceForeground);
+}
+
+.stat-item.removed .stat-value {
+    color: var(--vscode-gitDecoration-deletedResourceForeground);
+}
+
+.stat-item.modified .stat-value {
+    color: var(--vscode-gitDecoration-modifiedResourceForeground);
+}
+
+.diff-content {
+    padding: 15px;
+    background-color: var(--vscode-editor-background);
+    border: 1px solid var(--vscode-panel-border);
+    border-radius: 4px;
+}
+
+.diff-content h3 {
+    margin-top: 0;
+}
+
+.changes-list {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.change-group {
+    margin-bottom: 20px;
+}
+
+.change-group h4 {
+    margin-bottom: 10px;
+}
+
+.change-group ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.change-group li {
+    padding: 5px 10px;
+    margin-bottom: 2px;
+    border-radius: 3px;
+    font-family: var(--vscode-editor-font-family);
+    font-size: 12px;
+}
+
+.change-group.added li {
+    background-color: var(--vscode-diffEditor-insertedTextBackground);
+    color: var(--vscode-diffEditor-insertedTextForeground);
+}
+
+.change-group.removed li {
+    background-color: var(--vscode-diffEditor-removedTextBackground);
+    color: var(--vscode-diffEditor-removedTextForeground);
+}
+
+.change-group.modified li {
+    background-color: var(--vscode-diffEditor-modifiedTextBackground);
+    color: var(--vscode-diffEditor-modifiedTextForeground);
+}

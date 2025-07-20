@@ -17,6 +17,13 @@ import { registerObjectiveCommands } from './objectiveBuilder/objectiveCommands'
 import { AutoFixProvider } from './validation/autoFixProvider';
 import { UndoRedoProvider } from './undoRedo/undoRedoProvider';
 import { registerEnhancedQuickActionsCommands } from './quickActions/quickActionsEnhanced';
+import {
+  SmartSuggestionProvider,
+  registerSmartSuggestionCommands,
+} from './smartSuggestions/smartSuggestionProvider';
+import { MapVersionControl } from './versionControl/mapVersionControl';
+import { MapDiffProvider } from './versionControl/mapDiffProvider';
+import { registerVersionControlCommands } from './versionControl/versionControlCommands';
 
 export function activate(context: vscode.ExtensionContext) {
   // Extension activated successfully
@@ -138,6 +145,19 @@ export function activate(context: vscode.ExtensionContext) {
   );
   context.subscriptions.push(autoFixProvider);
 
+  // Register Smart Suggestion Provider
+  const smartSuggestionProvider = vscode.languages.registerCodeActionsProvider(
+    { scheme: 'file', language: 'manicminers' },
+    new SmartSuggestionProvider(),
+    {
+      providedCodeActionKinds: SmartSuggestionProvider.providedCodeActionKinds,
+    }
+  );
+  context.subscriptions.push(smartSuggestionProvider);
+
+  // Register Smart Suggestion Commands
+  registerSmartSuggestionCommands(context);
+
   // Register Objective Builder Provider
   const objectiveBuilderProvider = new ObjectiveBuilderProvider(context.extensionUri);
   context.subscriptions.push(
@@ -149,6 +169,23 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register Objective Commands
   registerObjectiveCommands(context);
+
+  // Register Version Control
+  const versionControl = new MapVersionControl(context);
+
+  // Register Map Diff Provider
+  const mapDiffProvider = new MapDiffProvider(
+    context.extensionUri,
+    hash => versionControl.getVersion(hash),
+    (from, to) => versionControl.getDiff(from, to)
+  );
+
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider('manicMiners.mapDiff', mapDiffProvider)
+  );
+
+  // Register Version Control Commands
+  registerVersionControlCommands(context, versionControl, mapDiffProvider);
 }
 
 export function deactivate() {}
