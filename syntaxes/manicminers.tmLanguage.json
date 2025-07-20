@@ -1,0 +1,120 @@
+{
+  "name": "Manic Miners Dat File",
+  "scopeName": "source.manicminers",
+  "patterns": [
+    {
+      "begin": "\\b(comments|info|tiles|height|resources|objectives|buildings|landslidefrequency|lavaspread|miners|briefing|briefingsuccess|briefingfailure|vehicles|creatures|blocks|script)\\b\\s*\\{",
+      "end": "\\}",
+      "beginCaptures": {
+        "0": {
+          "name": "keyword.control.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#keyvalue"
+        }
+      ]
+    }
+  ],
+  "repository": {
+    "keyvalue": {
+      "patterns": [
+        {
+          "match": "(\\b(rowcount|Rowcount|Colcount|colcount|camerapos|biome|creator|erosioninitialwaittime|spiderchance|erosionscale|camerazoom|version|oxygen|levelname|initialcrystals|initialore|cameraangle|initialheight|maxheight|minheight|gravity|ambientlight|weather|difficulty|resourcespeed|enemystrength|mapdescription)\\b)(\\s*:\\s*)([^,\\n\\r]+)",
+          "captures": {
+            "1": {
+              "name": "constant.language.manicminers"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.manicminers"
+            },
+            "3": {
+              "name": "string.quoted.double.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(\\b\\w+\\b)(\\s*=\\s*)([^,\\n\\r]+)",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.manicminers"
+            },
+            "2": {
+              "name": "punctuation.separator.key-value.manicminers"
+            },
+            "3": {
+              "name": "string.quoted.double.manicminers"
+            }
+          }
+        },
+        {
+          "begin": "\\bcamerapos\\s*:\\s*Translation\\s*:\\s*",
+          "end": "(?=\\n|$)",
+          "name": "meta.camerapos.manicminers",
+          "patterns": [
+            {
+              "match": "\\b(Translation|Rotation|Scale)\\b",
+              "name": "storage.type.manicminers"
+            },
+            {
+              "match": "\\bX=[-\\d\\.]+\\b",
+              "name": "constant.numeric.camerapos.x.manicminers"
+            },
+            {
+              "match": "\\bY=[-\\d\\.]+\\b",
+              "name": "constant.numeric.camerapos.y.manicminers"
+            },
+            {
+              "match": "\\bZ=[-\\d\\.]+\\b",
+              "name": "constant.numeric.camerapos.z.manicminers"
+            },
+            {
+              "match": "\\bP=[-\\d\\.]+\\b",
+              "name": "constant.numeric.camerapos.pitch.manicminers"
+            },
+            {
+              "match": "\\bR=[-\\d\\.]+\\b",
+              "name": "constant.numeric.camerapos.roll.manicminers"
+            },
+            {
+              "match": "\\bScale\\sX=[-\\d\\.]+\\b",
+              "name": "constant.numeric.camerapos.scale.x.manicminers"
+            },
+            {
+              "match": "\\bScale\\sY=[-\\d\\.]+\\b",
+              "name": "constant.numeric.camerapos.scale.y.manicminers"
+            },
+            {
+              "match": "\\bScale\\sZ=[-\\d\\.]+\\b",
+              "name": "constant.numeric.camerapos.scale.z.manicminers"
+            }
+          ]
+        },
+        {
+          "begin": "\\bcameraangle\\s*:\\s*",
+          "end": "(?=\\n|$)",
+          "name": "meta.cameraangle.manicminers",
+          "patterns": [
+            {
+              "match": "\\b\\d+\\b",
+              "name": "constant.numeric.cameraangle.manicminers"
+            },
+            {
+              "match": "(\\d+),",
+              "name": "constant.numeric.cameraangle.x.manicminers"
+            },
+            {
+              "match": ",(\\d+),",
+              "name": "constant.numeric.cameraangle.y.manicminers"
+            },
+            {
+              "match": ",(\\d+)$",
+              "name": "constant.numeric.cameraangle.z.manicminers"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

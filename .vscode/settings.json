@@ -1,0 +1,57 @@
+// Place your settings in this file to overwrite default and user settings.
+{
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "files.exclude": {
+    "**/.git": true,
+    "**/.svn": true,
+    "**/.hg": true,
+    "**/CVS": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true,
+    "out": false,
+    "**/.retool_types/**": true,
+    "**/*tsconfig.json": true,
+    ".cache": true,
+    "retool.config.json": true
+  },
+  "search.exclude": {
+    "out": true // set this to false to include "out" folder in search results
+  },
+  // Turn off tsc task auto detection since we have the necessary tasks as npm scripts
+  "typescript.tsc.autoDetect": "off",
+  "editor.tokenColorCustomizations": {
+    "textMateRules": [
+      {
+        "scope": "constant.numeric.oxygen.current.manicminers",
+        "settings": {
+          "foreground": "#FF0000" // Red color
+        }
+      },
+      {
+        "scope": "constant.numeric.oxygen.total.manicminers",
+        "settings": {
+          "foreground": "#0000FF" // Blue color
+        }
+      },
+      {
+        "scope": "constant.numeric.cameraangle.x.manicminers",
+        "settings": {
+          "foreground": "#FF0000" // Red color
+        }
+      },
+      {
+        "scope": "constant.numeric.cameraangle.y.manicminers",
+        "settings": {
+          "foreground": "#00FF00" // Green color
+        }
+      },
+      {
+        "scope": "constant.numeric.cameraangle.z.manicminers",
+        "settings": {
+          "foreground": "#0000FF" // Blue color
+        }
+      }
+    ]
+  }
+}
