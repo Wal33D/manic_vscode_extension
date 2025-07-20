@@ -174,6 +174,36 @@
         "command": "manicMiners.replaceWithTileSetEnhanced",
         "title": "Replace with Tile Set (with Undo)",
         "category": "Manic Miners"
+      },
+      {
+        "command": "manicMiners.showSmartSuggestions",
+        "title": "Show Smart Tile Suggestions",
+        "category": "Manic Miners",
+        "icon": "$(lightbulb)"
+      },
+      {
+        "command": "manicMiners.analyzeTilePatterns",
+        "title": "Analyze Tile Patterns",
+        "category": "Manic Miners",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "manicMiners.createVersion",
+        "title": "Create Map Version",
+        "category": "Manic Miners",
+        "icon": "$(save)"
+      },
+      {
+        "command": "manicMiners.showVersionHistory",
+        "title": "Show Version History",
+        "category": "Manic Miners",
+        "icon": "$(history)"
+      },
+      {
+        "command": "manicMiners.compareVersions",
+        "title": "Compare Map Versions",
+        "category": "Manic Miners",
+        "icon": "$(diff)"
       }
     ],
     "hoverProviders": [
@@ -196,6 +226,13 @@
           "name": "Objective Builder",
           "icon": "$(target)",
           "contextualTitle": "Manic Miners Objective Builder"
+        },
+        {
+          "type": "webview",
+          "id": "manicMiners.mapDiff",
+          "name": "Version Diff",
+          "icon": "$(diff)",
+          "contextualTitle": "Manic Miners Version Diff"
         }
       ]
     },
