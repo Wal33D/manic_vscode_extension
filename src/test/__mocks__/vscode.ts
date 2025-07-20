@@ -57,6 +57,31 @@ export class Range {
   ) {}
 }
 
+export class Uri {
+  constructor(public fsPath: string) {}
+  static file(path: string): Uri {
+    return new Uri(path);
+  }
+  toString(): string {
+    return this.fsPath;
+  }
+}
+
+export class Location {
+  public range: Range;
+
+  constructor(
+    public uri: Uri,
+    rangeOrPosition: Range | Position
+  ) {
+    if (rangeOrPosition instanceof Position) {
+      this.range = new Range(rangeOrPosition, rangeOrPosition);
+    } else {
+      this.range = rangeOrPosition;
+    }
+  }
+}
+
 export class CancellationToken {
   isCancellationRequested = false;
   onCancellationRequested = () => {};
@@ -78,14 +103,20 @@ export const commands = {
 export const languages = {
   registerCompletionItemProvider: jest.fn(),
   registerHoverProvider: jest.fn(),
+  registerDefinitionProvider: jest.fn(),
+  registerReferenceProvider: jest.fn(),
 };
 
 // Mock TextDocument
 export class TextDocument {
+  public uri: Uri;
+
   constructor(
     private content: string,
     public languageId: string = 'manicminers'
-  ) {}
+  ) {
+    this.uri = Uri.file('/test/document.dat');
+  }
 
   getText(range?: Range): string {
     if (!range) {

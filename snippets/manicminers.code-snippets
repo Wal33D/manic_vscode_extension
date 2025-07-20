@@ -1,0 +1,220 @@
+{
+  "Basic Level Template": {
+    "prefix": "level",
+    "body": [
+      "comments{",
+      "\t${1:Level description and notes}",
+      "}",
+      "",
+      "info{",
+      "\trowcount:${2:40}",
+      "\tcolcount:${3:40}",
+      "\tlevelname:${4:My Level}",
+      "\tcreator:${5:Your Name}",
+      "\tbiome:${6|rock,ice,lava|}",
+      "\tcamerapos:Translation: X=${7:2000.000} Y=${8:2000.000} Z=${9:2000.000} Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tinitialcrystals:${10:5}",
+      "\tinitialore:${11:0}",
+      "}",
+      "",
+      "tiles{",
+      "\t$0",
+      "}",
+      "",
+      "height{",
+      "\t",
+      "}",
+      "",
+      "objectives{",
+      "\tresources: 10,0,0",
+      "}",
+      "",
+      "buildings{",
+      "\tBuildingToolStore_C,Translation: X=2000.000 Y=2000.000 Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "}"
+    ],
+    "description": "Creates a basic level template with all required sections"
+  },
+  
+  "Info Section": {
+    "prefix": "info",
+    "body": [
+      "info{",
+      "\trowcount:${1:40}",
+      "\tcolcount:${2:40}",
+      "\tlevelname:${3:Level Name}",
+      "\tcreator:${4:Creator Name}",
+      "\tbiome:${5|rock,ice,lava|}",
+      "\tcamerapos:Translation: X=${6:0.000} Y=${7:0.000} Z=${8:0.000} Rotation: P=${9:0.000000} Y=${10:0.000000} R=${11:0.000000} Scale X=1.000 Y=1.000 Z=1.000",
+      "\tcamerazoom:${12:1.0}",
+      "\topencaves:${13:}",
+      "\toxygen:${14:0}",
+      "\tinitialcrystals:${15:5}",
+      "\tinitialore:${16:0}",
+      "\tspiderrate:${17:0}",
+      "\tspidermin:${18:1}",
+      "\tspidermax:${19:3}",
+      "\terosioninitialwaittime:${20:300}",
+      "\terosionscale:${21:1.0}",
+      "}"
+    ],
+    "description": "Complete info section with all common fields"
+  },
+
+  "Camera Position": {
+    "prefix": "camerapos",
+    "body": "camerapos:Translation: X=${1:0.000} Y=${2:0.000} Z=${3:0.000} Rotation: P=${4:0.000000} Y=${5:0.000000} R=${6:0.000000} Scale X=${7:1.000} Y=${8:1.000} Z=${9:1.000}",
+    "description": "Camera position with translation, rotation, and scale"
+  },
+
+  "Objectives - Resources": {
+    "prefix": "obj-resources",
+    "body": "resources: ${1:crystals},${2:ore},${3:studs}",
+    "description": "Resource collection objective"
+  },
+
+  "Objectives - Building": {
+    "prefix": "obj-building",
+    "body": "building:${1|BuildingPowerStation_C,BuildingOreRefinery_C,BuildingCanteen_C,BuildingGeologicalCenter_C,BuildingTeleportPad_C,BuildingDocks_C,BuildingMiningLaser_C|}",
+    "description": "Building construction objective"
+  },
+
+  "Objectives - Discover Tile": {
+    "prefix": "obj-discover",
+    "body": "discovertile:${1:x},${2:y}/${3:Find the hidden cavern}",
+    "description": "Discover location objective"
+  },
+
+  "Objectives - Find Miner": {
+    "prefix": "obj-miner",
+    "body": "findminer:${1:1}",
+    "description": "Find lost miner objective"
+  },
+
+  "Building - Tool Store": {
+    "prefix": "toolstore",
+    "body": "BuildingToolStore_C,Translation: X=${1:0.000} Y=${2:0.000} Z=${3:0.000} Rotation: P=${4:0.000000} Y=${5:0.000000} R=${6:0.000000} Scale X=1.000 Y=1.000 Z=1.000",
+    "description": "Tool Store building (headquarters)"
+  },
+
+  "Building - Power Station": {
+    "prefix": "powerstation",
+    "body": "BuildingPowerStation_C,Translation: X=${1:0.000} Y=${2:0.000} Z=${3:0.000} Rotation: P=${4:0.000000} Y=${5:0.000000} R=${6:0.000000} Scale X=1.000 Y=1.000 Z=1.000",
+    "description": "Power Station building"
+  },
+
+  "Vehicle - Small Digger": {
+    "prefix": "smalldigger",
+    "body": "VehicleSmallDigger_C,Translation: X=${1:0.000} Y=${2:0.000} Z=${3:0.000} Rotation: P=${4:0.000000} Y=${5:0.000000} R=${6:0.000000} Scale X=1.000 Y=1.000 Z=1.000,driver=Pilot_C",
+    "description": "Small digger vehicle with driver"
+  },
+
+  "Vehicle - Large Digger": {
+    "prefix": "largedigger",
+    "body": "VehicleLargeDigger_C,Translation: X=${1:0.000} Y=${2:0.000} Z=${3:0.000} Rotation: P=${4:0.000000} Y=${5:0.000000} R=${6:0.000000} Scale X=1.000 Y=1.000 Z=1.000",
+    "description": "Large digger vehicle"
+  },
+
+  "Creature - Rock Monster": {
+    "prefix": "rockmonster",
+    "body": "CreatureRockMonster_C,Translation: X=${1:0.000} Y=${2:0.000} Z=${3:0.000} Rotation: P=${4:0.000000} Y=${5:0.000000} R=${6:0.000000} Scale X=1.000 Y=1.000 Z=1.000,Sleep=${7|true,false|}",
+    "description": "Rock monster creature"
+  },
+
+  "Creature - Lava Monster": {
+    "prefix": "lavamonster",
+    "body": "CreatureLavaMonster_C,Translation: X=${1:0.000} Y=${2:0.000} Z=${3:0.000} Rotation: P=${4:0.000000} Y=${5:0.000000} R=${6:0.000000} Scale X=1.000 Y=1.000 Z=1.000",
+    "description": "Lava monster creature"
+  },
+
+  "Script Event": {
+    "prefix": "event",
+    "body": [
+      "${1:EventName}::;",
+      "\t${2:msg:3:Event triggered!}",
+      "\t$0"
+    ],
+    "description": "Basic script event"
+  },
+
+  "Script Conditional Event": {
+    "prefix": "event-cond",
+    "body": [
+      "(($1)) ${2:EventName};",
+      "\t${3:msg:3:Condition met!}",
+      "\t$0"
+    ],
+    "description": "Conditional script event"
+  },
+
+  "Script Variable": {
+    "prefix": "var",
+    "body": "${1|int,string,float,bool|} ${2:varName}=${3:value}",
+    "description": "Script variable declaration"
+  },
+
+  "Script Message": {
+    "prefix": "msg",
+    "body": "msg:${1:3}:${2:Message text}",
+    "description": "Display message command"
+  },
+
+  "Script Pan Camera": {
+    "prefix": "pan",
+    "body": "pan:${1:x},${2:y}",
+    "description": "Pan camera to coordinates"
+  },
+
+  "Script Drill": {
+    "prefix": "drill",
+    "body": "drill:${1:x},${2:y},${3:tileID}",
+    "description": "Drill wall at coordinates"
+  },
+
+  "Script Emerge": {
+    "prefix": "emerge",
+    "body": "emerge:${1|CreatureRockMonster_C,CreatureLavaMonster_C,CreatureSpider_C,CreatureSlug_C|}:${2:x},${3:y}",
+    "description": "Make creature emerge"
+  },
+
+  "Script Enable/Disable": {
+    "prefix": "enable",
+    "body": "${1|enable,disable|}:${2:entityID}",
+    "description": "Enable or disable entity"
+  },
+
+  "Tile Row": {
+    "prefix": "tilerow",
+    "body": "${1:1},${2:1},${3:1},${4:1},${5:1},${6:1},${7:1},${8:1},${9:1},${10:1}",
+    "description": "Row of tile IDs"
+  },
+
+  "Resource Grid Row": {
+    "prefix": "resourcerow",
+    "body": "${1:0},${2:0},${3:0},${4:0},${5:0},${6:0},${7:0},${8:0},${9:0},${10:0}",
+    "description": "Row of resource placement (0/1)"
+  },
+
+  "Height Row": {
+    "prefix": "heightrow",
+    "body": "${1:5},${2:5},${3:5},${4:5},${5:5},${6:5},${7:5},${8:5},${9:5},${10:5}",
+    "description": "Row of height values"
+  },
+
+  "Briefing Text": {
+    "prefix": "briefing",
+    "body": [
+      "briefing{",
+      "\t${1:Mission briefing text goes here.}",
+      "\t${2:You can have multiple lines.}",
+      "}"
+    ],
+    "description": "Mission briefing section"
+  },
+
+  "Open Caves": {
+    "prefix": "opencaves",
+    "body": "opencaves:${1:x1},${2:y1}/${3:x2},${4:y2}/",
+    "description": "Open cave connections"
+  }
+}

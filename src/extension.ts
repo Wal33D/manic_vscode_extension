@@ -1,6 +1,8 @@
 import * as vscode from 'vscode';
 import { DatCompletionItemProvider } from './completionItemProvider';
 import { DatHoverProvider } from './hoverProvider';
+import { DatDefinitionProvider } from './definitionProvider';
+import { DatReferenceProvider } from './referenceProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   // Extension activated successfully
@@ -25,6 +27,20 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(hoverProvider);
+
+  const definitionProvider = vscode.languages.registerDefinitionProvider(
+    { scheme: 'file', language: 'manicminers' },
+    new DatDefinitionProvider()
+  );
+
+  context.subscriptions.push(definitionProvider);
+
+  const referenceProvider = vscode.languages.registerReferenceProvider(
+    { scheme: 'file', language: 'manicminers' },
+    new DatReferenceProvider()
+  );
+
+  context.subscriptions.push(referenceProvider);
 }
 
 export function deactivate() {}
