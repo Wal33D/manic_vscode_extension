@@ -1,5 +1,7 @@
 # Manic Miner DAT File Support for Visual Studio Code
 
+[![CI](https://github.com/Wal33D/manic_vscode_extension/actions/workflows/ci.yml/badge.svg)](https://github.com/Wal33D/manic_vscode_extension/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/visual-studio-marketplace/v/manic-miners.dat)](https://marketplace.visualstudio.com/items?itemName=manic-miners.dat)
 [![Downloads](https://img.shields.io/visual-studio-marketplace/d/manic-miners.dat)](https://marketplace.visualstudio.com/items?itemName=manic-miners.dat)
 [![Rating](https://img.shields.io/visual-studio-marketplace/r/manic-miners.dat)](https://marketplace.visualstudio.com/items?itemName=manic-miners.dat)

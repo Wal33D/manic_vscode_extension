@@ -1,118 +1,601 @@
 {
-  "name": "Manic Miners Dat File",
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Manic Miners DAT File",
   "scopeName": "source.manicminers",
   "patterns": [
     {
-      "begin": "\\b(comments|info|tiles|height|resources|objectives|buildings|landslidefrequency|lavaspread|miners|briefing|briefingsuccess|briefingfailure|vehicles|creatures|blocks|script)\\b\\s*\\{",
+      "include": "#comments-section"
+    },
+    {
+      "include": "#info-section"
+    },
+    {
+      "include": "#tiles-section"
+    },
+    {
+      "include": "#height-section"
+    },
+    {
+      "include": "#resources-section"
+    },
+    {
+      "include": "#objectives-section"
+    },
+    {
+      "include": "#buildings-section"
+    },
+    {
+      "include": "#vehicles-section"
+    },
+    {
+      "include": "#creatures-section"
+    },
+    {
+      "include": "#miners-section"
+    },
+    {
+      "include": "#blocks-section"
+    },
+    {
+      "include": "#script-section"
+    },
+    {
+      "include": "#briefing-sections"
+    },
+    {
+      "include": "#landslide-section"
+    },
+    {
+      "include": "#lavaspread-section"
+    }
+  ],
+  "repository": {
+    "comments-section": {
+      "begin": "\\b(comments)\\s*\\{",
       "end": "\\}",
+      "name": "meta.section.comments.manicminers",
       "beginCaptures": {
-        "0": {
-          "name": "keyword.control.manicminers"
+        "1": {
+          "name": "storage.type.section.manicminers"
         }
       },
       "patterns": [
         {
-          "include": "#keyvalue"
+          "match": ".*",
+          "name": "comment.line.manicminers"
         }
       ]
-    }
-  ],
-  "repository": {
-    "keyvalue": {
+    },
+    "info-section": {
+      "begin": "\\b(info)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.info.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
       "patterns": [
         {
-          "match": "(\\b(rowcount|Rowcount|Colcount|colcount|camerapos|biome|creator|erosioninitialwaittime|spiderchance|erosionscale|camerazoom|version|oxygen|levelname|initialcrystals|initialore|cameraangle|initialheight|maxheight|minheight|gravity|ambientlight|weather|difficulty|resourcespeed|enemystrength|mapdescription)\\b)(\\s*:\\s*)([^,\\n\\r]+)",
+          "include": "#info-fields"
+        }
+      ]
+    },
+    "info-fields": {
+      "patterns": [
+        {
+          "match": "\\b(rowcount|colcount)\\s*:\\s*(\\d+)",
           "captures": {
             "1": {
-              "name": "constant.language.manicminers"
+              "name": "support.constant.dimensions.manicminers"
             },
             "2": {
-              "name": "punctuation.separator.key-value.manicminers"
-            },
-            "3": {
-              "name": "string.quoted.double.manicminers"
+              "name": "constant.numeric.integer.manicminers"
             }
           }
         },
         {
-          "match": "(\\b\\w+\\b)(\\s*=\\s*)([^,\\n\\r]+)",
+          "match": "\\b(spiderrate|spidermin|spidermax|initialcrystals|initialore)\\s*:\\s*(\\d+)",
           "captures": {
             "1": {
-              "name": "variable.parameter.manicminers"
+              "name": "support.constant.numeric.manicminers"
             },
             "2": {
-              "name": "punctuation.separator.key-value.manicminers"
-            },
-            "3": {
-              "name": "string.quoted.double.manicminers"
+              "name": "constant.numeric.integer.manicminers"
             }
           }
         },
         {
-          "begin": "\\bcamerapos\\s*:\\s*Translation\\s*:\\s*",
-          "end": "(?=\\n|$)",
-          "name": "meta.camerapos.manicminers",
-          "patterns": [
-            {
-              "match": "\\b(Translation|Rotation|Scale)\\b",
-              "name": "storage.type.manicminers"
+          "match": "\\b(oxygen|camerazoom|erosioninitialwaittime|erosionscale)\\s*:\\s*([\\d\\.]+)",
+          "captures": {
+            "1": {
+              "name": "support.constant.float.manicminers"
             },
-            {
-              "match": "\\bX=[-\\d\\.]+\\b",
-              "name": "constant.numeric.camerapos.x.manicminers"
-            },
-            {
-              "match": "\\bY=[-\\d\\.]+\\b",
-              "name": "constant.numeric.camerapos.y.manicminers"
-            },
-            {
-              "match": "\\bZ=[-\\d\\.]+\\b",
-              "name": "constant.numeric.camerapos.z.manicminers"
-            },
-            {
-              "match": "\\bP=[-\\d\\.]+\\b",
-              "name": "constant.numeric.camerapos.pitch.manicminers"
-            },
-            {
-              "match": "\\bR=[-\\d\\.]+\\b",
-              "name": "constant.numeric.camerapos.roll.manicminers"
-            },
-            {
-              "match": "\\bScale\\sX=[-\\d\\.]+\\b",
-              "name": "constant.numeric.camerapos.scale.x.manicminers"
-            },
-            {
-              "match": "\\bScale\\sY=[-\\d\\.]+\\b",
-              "name": "constant.numeric.camerapos.scale.y.manicminers"
-            },
-            {
-              "match": "\\bScale\\sZ=[-\\d\\.]+\\b",
-              "name": "constant.numeric.camerapos.scale.z.manicminers"
+            "2": {
+              "name": "constant.numeric.float.manicminers"
             }
-          ]
+          }
         },
         {
-          "begin": "\\bcameraangle\\s*:\\s*",
-          "end": "(?=\\n|$)",
-          "name": "meta.cameraangle.manicminers",
-          "patterns": [
-            {
-              "match": "\\b\\d+\\b",
-              "name": "constant.numeric.cameraangle.manicminers"
+          "match": "\\b(biome)\\s*:\\s*(rock|ice|lava)",
+          "captures": {
+            "1": {
+              "name": "support.constant.biome.manicminers"
             },
-            {
-              "match": "(\\d+),",
-              "name": "constant.numeric.cameraangle.x.manicminers"
-            },
-            {
-              "match": ",(\\d+),",
-              "name": "constant.numeric.cameraangle.y.manicminers"
-            },
-            {
-              "match": ",(\\d+)$",
-              "name": "constant.numeric.cameraangle.z.manicminers"
+            "2": {
+              "name": "constant.language.biome.manicminers"
             }
-          ]
+          }
+        },
+        {
+          "match": "\\b(creator|levelname|version)\\s*:\\s*(.+)",
+          "captures": {
+            "1": {
+              "name": "support.constant.string.manicminers"
+            },
+            "2": {
+              "name": "string.unquoted.manicminers"
+            }
+          }
+        },
+        {
+          "match": "\\b(opencaves)\\s*:\\s*(.+)",
+          "captures": {
+            "1": {
+              "name": "support.constant.caves.manicminers"
+            },
+            "2": {
+              "name": "string.unquoted.caves.manicminers"
+            }
+          }
+        },
+        {
+          "include": "#coordinates"
+        }
+      ]
+    },
+    "tiles-section": {
+      "begin": "\\b(tiles)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.tiles.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#tile-values"
+        }
+      ]
+    },
+    "tile-values": {
+      "patterns": [
+        {
+          "match": "\\b(38)\\b",
+          "name": "constant.numeric.tile.wall.manicminers"
+        },
+        {
+          "match": "\\b(1|101)\\b",
+          "name": "constant.numeric.tile.ground.manicminers"
+        },
+        {
+          "match": "\\b(6|7|11|106)\\b",
+          "name": "constant.numeric.tile.lava.manicminers"
+        },
+        {
+          "match": "\\b(42|46)\\b",
+          "name": "constant.numeric.tile.resource.manicminers"
+        },
+        {
+          "match": "\\b(14|24|26|30|34)\\b",
+          "name": "constant.numeric.tile.drillable.manicminers"
+        },
+        {
+          "match": "\\b(50)\\b",
+          "name": "constant.numeric.tile.recharge.manicminers"
+        },
+        {
+          "match": "\\b(111|114)\\b",
+          "name": "constant.numeric.tile.water.manicminers"
+        },
+        {
+          "match": "\\b(12|112)\\b",
+          "name": "constant.numeric.tile.slug.manicminers"
+        },
+        {
+          "match": "\\b(60|61|62|63|64|163|164|165)\\b",
+          "name": "constant.numeric.tile.rubble.manicminers"
+        },
+        {
+          "match": "\\b\\d+\\b",
+          "name": "constant.numeric.tile.unknown.manicminers"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.manicminers"
+        }
+      ]
+    },
+    "height-section": {
+      "begin": "\\b(height)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.height.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b\\d+\\b",
+          "name": "constant.numeric.height.manicminers"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.manicminers"
+        }
+      ]
+    },
+    "resources-section": {
+      "begin": "\\b(resources)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.resources.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b(crystals|ore)\\s*:",
+          "name": "entity.name.type.resource.manicminers"
+        },
+        {
+          "match": "\\b[01]\\b",
+          "name": "constant.numeric.binary.manicminers"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.manicminers"
+        }
+      ]
+    },
+    "objectives-section": {
+      "begin": "\\b(objectives)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.objectives.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "match": "(resources)\\s*:\\s*(\\d+)\\s*,\\s*(\\d+)\\s*,\\s*(\\d+)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.objective.manicminers"
+            },
+            "2": {
+              "name": "constant.numeric.crystals.manicminers"
+            },
+            "3": {
+              "name": "constant.numeric.ore.manicminers"
+            },
+            "4": {
+              "name": "constant.numeric.studs.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(building)\\s*:\\s*(Building\\w+_C)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.objective.manicminers"
+            },
+            "2": {
+              "name": "entity.name.type.building.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(discovertile)\\s*:\\s*(\\d+)\\s*,\\s*(\\d+)\\s*/\\s*(.+)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.objective.manicminers"
+            },
+            "2": {
+              "name": "constant.numeric.x.manicminers"
+            },
+            "3": {
+              "name": "constant.numeric.y.manicminers"
+            },
+            "4": {
+              "name": "string.unquoted.description.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(variable)\\s*:\\s*(.+?)\\s*/\\s*(.+)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.objective.manicminers"
+            },
+            "2": {
+              "name": "variable.other.condition.manicminers"
+            },
+            "3": {
+              "name": "string.unquoted.description.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(findminer)\\s*:\\s*(\\d+)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.objective.manicminers"
+            },
+            "2": {
+              "name": "constant.numeric.minerid.manicminers"
+            }
+          }
+        }
+      ]
+    },
+    "buildings-section": {
+      "begin": "\\b(buildings)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.buildings.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#entity-definition"
+        }
+      ]
+    },
+    "vehicles-section": {
+      "begin": "\\b(vehicles)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.vehicles.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#entity-definition"
+        }
+      ]
+    },
+    "creatures-section": {
+      "begin": "\\b(creatures)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.creatures.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#entity-definition"
+        }
+      ]
+    },
+    "miners-section": {
+      "begin": "\\b(miners)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.miners.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#entity-definition"
+        }
+      ]
+    },
+    "entity-definition": {
+      "patterns": [
+        {
+          "match": "\\b(Building\\w+_C|Vehicle\\w+_C|Creature\\w+_C|Pilot_C)\\b",
+          "name": "entity.name.type.manicminers"
+        },
+        {
+          "include": "#coordinates"
+        },
+        {
+          "match": "\\b(ID|driver|Level|Essential|Teleport|Sleep)\\s*=\\s*(\\w+)",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.property.manicminers"
+            },
+            "2": {
+              "name": "constant.language.value.manicminers"
+            }
+          }
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.manicminers"
+        }
+      ]
+    },
+    "blocks-section": {
+      "begin": "\\b(blocks)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.blocks.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b[01]\\b",
+          "name": "constant.numeric.binary.manicminers"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.manicminers"
+        }
+      ]
+    },
+    "script-section": {
+      "begin": "\\b(script)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.script.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "include": "#script-content"
+        }
+      ]
+    },
+    "script-content": {
+      "patterns": [
+        {
+          "match": "\\b(int|string|float|bool)\\s+(\\w+)\\s*=\\s*(.+)",
+          "captures": {
+            "1": {
+              "name": "storage.type.variable.manicminers"
+            },
+            "2": {
+              "name": "variable.other.manicminers"
+            },
+            "3": {
+              "name": "string.unquoted.value.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(\\w+)\\s*::\\s*;",
+          "captures": {
+            "1": {
+              "name": "entity.name.function.event.manicminers"
+            }
+          }
+        },
+        {
+          "match": "\\(\\((.+?)\\)\\)\\s*(\\w+)\\s*;",
+          "captures": {
+            "1": {
+              "name": "keyword.control.condition.manicminers"
+            },
+            "2": {
+              "name": "entity.name.function.event.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(msg|pan|wait|truewait|shake|drill|place|emerge|sound|enable|disable|wake|stoptimer)\\s*:\\s*([^;]+)\\s*;",
+          "captures": {
+            "1": {
+              "name": "support.function.command.manicminers"
+            },
+            "2": {
+              "name": "string.unquoted.parameters.manicminers"
+            }
+          }
+        },
+        {
+          "match": "\"([^\"]+)\"",
+          "name": "string.quoted.double.manicminers"
+        },
+        {
+          "match": ";",
+          "name": "punctuation.terminator.statement.manicminers"
+        }
+      ]
+    },
+    "briefing-sections": {
+      "begin": "\\b(briefing|briefingsuccess|briefingfailure)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.briefing.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "match": ".*",
+          "name": "string.unquoted.briefing.manicminers"
+        }
+      ]
+    },
+    "landslide-section": {
+      "begin": "\\b(landslidefrequency)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.landslide.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b\\d+\\b",
+          "name": "constant.numeric.frequency.manicminers"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.manicminers"
+        }
+      ]
+    },
+    "lavaspread-section": {
+      "begin": "\\b(lavaspread)\\s*\\{",
+      "end": "\\}",
+      "name": "meta.section.lavaspread.manicminers",
+      "beginCaptures": {
+        "1": {
+          "name": "storage.type.section.manicminers"
+        }
+      },
+      "patterns": [
+        {
+          "match": "\\b\\d+\\b",
+          "name": "constant.numeric.spread.manicminers"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.manicminers"
+        }
+      ]
+    },
+    "coordinates": {
+      "patterns": [
+        {
+          "match": "\\b(Translation|Rotation|Scale)\\b",
+          "name": "keyword.other.coordinate.manicminers"
+        },
+        {
+          "match": "\\b([XYZPR])\\s*=\\s*([\\-\\d\\.]+)",
+          "captures": {
+            "1": {
+              "name": "variable.parameter.coordinate.manicminers"
+            },
+            "2": {
+              "name": "constant.numeric.coordinate.manicminers"
+            }
+          }
+        },
+        {
+          "match": ":",
+          "name": "punctuation.separator.key-value.manicminers"
         }
       ]
     }
