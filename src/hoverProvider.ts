@@ -26,16 +26,18 @@ const infoFieldDescriptions: { [key: string]: string } = {
   resourcespeed: 'Speed of resource collection.',
   enemystrength: 'Strength of enemies in the map.',
   mapdescription: 'Description of the map.',
-  translation: 'Translation component of camerapos, representing the position in X, Y, Z coordinates.',
-  rotation: 'Rotation component of camerapos, representing the pitch (P), yaw (Y), and roll (R) angles.',
-  scale: 'Scale component of camerapos, representing the scale in X, Y, Z axes.'
+  translation:
+    'Translation component of camerapos, representing the position in X, Y, Z coordinates.',
+  rotation:
+    'Rotation component of camerapos, representing the pitch (P), yaw (Y), and roll (R) angles.',
+  scale: 'Scale component of camerapos, representing the scale in X, Y, Z axes.',
 };
 
 export class DatHoverProvider implements vscode.HoverProvider {
   provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
-    token: vscode.CancellationToken
+    _token: vscode.CancellationToken
   ): vscode.ProviderResult<vscode.Hover> {
     const range = document.getWordRangeAtPosition(position, /[a-zA-Z]+/);
     const word = document.getText(range).toLowerCase();
@@ -52,5 +54,7 @@ export class DatHoverProvider implements vscode.HoverProvider {
         return new vscode.Hover(infoFieldDescriptions[cameraposWord]);
       }
     }
+
+    return undefined;
   }
 }

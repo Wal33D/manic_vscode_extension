@@ -1,21 +1,60 @@
 {
-  "name": "dat",
-  "displayName": "Manic Miners Dat File",
-  "description": "Syntax highlighting for Manic Miners Dat files",
+  "name": "manic-miners-dat",
+  "displayName": "Manic Miners DAT File Support",
+  "description": "Language support for Manic Miner .dat level files with syntax highlighting, IntelliSense, and hover information",
   "version": "0.0.1",
+  "publisher": "waleedjudah",
+  "author": {
+    "name": "Waleed Judah",
+    "email": "aquataze@yahoo.com"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Wal33D/manic_vscode_extension"
+  },
+  "bugs": {
+    "url": "https://github.com/Wal33D/manic_vscode_extension/issues"
+  },
+  "homepage": "https://github.com/Wal33D/manic_vscode_extension#readme",
+  "keywords": [
+    "manic",
+    "miners",
+    "dat",
+    "game",
+    "level",
+    "editor",
+    "syntax",
+    "highlighting"
+  ],
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#1e1e1e",
+    "theme": "dark"
+  },
   "engines": {
     "vscode": "^1.89.0"
   },
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Formatters",
+    "Linters"
+  ],
+  "activationEvents": [
+    "onLanguage:manicminers"
   ],
   "main": "./out/extension.js",
   "contributes": {
     "languages": [
       {
         "id": "manicminers",
-        "aliases": ["Manic Miners Dat File", "manicminers"],
-        "extensions": [".dat"],
+        "aliases": [
+          "Manic Miners Dat File",
+          "manicminers"
+        ],
+        "extensions": [
+          ".dat"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -44,17 +83,39 @@
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "vscode-test"
+    "lint:fix": "eslint src --ext ts --fix",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "type-check": "tsc --noEmit",
+    "package": "vsce package",
+    "publish": "vsce publish"
   },
   "devDependencies": {
-    "@types/vscode": "^1.89.0",
-    "@types/mocha": "^10.0.6",
+    "@jest/globals": "^30.0.4",
+    "@types/jest": "^30.0.0",
     "@types/node": "18.x",
+    "@types/vscode": "^1.89.0",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
     "@typescript-eslint/parser": "^7.7.1",
+    "@vscode/vsce": "^3.6.0",
     "eslint": "^8.57.0",
-    "typescript": "^5.4.5",
-    "@vscode/test-cli": "^0.0.9",
-    "@vscode/test-electron": "^2.3.9"
+    "husky": "^9.1.7",
+    "jest": "^30.0.4",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "ts-jest": "^29.4.0",
+    "typescript": "^5.4.5"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
   }
 }

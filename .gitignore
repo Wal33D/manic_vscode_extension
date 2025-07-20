@@ -1,5 +1,51 @@
-out
-dist
-node_modules
-.vscode-test/
+# Compiled output
+out/
+dist/
 *.vsix
+
+# Testing
+.vscode-test/
+coverage/
+*.lcov
+
+# Dependencies
+node_modules/
+
+# Build files
+*.tsbuildinfo
+.eslintcache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor files
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Debug - keep example configs
+.vscode/launch.json
+.vscode/tasks.json
+.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json.example
+!.vscode/settings.json.example
+
+# Project specific
+CLAUDE.md
+scripts/utils/claude-check-only.sh
+scripts/utils/claude-workflow.sh
+scripts/utils/claude-pr-status.sh
+scripts/utils/claude-quick-pr.sh

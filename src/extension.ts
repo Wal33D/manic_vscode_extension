@@ -3,9 +3,9 @@ import { DatCompletionItemProvider } from './completionItemProvider';
 import { DatHoverProvider } from './hoverProvider';
 
 export function activate(context: vscode.ExtensionContext) {
-  console.log('Congratulations, your extension "dat" is now active!');
+  // Extension activated successfully
 
-  let disposable = vscode.commands.registerCommand('dat.helloWorld', () => {
+  const disposable = vscode.commands.registerCommand('dat.helloWorld', () => {
     vscode.window.showInformationMessage('Hello World from Manic Miners Dat File!');
   });
 
