@@ -49,3 +49,5 @@ scripts/utils/claude-check-only.sh
 scripts/utils/claude-workflow.sh
 scripts/utils/claude-pr-status.sh
 scripts/utils/claude-quick-pr.sh
+additional_context_manic_miner_dat_files
+/samples
