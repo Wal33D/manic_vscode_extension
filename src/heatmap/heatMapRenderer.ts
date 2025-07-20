@@ -174,8 +174,8 @@ export class HeatMapRenderer {
     const g = Math.round(g1 + (g2 - g1) * fraction);
     const b = Math.round(b1 + (b2 - b1) * fraction);
 
-    // Convert back to hex
-    return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    // Convert back to hex (uppercase to match scheme colors)
+    return `#${r.toString(16).padStart(2, '0').toUpperCase()}${g.toString(16).padStart(2, '0').toUpperCase()}${b.toString(16).padStart(2, '0').toUpperCase()}`;
   }
 
   /**

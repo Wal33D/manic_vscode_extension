@@ -357,6 +357,46 @@ export class PathfindingAnalyzer {
       }
     }
 
+    // Building tiles (101-110) as key destinations
+    for (let row = 0; row < this.rowCount; row++) {
+      for (let col = 0; col < this.colCount; col++) {
+        const tileId = this.tiles[row][col];
+        if (tileId >= 101 && tileId <= 110) {
+          // Building foundations are important destinations
+          points.push({ row, col });
+        }
+      }
+    }
+
+    // Power path intersections as key points
+    for (let row = 1; row < this.rowCount - 1; row++) {
+      for (let col = 1; col < this.colCount - 1; col++) {
+        const tileId = this.tiles[row][col];
+        if (tileId >= 14 && tileId <= 25) {
+          // Check if this is an intersection of power paths
+          let pathCount = 0;
+          const neighbors = [
+            { row: row - 1, col: col },
+            { row: row + 1, col: col },
+            { row: row, col: col - 1 },
+            { row: row, col: col + 1 },
+          ];
+
+          for (const n of neighbors) {
+            const neighborTile = this.tiles[n.row]?.[n.col];
+            if (neighborTile >= 14 && neighborTile <= 25) {
+              pathCount++;
+            }
+          }
+
+          // Intersections (3+ connections) are important navigation points
+          if (pathCount >= 3) {
+            points.push({ row, col });
+          }
+        }
+      }
+    }
+
     return points;
   }
 
@@ -592,7 +632,26 @@ export class PathfindingAnalyzer {
     const tileId = this.tiles[row][col];
 
     // Ground tiles (1) and rubble (2-5) are passable
-    return tileId >= 1 && tileId <= 5;
+    if (tileId >= 1 && tileId <= 5) {
+      return true;
+    }
+
+    // Power paths (14-25) connect buildings and are walkable
+    if (tileId >= 14 && tileId <= 25) {
+      return true;
+    }
+
+    // Building foundations/special ground tiles
+    if (tileId === 101) {
+      return true;
+    }
+
+    // Building power paths
+    if (tileId === 114 || tileId === 115) {
+      return true;
+    }
+
+    return false;
   }
 
   /**
