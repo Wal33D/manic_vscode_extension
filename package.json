@@ -264,6 +264,12 @@
         "title": "Navigate to Previous Section",
         "category": "Manic Miners",
         "icon": "$(arrow-up)"
+      },
+      {
+        "command": "manicMiners.showHeatMap",
+        "title": "Show Heat Map Analysis",
+        "category": "Manic Miners",
+        "icon": "$(graph-line)"
       }
     ],
     "hoverProviders": [
@@ -293,6 +299,13 @@
           "name": "Version Diff",
           "icon": "$(diff)",
           "contextualTitle": "Manic Miners Version Diff"
+        },
+        {
+          "type": "webview",
+          "id": "manicMiners.heatMap",
+          "name": "Heat Map",
+          "icon": "$(graph-line)",
+          "contextualTitle": "Manic Miners Heat Map Analysis"
         }
       ]
     },
