@@ -2,7 +2,7 @@
   "name": "manic-miners-dat",
   "displayName": "Manic Miners DAT File Support",
   "description": "Language support for Manic Miner .dat level files with syntax highlighting, IntelliSense, and hover information",
-  "version": "0.2.5",
+  "version": "0.3.0",
   "publisher": "Wal33D",
   "author": {
     "name": "Waleed Judah",
@@ -11,12 +11,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Wal33D/manic_vscode_extension"
+    "url": "https://github.com/Wal33D/vscode-manic-miners"
   },
   "bugs": {
-    "url": "https://github.com/Wal33D/manic_vscode_extension/issues"
+    "url": "https://github.com/Wal33D/vscode-manic-miners/issues"
   },
-  "homepage": "https://github.com/Wal33D/manic_vscode_extension#readme",
+  "homepage": "https://github.com/Wal33D/vscode-manic-miners#readme",
   "keywords": [
     "manic",
     "miners",

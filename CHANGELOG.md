@@ -1,86 +1,91 @@
-# Changelog
+# Change Log
 
-All notable changes to the "Manic Miners DAT File" extension will be documented in this file.
+All notable changes to the "Manic Miners DAT File Support" extension will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-## [Unreleased]
-
-## [0.2.0] - 2025-01-20
+## [0.3.0] - 2024-01-20
 
 ### Added
-- **Code Snippets**: 25+ snippets for common DAT file patterns
-  - Basic level template with all required sections
-  - Section-specific snippets (info, tiles, objectives, etc.)
-  - Entity snippets for buildings, vehicles, and creatures
-  - Script snippets for events, variables, and commands
-- **Navigation Features**:
-  - Go-to-Definition: Jump to entity declarations, event definitions, and variable declarations
-  - Find References: Find all usages of entities, events, and variables
-- **Enhanced IntelliSense**:
-  - Context-aware completions based on current section
-  - Tile ID suggestions with descriptions
-  - Script command completions with parameter placeholders
-- **Advanced Hover Information**:
-  - Rich markdown documentation for all elements
-  - Tile descriptions with properties
-  - Entity information with specific details
-  - Script command syntax examples
+- **Visual Map Preview** - Real-time canvas-based map rendering
+  - Zoom controls (25% to 400%)
+  - Click to navigate to tile in editor
+  - Multi-tile selection with Shift+drag
+  - Toggle grid lines and tile IDs
+  - Keyboard shortcuts for all controls
+  - Performance optimizations for large maps
+- **Objective Builder** - Visual interface for creating level objectives
+  - Support for all objective types
+  - Real-time preview and validation
+  - Parameter validation
+  - Quick examples
+  - Analysis and reporting commands
+- **Map Validation** - Advanced validation system
+  - Pathfinding analysis with BFS algorithm
+  - Resource accessibility checks
+  - Objective validation
+  - Real-time diagnostics
+  - Auto-fix for common issues
+  - Comprehensive validation reports
+- **Quick Actions** - Context-aware code actions
+  - Convert between normal and reinforced tiles
+  - Fill rectangular areas
+  - Replace all instances of a tile
+  - Custom tile sets with persistent storage
+- **Map Templates** - Reusable level patterns
+  - Pre-built templates for common structures
+  - Create custom templates from selection
+  - Template management system
+  - Parameter customization
 
-### Changed
-- Syntax highlighting now covers all 17 DAT file sections with semantic coloring
-- IntelliSense now works in all sections, not just info blocks
-- Hover provider completely rewritten with comprehensive documentation
-- Parser enhanced with section lookup and navigation support
-
-### Improved
-- Better semantic coloring for different tile types
-- More comprehensive test coverage (52 tests)
-- Complete TypeScript strict mode compliance
-- Professional documentation for all features
+### Enhanced
+- IntelliSense now supports all DAT file sections
+- Go-to-definition for miners, buildings, and script variables
+- Find all references functionality
+- Improved hover information with tile details
+- Enhanced snippets for all sections
 
 ### Fixed
-- IntelliSense no longer limited to info blocks
-- Proper handling of all DAT file sections
+- TypeScript strict mode compliance
+- ESLint rule violations
+- Test coverage gaps
+- Performance issues with large files
 
-## [0.1.0] - 2025-07-20
-
-### Added
-- CI workflow badge to README
-- License badge to README
-- Comprehensive project documentation
-- Testing infrastructure with Jest
-- Code quality tools (Prettier, ESLint)
-- GitHub Actions CI/CD pipeline
-- Professional project structure
-
-### Changed
-- Updated version from 0.0.1 to 0.1.0
-
-## [0.0.1] - 2024-01-20
+## [0.2.5] - 2024-01-19
 
 ### Added
-- Initial release of Manic Miners DAT File extension
-- Syntax highlighting for all major DAT file sections:
-  - `info`, `tiles`, `height`, `resources`, `objectives`
-  - `buildings`, `landslidefrequency`, `lavaspread`
-  - `miners`, `briefing`, `vehicles`, `creatures`, `blocks`, `script`
-- IntelliSense support for `info` section fields
-- Hover provider with detailed field descriptions
-- Language configuration with:
-  - Line comments (`//`)
-  - Block comments (`/* */`)
-  - Auto-closing pairs for brackets and quotes
-- Basic "Hello World" command for testing
-- Support for `.dat` file extension
+- Enhanced test coverage
+- Game asset images for buildings and vehicles
+- Improved documentation
 
-### Known Issues
-- IntelliSense only works within `info` blocks
-- No validation or diagnostics yet
-- Limited to basic language features
+### Fixed
+- TypeScript compilation errors
+- ESLint formatting issues
+- Failing unit tests
 
-[Unreleased]: https://github.com/Wal33D/manic_vscode_extension/compare/v0.2.0...HEAD
-[0.2.0]: https://github.com/Wal33D/manic_vscode_extension/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/Wal33D/manic_vscode_extension/compare/v0.0.1...v0.1.0
-[0.0.1]: https://github.com/Wal33D/manic_vscode_extension/releases/tag/v0.0.1
+## [0.2.0] - 2024-01-18
+
+### Added
+- Enhanced tile definitions with 115+ tiles
+- Smart completions with drill time information
+- Advanced validation
+- Improved IntelliSense
+
+## [0.1.0] - 2024-01-17
+
+### Added
+- Extended syntax highlighting
+- Basic validation
+- Code snippets
+- Navigation features
+
+## [0.0.1] - 2024-01-15
+
+### Added
+- Initial release
+- Basic syntax highlighting for DAT files
+- IntelliSense for `info` section fields
+- Hover information provider
+- Language configuration
+- Comment support
+- Auto-closing pairs
