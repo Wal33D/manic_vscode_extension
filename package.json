@@ -204,6 +204,66 @@
         "title": "Compare Map Versions",
         "category": "Manic Miners",
         "icon": "$(diff)"
+      },
+      {
+        "command": "manicMiners.toggleHighContrast",
+        "title": "Toggle High Contrast Mode",
+        "category": "Manic Miners",
+        "icon": "$(eye)"
+      },
+      {
+        "command": "manicMiners.toggleScreenReader",
+        "title": "Toggle Screen Reader Mode",
+        "category": "Manic Miners",
+        "icon": "$(megaphone)"
+      },
+      {
+        "command": "manicMiners.cycleFontSize",
+        "title": "Cycle Font Size",
+        "category": "Manic Miners",
+        "icon": "$(text-size)"
+      },
+      {
+        "command": "manicMiners.toggleReducedMotion",
+        "title": "Toggle Reduced Motion",
+        "category": "Manic Miners",
+        "icon": "$(screen-normal)"
+      },
+      {
+        "command": "manicMiners.toggleKeyboardNavigation",
+        "title": "Toggle Keyboard Navigation",
+        "category": "Manic Miners",
+        "icon": "$(keyboard)"
+      },
+      {
+        "command": "manicMiners.showAccessibilityOptions",
+        "title": "Show Accessibility Options",
+        "category": "Manic Miners",
+        "icon": "$(accessibility)"
+      },
+      {
+        "command": "manicMiners.announceTileInfo",
+        "title": "Announce Tile Information",
+        "category": "Manic Miners",
+        "icon": "$(info)"
+      },
+      {
+        "command": "manicMiners.readCurrentLine",
+        "title": "Read Current Line",
+        "category": "Manic Miners",
+        "icon": "$(comment)"
+      },
+      {
+        "command": "manicMiners.navigateToNextSection",
+        "title": "Navigate to Next Section",
+        "category": "Manic Miners",
+        "icon": "$(arrow-down)"
+      },
+      {
+        "command": "manicMiners.navigateToPreviousSection",
+        "title": "Navigate to Previous Section",
+        "category": "Manic Miners",
+        "icon": "$(arrow-up)"
       }
     ],
     "hoverProviders": [
@@ -287,6 +347,36 @@
         "command": "manicMiners.showUndoRedoHistory",
         "key": "ctrl+alt+h",
         "mac": "cmd+alt+h",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.showAccessibilityOptions",
+        "key": "ctrl+alt+a",
+        "mac": "cmd+alt+a",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.announceTileInfo",
+        "key": "ctrl+alt+i",
+        "mac": "cmd+alt+i",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.readCurrentLine",
+        "key": "ctrl+alt+l",
+        "mac": "cmd+alt+l",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.navigateToNextSection",
+        "key": "ctrl+alt+down",
+        "mac": "cmd+alt+down",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.navigateToPreviousSection",
+        "key": "ctrl+alt+up",
+        "mac": "cmd+alt+up",
         "when": "editorTextFocus && editorLangId == manicminers"
       }
     ],
