@@ -50,4 +50,14 @@ scripts/utils/claude-workflow.sh
 scripts/utils/claude-pr-status.sh
 scripts/utils/claude-quick-pr.sh
 additional_context_manic_miner_dat_files
-/samples
+
+# Level files (exclude actual .dat files but keep directory structure)
+/samples/**/*.dat
+/samples/**/*.DAT
+!/samples/**/.gitkeep
+!/samples/**/*.md
+
+# Game installation directory
+/game-install/**
+!/game-install/.gitkeep
+!/game-install/*.md
