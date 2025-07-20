@@ -14,7 +14,11 @@ describe('Extension', () => {
       subscriptions: [],
       extensionPath: '/test/path',
       extensionUri: {} as any,
-      globalState: {} as any,
+      globalState: {
+        get: jest.fn(),
+        update: jest.fn(),
+        setKeysForSync: jest.fn(),
+      } as any,
       localState: {} as any,
       workspaceState: {} as any,
       asAbsolutePath: jest.fn(),
@@ -56,8 +60,14 @@ describe('Extension', () => {
     it('should add all disposables to subscriptions', () => {
       activate(mockContext);
 
-      // Should have 5 subscriptions: command, completion provider, hover provider, definition provider, reference provider
-      expect(mockContext.subscriptions).toHaveLength(5);
+      // Should have 29 subscriptions: hello world command, show map preview command, map preview provider,
+      // onDidChangeActiveTextEditor, onDidChangeTextDocument, completion provider, hover provider,
+      // definition provider, reference provider, code actions provider, fill area command, replace all command,
+      // replace with tile set command, create tile set command, insert template command,
+      // create template from selection command, manage templates command,
+      // diagnostic collection, 3 validation listeners, 3 validation commands,
+      // objective builder view, 4 objective commands
+      expect(mockContext.subscriptions).toHaveLength(29);
     });
 
     it('should activate without errors', () => {

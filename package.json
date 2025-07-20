@@ -69,6 +69,72 @@
       {
         "command": "dat.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "manicMiners.showMapPreview",
+        "title": "Show Map Preview",
+        "category": "Manic Miners",
+        "icon": "$(map)"
+      },
+      {
+        "command": "manicMiners.insertTemplate",
+        "title": "Insert Map Template",
+        "category": "Manic Miners",
+        "icon": "$(symbol-namespace)"
+      },
+      {
+        "command": "manicMiners.createTemplateFromSelection",
+        "title": "Create Template from Selection",
+        "category": "Manic Miners",
+        "icon": "$(save)"
+      },
+      {
+        "command": "manicMiners.manageTemplates",
+        "title": "Manage Custom Templates",
+        "category": "Manic Miners",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "manicMiners.runValidation",
+        "title": "Run Map Validation",
+        "category": "Manic Miners",
+        "icon": "$(check)"
+      },
+      {
+        "command": "manicMiners.fixCommonIssues",
+        "title": "Fix Common Map Issues",
+        "category": "Manic Miners",
+        "icon": "$(wrench)"
+      },
+      {
+        "command": "manicMiners.showValidationReport",
+        "title": "Show Validation Report",
+        "category": "Manic Miners",
+        "icon": "$(output)"
+      },
+      {
+        "command": "manicMiners.openObjectiveBuilder",
+        "title": "Open Objective Builder",
+        "category": "Manic Miners",
+        "icon": "$(target)"
+      },
+      {
+        "command": "manicMiners.analyzeObjectives",
+        "title": "Analyze Objectives",
+        "category": "Manic Miners",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "manicMiners.generateObjectiveReport",
+        "title": "Generate Objective Report",
+        "category": "Manic Miners",
+        "icon": "$(book)"
+      },
+      {
+        "command": "manicMiners.convertObjectiveFormat",
+        "title": "Convert Objective Format",
+        "category": "Manic Miners",
+        "icon": "$(sync)"
       }
     ],
     "hoverProviders": [
@@ -76,6 +142,58 @@
         "language": "manicminers"
       }
     ],
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "manicMiners.mapPreview",
+          "name": "Map Preview",
+          "icon": "$(map)",
+          "contextualTitle": "Manic Miners Map Preview"
+        },
+        {
+          "type": "webview",
+          "id": "manicMiners.objectiveBuilder",
+          "name": "Objective Builder",
+          "icon": "$(target)",
+          "contextualTitle": "Manic Miners Objective Builder"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "manicMiners.mapPreview",
+        "contents": "Open a .dat file to see the map preview.\n[Open File](command:workbench.action.files.openFile)"
+      },
+      {
+        "view": "manicMiners.objectiveBuilder",
+        "contents": "Open a .dat file to build objectives.\n[Open File](command:workbench.action.files.openFile)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceExtname == .dat",
+          "command": "manicMiners.showMapPreview",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .dat",
+          "command": "manicMiners.insertTemplate",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .dat",
+          "command": "manicMiners.runValidation",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .dat",
+          "command": "manicMiners.openObjectiveBuilder",
+          "group": "navigation"
+        }
+      ]
+    },
     "snippets": [
       {
         "language": "manicminers",

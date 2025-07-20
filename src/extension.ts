@@ -3,6 +3,17 @@ import { DatCompletionItemProvider } from './completionItemProvider';
 import { DatHoverProvider } from './hoverProvider';
 import { DatDefinitionProvider } from './definitionProvider';
 import { DatReferenceProvider } from './referenceProvider';
+import { MapPreviewProvider } from './mapPreview/mapPreviewProvider';
+import {
+  QuickActionsProvider,
+  registerQuickActionsCommands,
+} from './quickActions/quickActionsProvider';
+import { registerMapTemplateCommands } from './mapTemplates/mapTemplatesProvider';
+import { CustomTileSetsManager } from './quickActions/customTileSets';
+import { MapDiagnosticProvider } from './validation/diagnosticProvider';
+import { registerValidationCommands } from './validation/validationCommands';
+import { ObjectiveBuilderProvider } from './objectiveBuilder/objectiveBuilderProvider';
+import { registerObjectiveCommands } from './objectiveBuilder/objectiveCommands';
 
 export function activate(context: vscode.ExtensionContext) {
   // Extension activated successfully
@@ -12,6 +23,48 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   context.subscriptions.push(disposable);
+
+  // Command to show map preview
+  const showMapPreviewCommand = vscode.commands.registerCommand(
+    'manicMiners.showMapPreview',
+    () => {
+      vscode.commands.executeCommand('manicMiners.mapPreview.focus');
+    }
+  );
+
+  context.subscriptions.push(showMapPreviewCommand);
+
+  // Register Map Preview Provider
+  const mapPreviewProvider = new MapPreviewProvider(context.extensionUri);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(MapPreviewProvider.viewType, mapPreviewProvider)
+  );
+
+  // Update map preview when active editor changes
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(editor => {
+      if (editor && editor.document.languageId === 'manicminers') {
+        mapPreviewProvider.updateDocument(editor.document);
+      }
+    })
+  );
+
+  // Update map preview when document changes
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(e => {
+      if (
+        e.document.languageId === 'manicminers' &&
+        e.document === vscode.window.activeTextEditor?.document
+      ) {
+        mapPreviewProvider.updateDocument(e.document);
+      }
+    })
+  );
+
+  // Initialize with current document
+  if (vscode.window.activeTextEditor?.document.languageId === 'manicminers') {
+    mapPreviewProvider.updateDocument(vscode.window.activeTextEditor.document);
+  }
 
   const completionItemProvider = vscode.languages.registerCompletionItemProvider(
     { scheme: 'file', language: 'manicminers' },
@@ -41,6 +94,42 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(referenceProvider);
+
+  // Create tile sets manager
+  const tileSetsManager = new CustomTileSetsManager(context);
+
+  // Register Quick Actions Provider
+  const quickActionsProvider = vscode.languages.registerCodeActionsProvider(
+    { scheme: 'file', language: 'manicminers' },
+    new QuickActionsProvider(tileSetsManager),
+    {
+      providedCodeActionKinds: QuickActionsProvider.providedCodeActionKinds,
+    }
+  );
+
+  context.subscriptions.push(quickActionsProvider);
+
+  // Register Quick Actions Commands
+  registerQuickActionsCommands(context, tileSetsManager);
+
+  // Register Map Template Commands
+  registerMapTemplateCommands(context);
+
+  // Register Map Validation
+  MapDiagnosticProvider.register(context);
+  registerValidationCommands(context);
+
+  // Register Objective Builder Provider
+  const objectiveBuilderProvider = new ObjectiveBuilderProvider(context.extensionUri);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(
+      ObjectiveBuilderProvider.viewType,
+      objectiveBuilderProvider
+    )
+  );
+
+  // Register Objective Commands
+  registerObjectiveCommands(context);
 }
 
 export function deactivate() {}

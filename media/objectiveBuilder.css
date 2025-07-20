@@ -1,0 +1,219 @@
+/* Objective Builder Styles */
+.objective-builder {
+  padding: 15px;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+}
+
+.objective-builder h3 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  color: var(--vscode-foreground);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding-bottom: 10px;
+}
+
+.objective-builder h4 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  color: var(--vscode-foreground);
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: var(--vscode-foreground);
+}
+
+.form-control {
+  width: 100%;
+  padding: 6px 8px;
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border: 1px solid var(--vscode-input-border);
+  border-radius: 2px;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: var(--vscode-focusBorder);
+}
+
+.form-control:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.parameters-section {
+  margin-bottom: 20px;
+  min-height: 50px;
+}
+
+.parameter-group {
+  margin-bottom: 12px;
+}
+
+.parameter-description {
+  font-size: 0.9em;
+  color: var(--vscode-descriptionForeground);
+  margin-top: 2px;
+}
+
+.preview-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+}
+
+.preview {
+  font-family: var(--vscode-editor-font-family);
+  color: var(--vscode-editor-foreground);
+  padding: 8px;
+  background-color: var(--vscode-editor-inactiveSelectionBackground);
+  border-radius: 2px;
+  min-height: 30px;
+  word-break: break-all;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 2px;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+.btn-secondary {
+  background-color: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: var(--vscode-button-secondaryHoverBackground);
+}
+
+.messages {
+  margin-bottom: 20px;
+}
+
+.message {
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-radius: 4px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.message.error {
+  background-color: var(--vscode-inputValidation-errorBackground);
+  border: 1px solid var(--vscode-inputValidation-errorBorder);
+  color: var(--vscode-errorForeground);
+}
+
+.message.warning {
+  background-color: var(--vscode-inputValidation-warningBackground);
+  border: 1px solid var(--vscode-inputValidation-warningBorder);
+  color: var(--vscode-editorWarning-foreground);
+}
+
+.message.info {
+  background-color: var(--vscode-inputValidation-infoBackground);
+  border: 1px solid var(--vscode-inputValidation-infoBorder);
+  color: var(--vscode-editorInfo-foreground);
+}
+
+.help-section {
+  border-top: 1px solid var(--vscode-panel-border);
+  padding-top: 20px;
+}
+
+.examples {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.example {
+  padding: 8px 12px;
+  background-color: var(--vscode-list-hoverBackground);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  font-size: 0.9em;
+}
+
+.example:hover {
+  background-color: var(--vscode-list-activeSelectionBackground);
+}
+
+.coordinate-input-group {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.coordinate-input-group input {
+  flex: 1;
+}
+
+.coordinate-input-group span {
+  color: var(--vscode-descriptionForeground);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 400px) {
+  .actions {
+    flex-direction: column;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+}
