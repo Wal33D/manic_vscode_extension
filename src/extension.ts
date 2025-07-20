@@ -24,8 +24,13 @@ import {
 import { MapVersionControl } from './versionControl/mapVersionControl';
 import { MapDiffProvider } from './versionControl/mapDiffProvider';
 import { registerVersionControlCommands } from './versionControl/versionControlCommands';
+import { AccessibilityManager } from './accessibility/accessibilityManager';
+import { AccessibleMapPreviewProvider } from './accessibility/accessibleMapPreview';
+import { registerAccessibilityCommands } from './accessibility/accessibilityCommands';
 
 export function activate(context: vscode.ExtensionContext) {
+  // Store context globally for accessibility manager
+  (global as unknown as Record<string, vscode.ExtensionContext>).extensionContext = context;
   // Extension activated successfully
 
   const disposable = vscode.commands.registerCommand('dat.helloWorld', () => {
@@ -44,8 +49,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(showMapPreviewCommand);
 
-  // Register Map Preview Provider
-  const mapPreviewProvider = new MapPreviewProvider(context.extensionUri);
+  // Initialize Accessibility Manager
+  AccessibilityManager.getInstance(context);
+
+  // Register Map Preview Provider with accessibility support
+  const mapPreviewProvider = new AccessibleMapPreviewProvider(context.extensionUri, context);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(MapPreviewProvider.viewType, mapPreviewProvider)
   );
@@ -186,6 +194,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register Version Control Commands
   registerVersionControlCommands(context, versionControl, mapDiffProvider);
+
+  // Register Accessibility Commands
+  registerAccessibilityCommands(context);
 }
 
 export function deactivate() {}
