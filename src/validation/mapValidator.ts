@@ -159,7 +159,7 @@ export class MapValidator {
         const tileId = this.tiles[row][col];
 
         // Check for invalid tile IDs
-        if (isNaN(tileId) || tileId < 1 || tileId > 115) {
+        if (isNaN(tileId) || tileId < 1 || tileId > 165) {
           errors.push({
             type: 'error',
             message: `Invalid tile ID ${tileId} at [${row}, ${col}]`,

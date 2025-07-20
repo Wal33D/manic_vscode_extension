@@ -252,5 +252,32 @@ tiles{
       expect(results.errors).toHaveLength(0);
       expect(results).toHaveProperty('info');
     });
+
+    it('should accept tiles 163, 164, and 165 as valid rubble tiles', async () => {
+      mockDocument = {
+        getText: () => `info{
+rowcount:3
+colcount:5
+}
+tiles{
+1,163,164,165,1,
+1,2,3,4,5,
+101,1,1,1,26,
+}`,
+        languageId: 'manicminers',
+      } as any;
+
+      const validator = new MapValidator(mockDocument);
+      const results = await validator.validate();
+
+      // Should not have errors about invalid tile IDs for 163, 164, 165
+      const invalidTileErrors = results.errors.filter(
+        e =>
+          e.message.includes('Invalid tile ID') &&
+          (e.message.includes('163') || e.message.includes('164') || e.message.includes('165'))
+      );
+
+      expect(invalidTileErrors).toHaveLength(0);
+    });
   });
 });
