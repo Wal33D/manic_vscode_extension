@@ -2,13 +2,41 @@
 
 export enum CompletionItemKind {
   Field = 4,
+  Snippet = 14,
+  Keyword = 13,
+  Method = 1,
+  Property = 9,
+  Variable = 5,
+  Enum = 12,
+  EnumMember = 19,
 }
 
 export class CompletionItem {
+  public detail?: string;
+  public documentation?: string;
+  public insertText?: string | SnippetString;
+
   constructor(
     public label: string,
     public kind: CompletionItemKind
   ) {}
+}
+
+export class SnippetString {
+  constructor(public value: string) {}
+}
+
+export class MarkdownString {
+  public value: string = '';
+
+  constructor(value?: string) {
+    if (value) this.value = value;
+  }
+
+  appendMarkdown(value: string): MarkdownString {
+    this.value += value;
+    return this;
+  }
 }
 
 export class Hover {
