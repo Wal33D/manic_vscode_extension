@@ -2,8 +2,8 @@
   "name": "manic-miners-dat",
   "displayName": "Manic Miners DAT File Support",
   "description": "Language support for Manic Miner .dat level files with syntax highlighting, IntelliSense, and hover information",
-  "version": "0.2.0",
-  "publisher": "waleedjudah",
+  "version": "0.2.5",
+  "publisher": "Wal33D",
   "author": {
     "name": "Waleed Judah",
     "email": "aquataze@yahoo.com"

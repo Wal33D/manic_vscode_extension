@@ -11,7 +11,7 @@ describe('DatHoverProvider', () => {
   let cancellationToken: vscode.CancellationToken;
 
   beforeEach(() => {
-    provider = new DatHoverProvider();
+    provider = new DatHoverProvider('/test/extension/path');
     cancellationToken = new CancellationToken();
   });
 
@@ -149,8 +149,8 @@ describe('DatHoverProvider', () => {
 
       expect(hover).toBeInstanceOf(vscode.Hover);
       const content = (hover as any)?.contents;
-      expect(content.value).toContain('**Tile 38: Solid Rock**');
-      expect(content.value).toContain('Impenetrable solid rock wall');
+      expect(content.value).toContain('**Tile 38: Solid Rock Regular**');
+      expect(content.value).toContain('Impenetrable solid rock - cannot be drilled');
     });
 
     it('should provide hover for section names', () => {

@@ -312,6 +312,34 @@
               "name": "constant.numeric.y.manicminers"
             },
             "4": {
+              "name": "string.quoted.description.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(findbuilding)\\s*:\\s*(\\d+)\\s*,\\s*(\\d+)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.objective.manicminers"
+            },
+            "2": {
+              "name": "constant.numeric.x.manicminers"
+            },
+            "3": {
+              "name": "constant.numeric.y.manicminers"
+            }
+          }
+        },
+        {
+          "match": "(variable)\\s*:\\s*([^/]+)\\s*/\\s*(.+)",
+          "captures": {
+            "1": {
+              "name": "keyword.other.objective.manicminers"
+            },
+            "2": {
+              "name": "variable.other.condition.manicminers"
+            },
+            "3": {
               "name": "string.unquoted.description.manicminers"
             }
           }
@@ -547,12 +575,23 @@
       },
       "patterns": [
         {
-          "match": "\\b\\d+\\b",
-          "name": "constant.numeric.frequency.manicminers"
+          "match": "(\\d+)\\s*:\\s*([\\d,/]+)",
+          "captures": {
+            "1": {
+              "name": "constant.numeric.time.manicminers"
+            },
+            "2": {
+              "name": "constant.other.coordinates.manicminers"
+            }
+          }
         },
         {
-          "match": ",",
-          "name": "punctuation.separator.manicminers"
+          "match": ":",
+          "name": "punctuation.separator.time.manicminers"
+        },
+        {
+          "match": "/",
+          "name": "punctuation.separator.coordinate.manicminers"
         }
       ]
     },
@@ -567,12 +606,23 @@
       },
       "patterns": [
         {
-          "match": "\\b\\d+\\b",
-          "name": "constant.numeric.spread.manicminers"
+          "match": "(\\d+)\\s*:\\s*([\\d,/]+)",
+          "captures": {
+            "1": {
+              "name": "constant.numeric.time.manicminers"
+            },
+            "2": {
+              "name": "constant.other.coordinates.manicminers"
+            }
+          }
         },
         {
-          "match": ",",
-          "name": "punctuation.separator.manicminers"
+          "match": ":",
+          "name": "punctuation.separator.time.manicminers"
+        },
+        {
+          "match": "/",
+          "name": "punctuation.separator.coordinate.manicminers"
         }
       ]
     },

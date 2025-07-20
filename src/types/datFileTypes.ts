@@ -45,6 +45,7 @@ export enum BuildingType {
   UpgradeStation = 'BuildingUpgradeStation_C',
   Docks = 'BuildingDocks_C',
   ElectricFence = 'BuildingElectricFence_C',
+  MiningLaser = 'BuildingMiningLaser_C',
 }
 
 // Vehicle types
@@ -60,6 +61,7 @@ export enum VehicleType {
   CargoCarrier = 'VehicleCargoCarrier_C',
   SmallDigger = 'VehicleSmallDigger_C',
   RapidRider = 'VehicleRapidRider_C',
+  HoverScout = 'VehicleHoverScout_C',
 }
 
 // Creature types
@@ -153,12 +155,19 @@ export interface FindMinerObjective {
   minerID: number;
 }
 
+export interface FindBuildingObjective {
+  type: 'findbuilding';
+  x: number;
+  y: number;
+}
+
 export type Objective =
   | ResourceObjective
   | BuildingObjective
   | DiscoverObjective
   | VariableObjective
-  | FindMinerObjective;
+  | FindMinerObjective
+  | FindBuildingObjective;
 
 // Script types
 export type ScriptVariableValue = string | number | boolean;
