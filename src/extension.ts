@@ -27,6 +27,7 @@ import { registerVersionControlCommands } from './versionControl/versionControlC
 import { AccessibilityManager } from './accessibility/accessibilityManager';
 import { AccessibleMapPreviewProvider } from './accessibility/accessibleMapPreview';
 import { registerAccessibilityCommands } from './accessibility/accessibilityCommands';
+import { HeatMapProvider } from './heatmap/heatMapProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -197,6 +198,44 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register Accessibility Commands
   registerAccessibilityCommands(context);
+
+  // Register Heat Map Provider
+  const heatMapProvider = new HeatMapProvider(context.extensionUri);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(HeatMapProvider.viewType, heatMapProvider)
+  );
+
+  // Update heat map when active editor changes
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(editor => {
+      if (editor && editor.document.languageId === 'manicminers') {
+        heatMapProvider.updateDocument(editor.document);
+      }
+    })
+  );
+
+  // Update heat map when document changes
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(e => {
+      if (
+        e.document.languageId === 'manicminers' &&
+        e.document === vscode.window.activeTextEditor?.document
+      ) {
+        heatMapProvider.updateDocument(e.document);
+      }
+    })
+  );
+
+  // Initialize heat map with current document
+  if (vscode.window.activeTextEditor?.document.languageId === 'manicminers') {
+    heatMapProvider.updateDocument(vscode.window.activeTextEditor.document);
+  }
+
+  // Register heat map command
+  const showHeatMapCommand = vscode.commands.registerCommand('manicMiners.showHeatMap', () => {
+    vscode.commands.executeCommand('manicMiners.heatMap.focus');
+  });
+  context.subscriptions.push(showHeatMapCommand);
 }
 
 export function deactivate() {}

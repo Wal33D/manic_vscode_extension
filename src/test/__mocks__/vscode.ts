@@ -102,6 +102,7 @@ export const window = {
   showQuickPick: jest.fn(),
   registerWebviewViewProvider: jest.fn(),
   onDidChangeActiveTextEditor: jest.fn(() => ({ dispose: jest.fn() })),
+  onDidChangeActiveColorTheme: jest.fn(() => ({ dispose: jest.fn() })),
   activeTextEditor: undefined,
   setStatusBarMessage: jest.fn(),
   withProgress: jest.fn((_options, task) => task({ report: jest.fn() })),
@@ -148,6 +149,12 @@ export const workspace = {
   onDidCloseTextDocument: jest.fn(() => ({ dispose: jest.fn() })),
   openTextDocument: jest.fn(),
   applyEdit: jest.fn(),
+  getConfiguration: jest.fn(() => ({
+    get: jest.fn(() => 'auto'),
+    has: jest.fn(() => false),
+    inspect: jest.fn(),
+    update: jest.fn(),
+  })),
 };
 
 export enum CodeActionKind {

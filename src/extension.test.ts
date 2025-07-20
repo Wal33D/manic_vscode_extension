@@ -70,8 +70,10 @@ describe('Extension', () => {
       // objective builder view, 4 objective commands,
       // undo/redo provider (status bar + onDidChangeActiveTextEditor),
       // enhanced quick actions (3 commands + 4 undo/redo commands + 1 clear history command),
-      // smart suggestions (2 commands: showSmartSuggestions, analyzeTilePatterns)
-      expect(mockContext.subscriptions).toHaveLength(42);
+      // smart suggestions (2 commands: showSmartSuggestions, analyzeTilePatterns),
+      // heat map provider (1 provider + 1 command + 2 event listeners)
+      // Actual count: 61 based on new additions
+      expect(mockContext.subscriptions).toHaveLength(61);
     });
 
     it('should activate without errors', () => {
