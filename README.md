@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Version](https://img.shields.io/visual-studio-marketplace/v/Wal33D.manic-miners-dat)](https://marketplace.visualstudio.com/items?itemName=Wal33D.manic-miners-dat)
 
-A comprehensive Visual Studio Code extension providing language support for Manic Miner `.dat` level files. Edit game levels with full syntax highlighting, IntelliSense, and helpful tooltips.
+A comprehensive Visual Studio Code extension providing full language support, visual editing tools, and advanced analysis for Manic Miner `.dat` level files. Create, edit, and optimize game levels with professional development tools.
 
 ![Manic Miner DAT File Extension Demo](images/demo.gif)
 
@@ -33,20 +33,21 @@ Full syntax highlighting for all DAT file sections including:
 
 ### 🗺️ Visual Map Preview
 - Real-time visual representation of your level
-- Zoom controls and tile information on hover
+- Zoom controls (25% to 400%) and tile information on hover
 - Click tiles to jump to their location in the editor
-- **NEW**: Multi-tile selection with Shift+drag
-- **NEW**: Toggle grid lines and tile IDs
-- **NEW**: Keyboard shortcuts for all controls
-- **NEW**: Performance optimizations for large maps
+- Multi-tile selection with Shift+drag
+- Toggle grid lines and tile IDs
+- Full keyboard navigation and shortcuts
+- Performance optimized for large maps
 
 ### ⚡ Quick Actions
 - Convert tiles between normal and reinforced variants
 - Replace tiles with common types
 - Fill areas and replace all instances of a tile type
 - Context-sensitive actions in the tiles section
-- **NEW**: Custom tile sets for frequently used combinations
-- **NEW**: Save and reuse your favorite tile patterns
+- Custom tile sets for frequently used combinations
+- Save and reuse your favorite tile patterns
+- Smart tile suggestions based on surrounding context
 
 ### 🎯 Objective Builder
 - Visual interface for creating level objectives
@@ -69,6 +70,33 @@ Full syntax highlighting for all DAT file sections including:
 - Create custom templates from selection
 - Manage and organize your template library
 - Quick insertion with customizable parameters
+
+### 🔄 Undo/Redo System
+- Sophisticated undo/redo for map operations
+- Visual preview before applying changes
+- History tracking (50 operations per file)
+- Survives file saves
+- Status bar integration
+
+### 📊 Heat Map Analysis
+- Visualize pathfinding and traffic patterns
+- Identify bottlenecks and optimize routes
+- Multiple analysis modes (traffic, accessibility, chokepoints)
+- Statistical insights and hotspot detection
+
+### 🔒 Version Control
+- Track map changes over time
+- Visual diff between versions
+- Restore previous versions
+- Git-like versioning system
+- Commit messages and history
+
+### ♿ Accessibility Features
+- Full screen reader support
+- High contrast mode
+- Keyboard-only navigation
+- ARIA labels for all UI elements
+- Accessible map descriptions
 
 ### 🔧 Language Configuration
 - Comment support (line `//` and block `/* */`)
@@ -129,6 +157,13 @@ The extension currently provides IntelliSense for these `info` section fields:
 
 This extension works out of the box with no configuration required. Future versions may add customizable settings.
 
+## Documentation
+
+- 📖 [User Guide](docs/USER_GUIDE.md) - Comprehensive guide to all features
+- 🛠️ [Developer Guide](docs/DEVELOPER_GUIDE.md) - Setup and contribution guidelines
+- 📄 [DAT Format Reference](docs/DAT_FORMAT.md) - Complete file format specification
+- 🎮 [Tile Reference](docs/reference/TILE_REFERENCE.md) - All tile IDs and properties
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
@@ -139,7 +174,7 @@ Contributions are welcome! Please feel free to submit a Pull Request. For major 
 3. Open in VS Code
 4. Press `F5` to run the extension in a new VS Code window
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+See the [Developer Guide](docs/DEVELOPER_GUIDE.md) for detailed instructions.
 
 ## Known Issues
 
@@ -150,18 +185,19 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
 
 See [CHANGELOG.md](CHANGELOG.md) for detailed release notes.
 
-### 0.3.0 - Phase 3 Complete
+### Latest Release
 
-Major feature release:
+Major features include:
 - **Visual Map Preview** with zoom, multi-selection, and keyboard controls
+- **Heat Map Analysis** for pathfinding and traffic visualization
+- **Version Control** with visual diff and history tracking
+- **Accessibility Features** including screen reader and high contrast support
+- **Smart Tile Suggestions** based on context analysis
+- **Undo/Redo System** with visual preview
 - **Objective Builder** interface for creating level objectives
 - **Map Validation** with pathfinding analysis and auto-fix
 - **Quick Actions** for tile manipulation and custom tile sets
 - **Map Templates** system with custom template support
-- Enhanced IntelliSense for all sections
-- Go-to-definition and find references
-- Real-time diagnostics
-- Performance optimizations
 
 ### 0.2.5
 
@@ -180,15 +216,30 @@ Initial release featuring:
 
 ## Roadmap
 
-- [x] Extend IntelliSense to all sections
-- [x] Add validation and diagnostics
-- [x] Implement code snippets
-- [x] Add level preview functionality
-- [x] Support for go-to-definition
-- [ ] Auto-formatting support
-- [ ] Map export functionality
-- [ ] Collaborative editing support
-- [ ] AI-powered map generation
+### Completed ✅
+- Extend IntelliSense to all sections
+- Add validation and diagnostics
+- Implement code snippets
+- Add level preview functionality
+- Support for go-to-definition
+- Heat map visualization
+- Version control integration
+- Accessibility features
+- Smart tile suggestions
+- Undo/redo with preview
+
+### In Development 🚧
+- Tile statistics panel
+- Map diff tool improvements
+- Minimap navigation
+- Performance profiler
+
+### Future Plans 📋
+- Auto-formatting support
+- Map export to image/PDF
+- Collaborative editing
+- AI-powered map generation
+- Tutorial mode
 
 ## License
 

@@ -1,74 +1,25 @@
-# Manic Miners VSCode Extension Documentation
+# Manic Miners Extension Documentation
 
-Welcome to the comprehensive documentation for the Manic Miners VSCode Extension. This extension provides powerful tools for editing and managing Manic Miners .dat map files.
+## Quick Links
 
-## 📚 Documentation Structure
+### For Users
+- 📖 [User Guide](./USER_GUIDE.md) - Complete guide to using the extension
+- 📄 [DAT File Format](./DAT_FORMAT.md) - Understanding the file format
+- 🎮 [Tile Reference](./reference/TILE_REFERENCE.md) - Complete tile ID reference
 
-### Core Documentation
-- [DAT File Format Guide](./DAT_FILE_FORMAT_GUIDE.md) - Complete specification of the .dat file format
-- [Complete Tile Reference](./COMPLETE_TILE_REFERENCE.md) - All tile IDs and their properties
-- [Development Phases](./DEVELOPMENT_PHASES.md) - Summary of all development phases
+### For Developers  
+- 🛠️ [Developer Guide](./DEVELOPER_GUIDE.md) - Contributing and development setup
+- 📋 [Development History](./DEVELOPMENT_PHASES.md) - Project evolution and phases
 
-### Feature Documentation
-- [Map Preview](./features/MAP_PREVIEW.md) - Visual map preview functionality
-- [Map Templates](./features/MAP_TEMPLATES.md) - Template system for quick map creation
-- [Map Validation](./features/MAP_VALIDATION.md) - Comprehensive validation system
-- [Objective Builder](./features/OBJECTIVE_BUILDER.md) - Visual objective creation tool
-- [Quick Actions](./features/QUICK_ACTIONS.md) - Context-aware quick actions and tile operations
-- [Undo/Redo System](./features/UNDO_REDO.md) - Edit history with visual preview
+### Additional Resources
+- 📝 [Main README](../README.md) - Extension overview
+- 📜 [Changelog](../CHANGELOG.md) - Version history
+- 🚀 [Workflow Guide](../CLAUDE.md) - Development workflow automation
 
-### Development Guides
-- [Extension Development](./guides/DEVELOPMENT.md) - How to develop and contribute
-- [Image Asset Integration Plan](./guides/IMAGE_ASSET_INTEGRATION.md) - Plan for integrating game assets
-- [Future Features](./guides/FUTURE_FEATURES.md) - Roadmap and planned features
+## Getting Started
 
-## 🚀 Quick Start
+**New to the extension?** Start with the [User Guide](./USER_GUIDE.md).
 
-1. **Installation**: Install the extension from the VSCode marketplace
-2. **Open a .dat file**: The extension automatically activates for Manic Miners map files
-3. **Use IntelliSense**: Get autocomplete suggestions as you type
-4. **Preview your map**: Use Cmd+Shift+P → "Show Map Preview"
-5. **Validate your map**: Use Cmd+Shift+P → "Run Map Validation"
+**Want to contribute?** Check out the [Developer Guide](./DEVELOPER_GUIDE.md).
 
-## 🎯 Key Features
-
-### Phase 1 - Foundation
-- ✅ Syntax highlighting for .dat files
-- ✅ IntelliSense with smart completions
-- ✅ Hover information for tiles and properties
-- ✅ Go to definition and find references
-- ✅ Code snippets for common patterns
-
-### Phase 2 - Enhanced Features
-- ✅ Visual map preview with tile rendering
-- ✅ Map templates system
-- ✅ Comprehensive validation
-- ✅ Quick actions for tile manipulation
-- ✅ Custom tile sets
-- ✅ Visual objective builder
-
-### Phase 3 - Advanced Capabilities
-- ✅ Auto-fix suggestions for validation errors
-- ✅ Undo/redo with visual preview
-- ✅ Enhanced tile definitions (300+ tiles)
-- 🚧 Smart tile suggestions
-- 🚧 Version control integration
-- 🚧 Accessibility features
-
-## 📖 Using This Documentation
-
-- **For Users**: Start with the feature documentation to learn how to use each tool
-- **For Developers**: Check the development guides for contribution guidelines
-- **For Reference**: Use the DAT format guide and tile reference when editing maps
-
-## 🤝 Contributing
-
-See our [Development Guide](./guides/DEVELOPMENT.md) for information on:
-- Setting up the development environment
-- Running tests
-- Submitting pull requests
-- Code style guidelines
-
-## 📝 License
-
-This extension is licensed under the MIT License. See the LICENSE file in the root directory.
+**Need format details?** See the [DAT Format](./DAT_FORMAT.md) specification.

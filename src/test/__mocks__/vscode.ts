@@ -57,6 +57,15 @@ export class Range {
   ) {}
 }
 
+export class Selection extends Range {
+  constructor(
+    public anchor: Position,
+    public active: Position
+  ) {
+    super(anchor, active);
+  }
+}
+
 export class Uri {
   constructor(public fsPath: string) {}
   static file(path: string): Uri {
@@ -119,6 +128,15 @@ export const window = {
     text: '',
     tooltip: '',
     command: '',
+    show: jest.fn(),
+    hide: jest.fn(),
+    dispose: jest.fn(),
+  })),
+  createOutputChannel: jest.fn(() => ({
+    name: '',
+    append: jest.fn(),
+    appendLine: jest.fn(),
+    clear: jest.fn(),
     show: jest.fn(),
     hide: jest.fn(),
     dispose: jest.fn(),
