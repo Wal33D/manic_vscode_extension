@@ -15,6 +15,8 @@ import { registerValidationCommands } from './validation/validationCommands';
 import { ObjectiveBuilderProvider } from './objectiveBuilder/objectiveBuilderProvider';
 import { registerObjectiveCommands } from './objectiveBuilder/objectiveCommands';
 import { AutoFixProvider } from './validation/autoFixProvider';
+import { UndoRedoProvider } from './undoRedo/undoRedoProvider';
+import { registerEnhancedQuickActionsCommands } from './quickActions/quickActionsEnhanced';
 
 export function activate(context: vscode.ExtensionContext) {
   // Extension activated successfully
@@ -99,6 +101,9 @@ export function activate(context: vscode.ExtensionContext) {
   // Create tile sets manager
   const tileSetsManager = new CustomTileSetsManager(context);
 
+  // Create undo/redo provider
+  const undoRedoProvider = new UndoRedoProvider(context);
+
   // Register Quick Actions Provider
   const quickActionsProvider = vscode.languages.registerCodeActionsProvider(
     { scheme: 'file', language: 'manicminers' },
@@ -110,8 +115,11 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(quickActionsProvider);
 
-  // Register Quick Actions Commands
+  // Register Quick Actions Commands (keeping original for backward compatibility)
   registerQuickActionsCommands(context, tileSetsManager);
+
+  // Register Enhanced Quick Actions Commands with undo/redo support
+  registerEnhancedQuickActionsCommands(context, tileSetsManager, undoRedoProvider);
 
   // Register Map Template Commands
   registerMapTemplateCommands(context);
