@@ -23,7 +23,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   const hoverProvider = vscode.languages.registerHoverProvider(
     { scheme: 'file', language: 'manicminers' },
-    new DatHoverProvider()
+    new DatHoverProvider(context.extensionPath)
   );
 
   context.subscriptions.push(hoverProvider);

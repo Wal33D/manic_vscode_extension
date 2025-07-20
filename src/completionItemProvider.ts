@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { DatFileParser } from './parser/datFileParser';
 import { BuildingType, VehicleType, CreatureType, BiomeType } from './types/datFileTypes';
 import { getTileInfo } from './data/tileDefinitions';
+import { getEnhancedTileInfo, isReinforcedTile } from './data/enhancedTileDefinitions';
 
 // Info section fields with descriptions
 const infoFieldCompletions: Map<string, { detail: string; documentation: string }> = new Map([
@@ -137,9 +138,13 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
       case 'tiles':
       case 'height':
       case 'blocks':
-      case 'landslidefrequency':
-      case 'lavaspread':
         return this.getNumericCompletions(linePrefix);
+
+      case 'landslidefrequency':
+        return this.getLandslideCompletions(linePrefix);
+
+      case 'lavaspread':
+        return this.getLavaSpreadCompletions(linePrefix);
 
       case 'resources':
         return this.getResourcesCompletions(linePrefix);
@@ -206,24 +211,200 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
 
     // If we're in tiles section, provide tile ID completions
     if (linePrefix.match(/,\s*$/) || linePrefix.match(/^\s*$/)) {
-      // Common tile IDs
-      const commonTiles = [1, 38, 42, 46, 26, 24, 14, 11, 50, 34, 30];
+      // Enhanced tile categories with better organization
+      const tileCategories = {
+        '🏗️ Buildable Ground': {
+          tiles: [1],
+          description: 'Safe tiles for construction',
+        },
+        '🪨 Rubble (Clearable)': {
+          tiles: [2, 3, 4, 5],
+          description: 'Can be cleared by raiders',
+        },
+        '🌋 Hazards': {
+          tiles: [6, 7, 8, 9, 10, 11, 106, 107, 108, 109, 110, 111],
+          description: 'Dangerous terrain',
+        },
+        '⚡ Special Functions': {
+          tiles: [12, 112, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25],
+          description: 'Electric fences and power paths',
+        },
+        '🪨 Drillable Walls': {
+          tiles: [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37],
+          description: 'Dirt, loose rock, and hard rock',
+        },
+        '🔒 Solid Rock': {
+          tiles: [38, 39, 40, 41, 88, 89, 90, 91],
+          description: 'Cannot be drilled',
+        },
+        '💎 Crystal Seams': {
+          tiles: [42, 43, 44, 45, 92, 93, 94, 95],
+          description: 'Contains energy crystals',
+        },
+        '⛏️ Ore Seams': {
+          tiles: [46, 47, 48, 49, 96, 97, 98, 99],
+          description: 'Contains building ore',
+        },
+        '⚡ Recharge Seams': {
+          tiles: [50, 51, 52, 53, 100, 101, 102, 103],
+          description: 'Powers electric fences',
+        },
+        '🎨 Decorative': {
+          tiles: [58, 60, 61, 62, 63],
+          description: 'Visual elements only',
+        },
+        '🧪 Experimental': {
+          tiles: [64, 65, 114, 115],
+          description: 'Cliff terrain (experimental)',
+        },
+        '🛡️ Reinforced Ground': {
+          tiles: [76, 77, 78, 79, 80],
+          description: 'Harder versions of ground tiles',
+        },
+        '🛡️ Reinforced Walls': {
+          tiles: [76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87],
+          description: 'Take 2x longer to drill',
+        },
+      };
 
-      for (const tileId of commonTiles) {
-        const tileInfo = getTileInfo(tileId);
-        if (tileInfo) {
-          const item = new vscode.CompletionItem(
-            tileId.toString(),
-            vscode.CompletionItemKind.Constant
-          );
-          item.detail = tileInfo.name;
-          item.documentation = new vscode.MarkdownString(tileInfo.description);
-          completionItems.push(item);
-        }
+      // Add quick access presets first
+      const quickAccessItem = new vscode.CompletionItem(
+        '-- Quick Access Tiles --',
+        vscode.CompletionItemKind.Folder
+      );
+      quickAccessItem.detail = 'Common tiles for level building';
+      quickAccessItem.sortText = '000';
+      quickAccessItem.insertText = '';
+      completionItems.push(quickAccessItem);
+
+      // Add common tiles
+      const commonTiles = [
+        { id: 1, use: 'Ground (buildable)' },
+        { id: 38, use: 'Solid rock (impassable)' },
+        { id: 26, use: 'Dirt wall (easy)' },
+        { id: 34, use: 'Hard rock (difficult)' },
+        { id: 42, use: 'Crystal seam' },
+        { id: 46, use: 'Ore seam' },
+        { id: 6, use: 'Lava hazard' },
+        { id: 11, use: 'Water hazard' },
+      ];
+
+      for (const common of commonTiles) {
+        const item = new vscode.CompletionItem(
+          common.id.toString(),
+          vscode.CompletionItemKind.Constant
+        );
+        item.detail = `⭐ ${common.use}`;
+        item.sortText = `001-${common.id.toString().padStart(3, '0')}`;
+        completionItems.push(item);
       }
+
+      // Add separator
+      const separatorItem = new vscode.CompletionItem(
+        '-- All Tiles by Category --',
+        vscode.CompletionItemKind.Folder
+      );
+      separatorItem.detail = 'Complete tile listing';
+      separatorItem.sortText = '002';
+      separatorItem.insertText = '';
+      completionItems.push(separatorItem);
+
+      // Add tiles from each category
+      let categoryIndex = 0;
+      for (const [categoryName, categoryData] of Object.entries(tileCategories)) {
+        for (const tileId of categoryData.tiles) {
+          const tileInfo = getEnhancedTileInfo(tileId) || getTileInfo(tileId);
+          if (tileInfo) {
+            const item = new vscode.CompletionItem(
+              tileId.toString(),
+              vscode.CompletionItemKind.Constant
+            );
+
+            const isReinforced = tileId >= 76;
+            const reinforcedMarker = isReinforced ? ' 🛡️' : '';
+
+            item.detail = `${categoryName}: ${tileInfo.name}${reinforcedMarker}`;
+
+            const docs = new vscode.MarkdownString();
+            docs.appendMarkdown(`**${tileInfo.name}** (ID: ${tileId})\n\n`);
+            docs.appendMarkdown(`${tileInfo.description}\n\n`);
+            docs.appendMarkdown(`*Category:* ${categoryData.description}\n\n`);
+
+            if (tileInfo.canDrill) {
+              const drillTime = this.getDrillTimeForTile(tileId);
+              docs.appendMarkdown(`*Drill time:* ${drillTime}\n`);
+            }
+
+            if (tileInfo.category === 'resource') {
+              const resource =
+                (tileId >= 42 && tileId <= 45) || (tileId >= 92 && tileId <= 95)
+                  ? 'crystals'
+                  : (tileId >= 46 && tileId <= 49) || (tileId >= 96 && tileId <= 99)
+                    ? 'ore'
+                    : 'recharge';
+              docs.appendMarkdown(`*Yields:* ${resource}\n`);
+            }
+
+            item.documentation = docs;
+            item.sortText = `${(categoryIndex + 3).toString().padStart(3, '0')}-${categoryName}-${tileId.toString().padStart(3, '0')}`;
+            completionItems.push(item);
+          }
+        }
+        categoryIndex++;
+      }
+
+      // Add a special completion for "show all tiles"
+      const showAllItem = new vscode.CompletionItem(
+        'View all tile IDs...',
+        vscode.CompletionItemKind.Text
+      );
+      showAllItem.detail = 'Click for complete tile reference (1-115)';
+      showAllItem.documentation = new vscode.MarkdownString(
+        '**All Tile IDs:**\n\n' +
+          '**Ground (1-5, 76-80):** Rubble, dirt, loose rock\n' +
+          '**Hazards (6-11, 106-111):** Lava, water, erosion\n' +
+          '**Special (12-14, 112-114):** Electric fence, paths\n' +
+          '**Walls (26-37, 76-87):** Various rock types\n' +
+          '**Solid (38, 88):** Impenetrable rock\n' +
+          '**Crystal (42-45, 92-95):** Energy crystal seams\n' +
+          '**Ore (46-49, 96-99):** Ore seams\n' +
+          '**Recharge (50-53, 100-103):** Power crystal seams\n\n' +
+          '*Reinforced tiles = base ID + 50*'
+      );
+      showAllItem.sortText = 'zzz'; // Put at end
+      completionItems.push(showAllItem);
     }
 
     return completionItems;
+  }
+
+  private getDrillTimeForTile(tileId: number): string {
+    const baseId = isReinforcedTile(tileId) ? tileId - 50 : tileId;
+    const multiplier = isReinforcedTile(tileId) ? 2 : 1;
+
+    if (baseId >= 26 && baseId <= 29) {
+      return `${3 * multiplier}s`;
+    }
+    if (baseId >= 30 && baseId <= 33) {
+      return `${5 * multiplier}s`;
+    }
+    if (baseId >= 34 && baseId <= 37) {
+      return `${8 * multiplier}s`;
+    }
+    if (baseId >= 42 && baseId <= 45) {
+      return `${6 * multiplier}s`;
+    }
+    if (baseId >= 46 && baseId <= 49) {
+      return `${7 * multiplier}s`;
+    }
+    if (baseId >= 50 && baseId <= 53) {
+      return `${5 * multiplier}s`;
+    }
+    if (baseId >= 2 && baseId <= 5) {
+      return `${(baseId - 1) * multiplier}s`;
+    }
+
+    return 'N/A';
   }
 
   private getResourcesCompletions(linePrefix: string): vscode.CompletionItem[] {
@@ -263,7 +444,7 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
         vscode.CompletionItemKind.Snippet
       );
       buildingItem.insertText = new vscode.SnippetString(
-        'building:${1|BuildingPowerStation_C,BuildingOreRefinery_C,BuildingCanteen_C|}'
+        'building:${1|BuildingToolStore_C,BuildingPowerStation_C,BuildingTeleportPad_C,BuildingDocks_C,BuildingCanteen_C,BuildingSupportStation_C,BuildingOreRefinery_C,BuildingGeologicalCenter_C,BuildingUpgradeStation_C,BuildingMiningLaser_C,BuildingSuperTeleport_C|}'
       );
       buildingItem.detail = 'Building construction objective';
       completionItems.push(buildingItem);
@@ -295,6 +476,15 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
       minerItem.insertText = new vscode.SnippetString('findminer:${1:minerID}');
       minerItem.detail = 'Find lost miner objective';
       completionItems.push(minerItem);
+
+      // Find building objective
+      const findBuildingItem = new vscode.CompletionItem(
+        'findbuilding:',
+        vscode.CompletionItemKind.Snippet
+      );
+      findBuildingItem.insertText = new vscode.SnippetString('findbuilding:${1:x},${2:y}');
+      findBuildingItem.detail = 'Find hidden building objective';
+      completionItems.push(findBuildingItem);
     }
 
     return completionItems;
@@ -304,17 +494,71 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
     const completionItems: vscode.CompletionItem[] = [];
 
     if (linePrefix.match(/^\s*$/) || linePrefix.match(/,\s*$/)) {
+      // Smart building suggestions based on what's already present
+      const existingBuildings = this.getExistingBuildingsFromDocument();
+      const hasToolStore = existingBuildings.includes('BuildingToolStore_C');
+      const hasPowerStation = existingBuildings.includes('BuildingPowerStation_C');
+
       for (const [key, value] of Object.entries(BuildingType)) {
         const item = new vscode.CompletionItem(value, vscode.CompletionItemKind.Class);
-        item.detail = key.replace(/([A-Z])/g, ' $1').trim();
+        const name = key.replace(/([A-Z])/g, ' $1').trim();
+
+        // Prioritize essential buildings
+        if (value === 'BuildingToolStore_C' && !hasToolStore) {
+          item.detail = `${name} (REQUIRED - Place first!)`;
+          item.sortText = '0_' + value;
+        } else if (value === 'BuildingPowerStation_C' && !hasPowerStation) {
+          item.detail = `${name} (Recommended - Powers other buildings)`;
+          item.sortText = '1_' + value;
+        } else {
+          item.detail = name;
+          item.sortText = '2_' + value;
+        }
+
+        // Calculate smart default coordinates based on grid
+        const gridX = 20; // Default to center-ish
+        const gridY = 20;
+        const worldX = gridX * 150;
+        const worldY = gridY * 150;
+
         item.insertText = new vscode.SnippetString(
-          `${value},Translation: X=\${1:0.000} Y=\${2:0.000} Z=\${3:0.000} Rotation: P=\${4:0.000000} Y=\${5:0.000000} R=\${6:0.000000} Scale X=\${7:1.000} Y=\${8:1.000} Z=\${9:1.000}`
+          `${value},Translation: X=\${1:${worldX.toFixed(3)}} Y=\${2:${worldY.toFixed(3)}} Z=\${3:0.000} Rotation: P=\${4:0.000000} Y=\${5:0.000000} R=\${6:0.000000} Scale X=\${7:1.000} Y=\${8:1.000} Z=\${9:1.000}`
         );
+
+        // Add documentation about the building
+        const docs = new vscode.MarkdownString();
+        if (value === 'BuildingToolStore_C') {
+          docs.appendMarkdown('**Tool Store** - Main headquarters (self-powered)\n\n');
+          docs.appendMarkdown('Place this first! Raiders teleport here.');
+        } else if (value === 'BuildingPowerStation_C') {
+          docs.appendMarkdown('**Power Station** - Provides power to adjacent buildings\n\n');
+          docs.appendMarkdown('Place near other buildings for power connection.');
+        }
+        item.documentation = docs;
+
         completionItems.push(item);
       }
+
+      // Add a helper for converting grid to world coordinates
+      const coordHelper = new vscode.CompletionItem(
+        'Grid to World Helper',
+        vscode.CompletionItemKind.Snippet
+      );
+      coordHelper.detail = 'Convert grid (10,10) to world coordinates';
+      coordHelper.insertText = new vscode.SnippetString(
+        '// Grid (${1:10},${2:10}) = World (${1:10}*150=${3:1500}, ${2:10}*150=${4:1500})'
+      );
+      coordHelper.sortText = 'zzz';
+      completionItems.push(coordHelper);
     }
 
     return completionItems;
+  }
+
+  private getExistingBuildingsFromDocument(): string[] {
+    // This is a simplified version - in real implementation, parse the document
+    // to find already placed buildings
+    return [];
   }
 
   private getVehicleCompletions(linePrefix: string): vscode.CompletionItem[] {
@@ -384,6 +628,80 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
         item.insertText = new vscode.SnippetString(`${cmd.name}:\${1:params};`);
         completionItems.push(item);
       }
+    }
+
+    return completionItems;
+  }
+
+  private getLandslideCompletions(linePrefix: string): vscode.CompletionItem[] {
+    const completionItems: vscode.CompletionItem[] = [];
+
+    if (linePrefix.match(/^\s*$/)) {
+      // Suggest common time intervals
+      const timeIntervals = [30, 60, 90, 120, 180, 240, 300];
+
+      for (const time of timeIntervals) {
+        const item = new vscode.CompletionItem(`${time}:`, vscode.CompletionItemKind.Snippet);
+        item.insertText = new vscode.SnippetString(`${time}:\${1:x},\${2:y}/`);
+        item.detail = `Landslide at ${time} seconds`;
+        item.documentation = new vscode.MarkdownString(
+          `Triggers landslide after ${time} seconds (${time / 60} minutes)`
+        );
+        completionItems.push(item);
+      }
+
+      // Add custom time template
+      const customItem = new vscode.CompletionItem(
+        'Custom time',
+        vscode.CompletionItemKind.Snippet
+      );
+      customItem.insertText = new vscode.SnippetString('${1:time}:${2:x},${3:y}/');
+      customItem.detail = 'Custom landslide timing';
+      customItem.documentation = new vscode.MarkdownString(
+        'Define custom landslide timing\n\n*Format:* time:x1,y1/x2,y2/'
+      );
+      completionItems.push(customItem);
+    }
+
+    return completionItems;
+  }
+
+  private getLavaSpreadCompletions(linePrefix: string): vscode.CompletionItem[] {
+    const completionItems: vscode.CompletionItem[] = [];
+
+    if (linePrefix.match(/^\s*$/)) {
+      // Suggest common lava spread patterns
+      const spreadPatterns = [
+        { time: 60, desc: 'Early spread (1 minute)' },
+        { time: 120, desc: 'Medium spread (2 minutes)' },
+        { time: 180, desc: 'Late spread (3 minutes)' },
+        { time: 300, desc: 'Very late spread (5 minutes)' },
+      ];
+
+      for (const pattern of spreadPatterns) {
+        const item = new vscode.CompletionItem(
+          `${pattern.time}:`,
+          vscode.CompletionItemKind.Snippet
+        );
+        item.insertText = new vscode.SnippetString(`${pattern.time}:\${1:x},\${2:y}/`);
+        item.detail = pattern.desc;
+        item.documentation = new vscode.MarkdownString(
+          `Lava spreads to specified tiles after ${pattern.time} seconds`
+        );
+        completionItems.push(item);
+      }
+
+      // Add spreading pattern template
+      const patternItem = new vscode.CompletionItem(
+        'Lava spread pattern',
+        vscode.CompletionItemKind.Snippet
+      );
+      patternItem.insertText = new vscode.SnippetString('${1:60}:${2:x},${3:y}/${4:x2},${5:y2}/');
+      patternItem.detail = 'Multi-tile lava spread';
+      patternItem.documentation = new vscode.MarkdownString(
+        'Spread lava to multiple tiles at once\n\n*Example:* 60:5,5/5,6/5,7/'
+      );
+      completionItems.push(patternItem);
     }
 
     return completionItems;

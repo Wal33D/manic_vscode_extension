@@ -1,6 +1,12 @@
 import * as vscode from 'vscode';
 import { DatFileParser } from './parser/datFileParser';
 import { getTileInfo } from './data/tileDefinitions';
+import {
+  getEnhancedTileInfo,
+  getTileColor,
+  isReinforcedTile,
+  getBaseTileId,
+} from './data/enhancedTileDefinitions';
 import { BuildingType, VehicleType, CreatureType, BiomeType } from './types/datFileTypes';
 
 // Section descriptions
@@ -273,6 +279,37 @@ const scriptCommandDescriptions: Map<string, { syntax: string; description: stri
   ],
 ]);
 
+// Vehicle upgrade descriptions
+const vehicleUpgradeDescriptions: Map<string, string> = new Map([
+  ['UpEngine', 'Engine upgrade - Increases vehicle speed and acceleration'],
+  ['UpDrill', 'Drill upgrade - Allows drilling harder rock types faster'],
+  ['UpAddDrill', 'Additional drill - Adds a second drill for faster drilling'],
+  ['UpLaser', 'Laser upgrade - Adds a powerful laser for combat and drilling'],
+  ['UpScanner', 'Scanner upgrade - Reveals hidden walls and resources'],
+  ['UpCargoHold', 'Cargo hold upgrade - Increases carrying capacity'],
+  ['UpAddNav', 'Additional navigation - Improves pathfinding and allows water travel'],
+]);
+
+// Miner equipment descriptions
+const minerEquipmentDescriptions: Map<string, string> = new Map([
+  ['Drill', 'Handheld drill for breaking through walls'],
+  ['Shovel', 'Shovel for clearing rubble and digging'],
+  ['Hammer', 'Hammer for construction and repairs'],
+  ['Sandwich', 'Food item that restores miner health'],
+  ['Spanner', 'Wrench for vehicle and building repairs'],
+  ['Dynamite', 'Explosives for clearing large areas'],
+]);
+
+// Miner job descriptions
+const minerJobDescriptions: Map<string, string> = new Map([
+  ['JobDriver', 'Vehicle operator - Can drive all vehicle types'],
+  ['JobSailor', 'Sailor - Can operate water vehicles'],
+  ['JobPilot', 'Pilot - Can operate flying vehicles'],
+  ['JobGeologist', 'Geologist - Can analyze and find resources'],
+  ['JobEngineer', 'Engineer - Faster at building and repairs'],
+  ['JobExplosivesExpert', 'Explosives expert - Can use dynamite safely'],
+]);
+
 // Objective type descriptions
 const objectiveDescriptions: Map<string, string> = new Map([
   [
@@ -292,6 +329,51 @@ const objectiveDescriptions: Map<string, string> = new Map([
 ]);
 
 export class DatHoverProvider implements vscode.HoverProvider {
+  private extensionPath: string;
+
+  constructor(extensionPath: string) {
+    this.extensionPath = extensionPath;
+  }
+
+  private getTileImagePath(tileId: number): vscode.Uri | undefined {
+    const baseTileId = isReinforcedTile(tileId) ? getBaseTileId(tileId) : tileId;
+
+    // Map tile IDs to image files
+    if ((baseTileId >= 42 && baseTileId <= 45) || (baseTileId >= 92 && baseTileId <= 95)) {
+      // Crystal seam tiles
+      return vscode.Uri.file(
+        vscode.Uri.joinPath(
+          vscode.Uri.file(this.extensionPath),
+          'images',
+          'tiles',
+          'crystal_energy.png'
+        ).fsPath
+      );
+    } else if ((baseTileId >= 46 && baseTileId <= 49) || (baseTileId >= 96 && baseTileId <= 99)) {
+      // Ore seam tiles
+      return vscode.Uri.file(
+        vscode.Uri.joinPath(
+          vscode.Uri.file(this.extensionPath),
+          'images',
+          'tiles',
+          'ore_resource.png'
+        ).fsPath
+      );
+    } else if ((baseTileId >= 50 && baseTileId <= 53) || (baseTileId >= 100 && baseTileId <= 103)) {
+      // Recharge seam tiles - for now use energy crystal as placeholder
+      return vscode.Uri.file(
+        vscode.Uri.joinPath(
+          vscode.Uri.file(this.extensionPath),
+          'images',
+          'tiles',
+          'crystal_energy.png'
+        ).fsPath
+      );
+    }
+
+    return undefined;
+  }
+
   provideHover(
     document: vscode.TextDocument,
     position: vscode.Position,
@@ -335,6 +417,9 @@ export class DatHoverProvider implements vscode.HoverProvider {
           return this.getScriptHover(word, lineText);
         case 'resources':
           return this.getResourceHover(word);
+        case 'landslidefrequency':
+        case 'lavaspread':
+          return this.getTimedEventHover(lineText, section.name);
       }
     }
 
@@ -430,12 +515,82 @@ export class DatHoverProvider implements vscode.HoverProvider {
         const matchIndex = lineText.indexOf(match, currentPos);
         if (position.character >= matchIndex && position.character <= matchIndex + match.length) {
           const tileId = parseInt(match);
-          const tileInfo = getTileInfo(tileId);
+          // Try enhanced tile info first, fall back to basic if not found
+          const tileInfo = getEnhancedTileInfo(tileId) || getTileInfo(tileId);
           if (tileInfo) {
             const markdown = new vscode.MarkdownString();
+            markdown.supportHtml = true;
+            markdown.isTrusted = true;
+
+            // Add tile image if available
+            const tileImage = this.getTileImagePath(tileId);
+            if (tileImage) {
+              const imageMarkdown = `<img src="${tileImage}" width="48" height="48" alt="${tileInfo.name}" />\n\n`;
+              markdown.appendMarkdown(imageMarkdown);
+            }
+
             markdown.appendMarkdown(`**Tile ${tileId}: ${tileInfo.name}**\n\n`);
             markdown.appendMarkdown(`${tileInfo.description}\n\n`);
             markdown.appendMarkdown(`*Category:* ${tileInfo.category}\n\n`);
+
+            // Add reinforced indicator
+            if (isReinforcedTile(tileId)) {
+              markdown.appendMarkdown(`⚠️ *Reinforced tile* - Requires more drilling effort\n\n`);
+              const baseTileId = getBaseTileId(tileId);
+              const baseTile = getEnhancedTileInfo(baseTileId);
+              if (baseTile) {
+                markdown.appendMarkdown(`*Base tile:* ${baseTile.name} (ID: ${baseTileId})\n\n`);
+              }
+            }
+
+            // Add color information if available
+            const color = getTileColor(tileId);
+            if (color) {
+              const colorHex = `#${color.r.toString(16).padStart(2, '0')}${color.g.toString(16).padStart(2, '0')}${color.b.toString(16).padStart(2, '0')}`;
+              markdown.appendMarkdown(
+                `*Color:* <span style="color: ${colorHex}">⬤</span> RGB(${color.r}, ${color.g}, ${color.b})\n\n`
+              );
+            }
+
+            // Add tile variant information for walls and resources
+            if (tileInfo.category === 'wall' || tileInfo.category === 'resource') {
+              const tileVariant = tileId % 4;
+              const variantNames = ['Regular', 'Corner', 'Edge', 'Intersect'];
+              markdown.appendMarkdown(`*Variant:* ${variantNames[tileVariant]}\n\n`);
+            }
+
+            // Add special notes for specific tiles
+            if (tileId === 38 || tileId === 88) {
+              markdown.appendMarkdown(`💎 *Note:* Solid rock is completely impenetrable\n\n`);
+            } else if (tileId >= 42 && tileId <= 45) {
+              markdown.appendMarkdown(`💎 *Yield:* 1-5 energy crystals\n\n`);
+              markdown.appendMarkdown(
+                `*Drill time:* ${isReinforcedTile(tileId) ? '6 seconds' : '3 seconds'}\n\n`
+              );
+            } else if (tileId >= 46 && tileId <= 49) {
+              markdown.appendMarkdown(`⛏️ *Yield:* 1-3 ore\n\n`);
+              markdown.appendMarkdown(
+                `*Drill time:* ${isReinforcedTile(tileId) ? '6 seconds' : '3 seconds'}\n\n`
+              );
+            } else if (tileId >= 50 && tileId <= 53) {
+              markdown.appendMarkdown(`⚡ *Function:* Powers electric fences\n\n`);
+              markdown.appendMarkdown(
+                `*Drill time:* ${isReinforcedTile(tileId) ? '8 seconds' : '4 seconds'}\n\n`
+              );
+            } else if (tileInfo.category === 'wall') {
+              const drillTime = isReinforcedTile(tileId) ? '4 seconds' : '2 seconds';
+              markdown.appendMarkdown(`*Drill time:* ${drillTime}\n\n`);
+            } else if (tileId === 11 || tileId === 111) {
+              markdown.appendMarkdown(`💧 *Effect:* Slows vehicles without hover upgrade\n\n`);
+              markdown.appendMarkdown(`*Sound:* Water splash effect\n\n`);
+            } else if (tileId === 6 || tileId === 106) {
+              markdown.appendMarkdown(`🔥 *Danger:* Damages vehicles and miners over time\n\n`);
+              markdown.appendMarkdown(`*Sound:* Lava bubbling effect\n\n`);
+            } else if (tileId === 12 || tileId === 112) {
+              markdown.appendMarkdown(`⚡ *Effect:* Stops creatures when powered\n\n`);
+              markdown.appendMarkdown(`*Requires:* Connection to recharge seam\n\n`);
+            }
+
             if (tileInfo.canBuild !== undefined) {
               markdown.appendMarkdown(`*Can build:* ${tileInfo.canBuild ? 'Yes' : 'No'}\n\n`);
             }
@@ -503,41 +658,86 @@ export class DatHoverProvider implements vscode.HoverProvider {
         switch (value) {
           case 'BuildingToolStore_C':
             markdown.appendMarkdown(
-              'The most important building - headquarters for your Rock Raiders. Required in most levels.'
+              'The most important building - headquarters for your Rock Raiders. Required in most levels.\n\n'
             );
+            markdown.appendMarkdown('*Power requirement:* Self-powered\n');
+            markdown.appendMarkdown('*Function:* Teleport pad, raider spawn point, tool storage');
             break;
           case 'BuildingPowerStation_C':
             markdown.appendMarkdown(
-              'Generates power for your base. Each building needs power to function.'
+              'Generates power for your base. Each building needs power to function.\n\n'
             );
+            markdown.appendMarkdown('*Power output:* Powers adjacent buildings\n');
+            markdown.appendMarkdown('*Upgrade benefit:* Increased power range');
             break;
           case 'BuildingOreRefinery_C':
-            markdown.appendMarkdown('Processes raw ore into usable building materials.');
+            markdown.appendMarkdown('Processes raw ore into usable building materials.\n\n');
+            markdown.appendMarkdown('*Power requirement:* Must be connected to power\n');
+            markdown.appendMarkdown('*Processing rate:* 1 ore every 5 seconds');
             break;
           case 'BuildingCanteen_C':
-            markdown.appendMarkdown('Feeds your Rock Raiders to keep them working efficiently.');
+            markdown.appendMarkdown(
+              'Feeds your Rock Raiders to keep them working efficiently.\n\n'
+            );
+            markdown.appendMarkdown('*Power requirement:* Must be connected to power\n');
+            markdown.appendMarkdown('*Effect:* Restores raider health and energy');
+            break;
+          case 'BuildingMiningLaser_C':
+            markdown.appendMarkdown('Automated laser that drills walls from a distance.\n\n');
+            markdown.appendMarkdown('*Power requirement:* High power consumption\n');
+            markdown.appendMarkdown('*Range:* 5 tiles\n');
+            markdown.appendMarkdown('*Drill speed:* Faster than vehicles');
             break;
           case 'VehicleSmallDigger_C':
-            markdown.appendMarkdown('Small drilling vehicle, fast but limited cargo capacity.');
+            markdown.appendMarkdown('Small drilling vehicle, fast but limited cargo capacity.\n\n');
+            markdown.appendMarkdown('*Cargo:* 2 units\n');
+            markdown.appendMarkdown('*Speed:* Fast\n');
+            markdown.appendMarkdown('*Upgrades:* Engine, Drill, Scanner');
             break;
           case 'VehicleLargeDigger_C':
-            markdown.appendMarkdown('Large drilling vehicle with high cargo capacity.');
+            markdown.appendMarkdown('Large drilling vehicle with high cargo capacity.\n\n');
+            markdown.appendMarkdown('*Cargo:* 4 units\n');
+            markdown.appendMarkdown('*Speed:* Slow\n');
+            markdown.appendMarkdown('*Upgrades:* Engine, AddDrill, CargoHold');
+            break;
+          case 'VehicleHoverScout_C':
+            markdown.appendMarkdown('Fast hover vehicle that can travel over water.\n\n');
+            markdown.appendMarkdown('*Cargo:* 1 unit\n');
+            markdown.appendMarkdown('*Speed:* Very fast\n');
+            markdown.appendMarkdown('*Special:* Can cross water tiles');
             break;
           case 'CreatureLavaMonster_C':
-            markdown.appendMarkdown('Dangerous lava creature that emerges from lava tiles.');
+            markdown.appendMarkdown('Dangerous lava creature that emerges from lava tiles.\n\n');
+            markdown.appendMarkdown('*Health:* High\n');
+            markdown.appendMarkdown('*Attack:* Throws fireballs\n');
+            markdown.appendMarkdown('*Weakness:* Water and ice');
             break;
           case 'CreatureRockMonster_C':
             markdown.appendMarkdown(
-              'Rock creature that can eat energy crystals and throw boulders.'
+              'Rock creature that can eat energy crystals and throw boulders.\n\n'
             );
+            markdown.appendMarkdown('*Health:* Very high\n');
+            markdown.appendMarkdown('*Behavior:* Steals crystals\n');
+            markdown.appendMarkdown('*Weakness:* Dynamite');
             break;
           case 'CreatureSpider_C':
-            markdown.appendMarkdown('Small spider creature that can climb walls.');
+            markdown.appendMarkdown('Small spider creature that can climb walls.\n\n');
+            markdown.appendMarkdown('*Health:* Low\n');
+            markdown.appendMarkdown('*Behavior:* Jumps on raiders\n');
+            markdown.appendMarkdown('*Spawning:* Emerges from walls');
             break;
         }
 
         return new vscode.Hover(markdown);
       }
+    }
+
+    // Check for vehicle upgrades
+    if (sectionName === 'vehicles' && vehicleUpgradeDescriptions.has(word)) {
+      const markdown = new vscode.MarkdownString();
+      markdown.appendMarkdown(`**Vehicle Upgrade: ${word}**\n\n`);
+      markdown.appendMarkdown(vehicleUpgradeDescriptions.get(word) || '');
+      return new vscode.Hover(markdown);
     }
 
     // Check for entity properties
@@ -547,7 +747,11 @@ export class DatHoverProvider implements vscode.HoverProvider {
       word === 'Level' ||
       word === 'Essential' ||
       word === 'Teleport' ||
-      word === 'Sleep'
+      word === 'Sleep' ||
+      word === 'Powerpaths' ||
+      word === 'Health' ||
+      word === 'upgrades' ||
+      word === 'HP'
     ) {
       const markdown = new vscode.MarkdownString();
       switch (word) {
@@ -577,8 +781,49 @@ export class DatHoverProvider implements vscode.HoverProvider {
         case 'Sleep':
           markdown.appendMarkdown('**Sleep State**\n\nWhether a creature starts in sleep mode.');
           break;
+        case 'Powerpaths':
+          markdown.appendMarkdown(
+            '**Power Path Connections**\n\nDefines where power cables connect to this building.\n\n'
+          );
+          markdown.appendMarkdown('*Format:* X=dx Y=dy Z=dz/\n');
+          markdown.appendMarkdown('*Example:* X=0 Y=0 Z=1/ (connects on north side)\n');
+          markdown.appendMarkdown(
+            '*Directions:* X=1 (east), X=-1 (west), Z=1 (north), Z=-1 (south)'
+          );
+          break;
+        case 'Health':
+        case 'HP':
+          markdown.appendMarkdown(
+            '**Health Points**\n\nEntity health. Use MAX for full health or a specific number.'
+          );
+          break;
+        case 'upgrades':
+          markdown.appendMarkdown(
+            '**Vehicle Upgrades**\n\nList of upgrades applied to this vehicle.\n\n'
+          );
+          markdown.appendMarkdown('*Format:* UpgradeName1/UpgradeName2/\n');
+          markdown.appendMarkdown(
+            '*Available:* UpEngine, UpDrill, UpAddDrill, UpLaser, UpScanner, UpCargoHold, UpAddNav'
+          );
+          break;
       }
       return new vscode.Hover(markdown);
+    }
+
+    // Check for miner properties in miners section
+    if (sectionName === 'miners') {
+      if (minerEquipmentDescriptions.has(word)) {
+        const markdown = new vscode.MarkdownString();
+        markdown.appendMarkdown(`**Miner Equipment: ${word}**\n\n`);
+        markdown.appendMarkdown(minerEquipmentDescriptions.get(word) || '');
+        return new vscode.Hover(markdown);
+      }
+      if (minerJobDescriptions.has(word)) {
+        const markdown = new vscode.MarkdownString();
+        markdown.appendMarkdown(`**Miner Job: ${word}**\n\n`);
+        markdown.appendMarkdown(minerJobDescriptions.get(word) || '');
+        return new vscode.Hover(markdown);
+      }
     }
 
     return undefined;
@@ -646,6 +891,56 @@ export class DatHoverProvider implements vscode.HoverProvider {
       }
       return new vscode.Hover(markdown);
     }
+    return undefined;
+  }
+
+  private getTimedEventHover(lineText: string, sectionName: string): vscode.Hover | undefined {
+    // Check for time:coordinates pattern
+    const timeMatch = lineText.match(/(\d+)\s*:/);
+    if (timeMatch) {
+      const markdown = new vscode.MarkdownString();
+      const time = parseInt(timeMatch[1]);
+
+      if (sectionName === 'landslidefrequency') {
+        markdown.appendMarkdown(`**Landslide Event**\n\n`);
+        markdown.appendMarkdown(`*Time:* ${time} seconds after level start\n\n`);
+        markdown.appendMarkdown(`*Format:* time:x1,y1/x2,y2/...\n`);
+        markdown.appendMarkdown(`*Effect:* Causes landslides at specified coordinates\n`);
+        markdown.appendMarkdown(
+          `*Example:* 30:10,15/12,15/ (landslides at (10,15) and (12,15) after 30 seconds)`
+        );
+      } else if (sectionName === 'lavaspread') {
+        markdown.appendMarkdown(`**Lava Spread Event**\n\n`);
+        markdown.appendMarkdown(`*Time:* ${time} seconds after level start\n\n`);
+        markdown.appendMarkdown(`*Format:* time:x1,y1/x2,y2/...\n`);
+        markdown.appendMarkdown(`*Effect:* Spreads lava to specified coordinates\n`);
+        markdown.appendMarkdown(
+          `*Example:* 60:5,5/5,6/5,7/ (lava spreads to these tiles after 60 seconds)`
+        );
+      }
+
+      return new vscode.Hover(markdown);
+    }
+
+    // Hover for section itself
+    if (lineText.includes(sectionName)) {
+      const markdown = new vscode.MarkdownString();
+      if (sectionName === 'landslidefrequency') {
+        markdown.appendMarkdown('**Landslide Frequency Section**\n\n');
+        markdown.appendMarkdown('Defines timed landslide events that occur during gameplay.\n\n');
+        markdown.appendMarkdown('*Format:* Each line contains time:coordinates\n');
+        markdown.appendMarkdown('*Time:* Seconds after level start\n');
+        markdown.appendMarkdown('*Coordinates:* x,y pairs separated by /');
+      } else {
+        markdown.appendMarkdown('**Lava Spread Section**\n\n');
+        markdown.appendMarkdown('Defines how lava spreads over time in the level.\n\n');
+        markdown.appendMarkdown('*Format:* Each line contains time:coordinates\n');
+        markdown.appendMarkdown('*Time:* Seconds after level start\n');
+        markdown.appendMarkdown('*Coordinates:* x,y pairs where lava will appear');
+      }
+      return new vscode.Hover(markdown);
+    }
+
     return undefined;
   }
 }

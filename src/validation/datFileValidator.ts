@@ -1,5 +1,10 @@
-import { DatFile, ValidationError, InfoSection, Entity } from '../types/datFileTypes';
+import { DatFile, ValidationError, InfoSection, Entity, BuildingType } from '../types/datFileTypes';
 import { getTileInfo } from '../data/tileDefinitions';
+import {
+  getEnhancedTileInfo,
+  isReinforcedTile,
+  getBaseTileId,
+} from '../data/enhancedTileDefinitions';
 
 export class DatFileValidator {
   private errors: ValidationError[] = [];
@@ -101,13 +106,61 @@ export class DatFileValidator {
 
     // Check for unknown tile IDs
     const unknownTiles = new Set<number>();
+    const reinforcedCount = new Map<number, number>();
+    let hasSolidRock = false;
+    let hasWater = false;
+    let hasLava = false;
+    let hasElectricFence = false;
+    let hasRechargeSeam = false;
+
     for (let row = 0; row < tiles.length; row++) {
       for (let col = 0; col < tiles[row].length; col++) {
         const tileId = tiles[row][col];
-        if (!getTileInfo(tileId) && !unknownTiles.has(tileId)) {
+        const tileInfo = getEnhancedTileInfo(tileId) || getTileInfo(tileId);
+
+        if (!tileInfo && !unknownTiles.has(tileId)) {
           unknownTiles.add(tileId);
           this.addWarning(`Unknown tile ID: ${tileId}`, row, col, 'tiles');
         }
+
+        // Track reinforced tiles
+        if (isReinforcedTile(tileId)) {
+          const baseTileId = getBaseTileId(tileId);
+          reinforcedCount.set(baseTileId, (reinforcedCount.get(baseTileId) || 0) + 1);
+        }
+
+        // Track special tiles
+        if (tileId === 38 || tileId === 88) {
+          hasSolidRock = true;
+        }
+        if (tileId === 11 || tileId === 111) {
+          hasWater = true;
+        }
+        if (tileId === 6 || tileId === 106) {
+          hasLava = true;
+        }
+        if (tileId === 12 || tileId === 112) {
+          hasElectricFence = true;
+        }
+        if ((tileId >= 50 && tileId <= 53) || (tileId >= 100 && tileId <= 103)) {
+          hasRechargeSeam = true;
+        }
+
+        // Validate tile variants for walls and resources
+        if (tileInfo && (tileInfo.category === 'wall' || tileInfo.category === 'resource')) {
+          const variant = tileId % 4;
+          if (variant < 0 || variant > 3) {
+            this.addError(
+              `Invalid variant for ${tileInfo.category} tile: ${tileId}`,
+              row,
+              col,
+              'tiles'
+            );
+          }
+        }
+
+        // Advanced tile placement validation
+        this.validateTilePlacement(tiles, row, col, tileId, tileInfo);
       }
     }
 
@@ -116,7 +169,7 @@ export class DatFileValidator {
 
     for (const row of tiles) {
       for (const tileId of row) {
-        const tileInfo = getTileInfo(tileId);
+        const tileInfo = getEnhancedTileInfo(tileId) || getTileInfo(tileId);
         if (tileInfo && tileInfo.canBuild) {
           hasGround = true;
         }
@@ -126,6 +179,169 @@ export class DatFileValidator {
     if (!hasGround) {
       this.addError('Level must have at least one buildable ground tile', 0, 0, 'tiles');
     }
+
+    // Add informational warnings
+    if (reinforcedCount.size > 0) {
+      const totalReinforced = Array.from(reinforcedCount.values()).reduce((a, b) => a + b, 0);
+      this.addWarning(
+        `Level contains ${totalReinforced} reinforced tiles (harder difficulty)`,
+        0,
+        0,
+        'tiles'
+      );
+    }
+
+    if (hasSolidRock) {
+      this.addWarning('Level contains solid rock tiles that cannot be drilled', 0, 0, 'tiles');
+    }
+
+    if (hasWater && !info.biome?.includes('ice')) {
+      this.addWarning(
+        'Level contains water - ensure vehicles have appropriate upgrades',
+        0,
+        0,
+        'tiles'
+      );
+    }
+
+    if (hasLava && info.biome !== 'lava') {
+      this.addWarning('Level contains lava in non-lava biome', 0, 0, 'tiles');
+    }
+
+    if (hasElectricFence && !hasRechargeSeam) {
+      this.addWarning(
+        'Level has electric fences but no recharge seams to power them',
+        0,
+        0,
+        'tiles'
+      );
+    }
+  }
+
+  /**
+   * Validate tile placement rules
+   */
+  private validateTilePlacement(
+    tiles: number[][],
+    row: number,
+    col: number,
+    tileId: number,
+    tileInfo: ReturnType<typeof getEnhancedTileInfo>
+  ): void {
+    // Check water tile placement
+    if (tileId === 11 || tileId === 111) {
+      const adjacentTiles = this.getAdjacentTiles(tiles, row, col);
+      let hasShore = false;
+
+      for (const adjacent of adjacentTiles) {
+        const adjInfo = getEnhancedTileInfo(adjacent) || getTileInfo(adjacent);
+        if (adjInfo && (adjInfo.category === 'ground' || adjacent === 14 || adjacent === 114)) {
+          hasShore = true;
+          break;
+        }
+      }
+
+      if (!hasShore) {
+        this.addWarning('Water tile should be adjacent to shore/ground tiles', row, col, 'tiles');
+      }
+    }
+
+    // Check lava tile placement
+    if (tileId === 6 || tileId === 106) {
+      const adjacentTiles = this.getAdjacentTiles(tiles, row, col);
+      let hasEdge = false;
+
+      for (const adjacent of adjacentTiles) {
+        if (adjacent === 7 || adjacent === 107 || adjacent === 8 || adjacent === 108) {
+          hasEdge = true;
+          break;
+        }
+      }
+
+      if (!hasEdge && adjacentTiles.some(adj => adj !== 6 && adj !== 106)) {
+        this.addWarning(
+          'Lava tile should have proper edge tiles when adjacent to non-lava',
+          row,
+          col,
+          'tiles'
+        );
+      }
+    }
+
+    // Check resource seam shape variants
+    if (tileInfo && tileInfo.category === 'resource') {
+      const variant = tileId % 4;
+      const expectedVariant = this.calculateExpectedVariant(tiles, row, col, tileId);
+
+      if (variant !== expectedVariant) {
+        this.addWarning(
+          `Resource seam uses variant ${variant} but ${expectedVariant} would be more appropriate based on adjacent tiles`,
+          row,
+          col,
+          'tiles'
+        );
+      }
+    }
+  }
+
+  /**
+   * Get adjacent tile IDs
+   */
+  private getAdjacentTiles(tiles: number[][], row: number, col: number): number[] {
+    const adjacent: number[] = [];
+    const directions = [
+      [-1, 0],
+      [1, 0],
+      [0, -1],
+      [0, 1],
+    ]; // N, S, W, E
+
+    for (const [dr, dc] of directions) {
+      const newRow = row + dr;
+      const newCol = col + dc;
+
+      if (newRow >= 0 && newRow < tiles.length && newCol >= 0 && newCol < tiles[newRow].length) {
+        adjacent.push(tiles[newRow][newCol]);
+      }
+    }
+
+    return adjacent;
+  }
+
+  /**
+   * Calculate expected variant based on adjacent tiles
+   */
+  private calculateExpectedVariant(
+    tiles: number[][],
+    row: number,
+    col: number,
+    tileId: number
+  ): number {
+    const baseTileId = isReinforcedTile(tileId) ? getBaseTileId(tileId) : tileId;
+    const baseType = Math.floor(baseTileId / 4) * 4; // Get base of variant group
+
+    const adjacent = this.getAdjacentTiles(tiles, row, col);
+    let connectionCount = 0;
+
+    for (const adj of adjacent) {
+      const adjBase = isReinforcedTile(adj) ? getBaseTileId(adj) : adj;
+      if (Math.floor(adjBase / 4) * 4 === baseType) {
+        connectionCount++;
+      }
+    }
+
+    // Return variant based on connection count
+    // 0 = regular, 1 = corner, 2 = edge, 3 = intersect
+    if (connectionCount >= 3) {
+      return 3;
+    } // Intersect
+    if (connectionCount === 2) {
+      return 2;
+    } // Edge
+    if (connectionCount === 1) {
+      return 1;
+    } // Corner
+    return 0; // Regular
   }
 
   /**
@@ -212,6 +428,40 @@ export class DatFileValidator {
             );
           }
           break;
+        case 'findbuilding':
+          if (
+            objective.x < 0 ||
+            objective.x >= datFile.info.colcount ||
+            objective.y < 0 ||
+            objective.y >= datFile.info.rowcount
+          ) {
+            this.addError(
+              `Find building objective has invalid coordinates: ${objective.x},${objective.y}`,
+              0,
+              0,
+              'objectives'
+            );
+          }
+          break;
+        case 'variable':
+          // Check if condition seems valid
+          if (!objective.condition || objective.condition.trim() === '') {
+            this.addError('Variable objective has empty condition', 0, 0, 'objectives');
+          }
+          break;
+        case 'building': {
+          // Check if building type is valid
+          const validBuildings = Object.values(BuildingType);
+          if (!validBuildings.includes(objective.building)) {
+            this.addWarning(
+              `Unknown building type in objective: ${objective.building}`,
+              0,
+              0,
+              'objectives'
+            );
+          }
+          break;
+        }
       }
     }
   }
@@ -220,6 +470,10 @@ export class DatFileValidator {
    * Validate entities (buildings, vehicles, creatures, miners)
    */
   private validateEntities(entities: Entity[], section: string, info: InfoSection): void {
+    const entityIds = new Set<string>();
+    const powerStations: Entity[] = [];
+    const buildingsNeedingPower: Entity[] = [];
+
     for (const entity of entities) {
       // Check if coordinates are within map bounds
       const x = entity.coordinates.translation.x;
@@ -237,6 +491,117 @@ export class DatFileValidator {
           section
         );
       }
+
+      // Check for duplicate IDs
+      if ('id' in entity && entity.id) {
+        const entityId = String(entity.id);
+        if (entityIds.has(entityId)) {
+          this.addError(`Duplicate entity ID: ${entityId}`, 0, 0, section);
+        } else {
+          entityIds.add(entityId);
+        }
+      }
+
+      // Track power-related buildings
+      if (section === 'buildings') {
+        if (entity.type === 'BuildingPowerStation_C') {
+          powerStations.push(entity);
+        } else if (entity.type !== 'BuildingToolStore_C') {
+          // Tool Store is self-powered
+          buildingsNeedingPower.push(entity);
+        }
+
+        // Validate power paths
+        if ('powerpaths' in entity && entity.powerpaths && Array.isArray(entity.powerpaths)) {
+          for (const path of entity.powerpaths) {
+            if (!path.x && !path.y && !path.z) {
+              this.addWarning(
+                `${entity.type} has invalid power path with all zero values`,
+                0,
+                0,
+                section
+              );
+            }
+          }
+        }
+      }
+
+      // Validate vehicle upgrades
+      if (
+        section === 'vehicles' &&
+        'upgrades' in entity &&
+        entity.upgrades &&
+        Array.isArray(entity.upgrades)
+      ) {
+        const validUpgrades = [
+          'UpEngine',
+          'UpDrill',
+          'UpAddDrill',
+          'UpLaser',
+          'UpScanner',
+          'UpCargoHold',
+          'UpAddNav',
+        ];
+        for (const upgrade of entity.upgrades) {
+          if (!validUpgrades.includes(upgrade)) {
+            this.addWarning(`Unknown vehicle upgrade: ${upgrade}`, 0, 0, section);
+          }
+        }
+
+        // Check upgrade compatibility
+        if (
+          entity.upgrades &&
+          Array.isArray(entity.upgrades) &&
+          entity.upgrades.includes('UpAddDrill') &&
+          !entity.upgrades.includes('UpDrill')
+        ) {
+          this.addWarning(
+            'Vehicle has UpAddDrill but no UpDrill - additional drill requires base drill',
+            0,
+            0,
+            section
+          );
+        }
+      }
+
+      // Validate miner equipment and jobs
+      if (
+        section === 'miners' &&
+        'equipment' in entity &&
+        entity.equipment &&
+        Array.isArray(entity.equipment)
+      ) {
+        const validEquipment = ['Drill', 'Shovel', 'Hammer', 'Sandwich', 'Spanner', 'Dynamite'];
+        const validJobs = [
+          'JobDriver',
+          'JobSailor',
+          'JobPilot',
+          'JobGeologist',
+          'JobEngineer',
+          'JobExplosivesExpert',
+        ];
+
+        for (const item of entity.equipment) {
+          if (!validEquipment.includes(item) && !validJobs.includes(item)) {
+            this.addWarning(`Unknown miner equipment/job: ${item}`, 0, 0, section);
+          }
+        }
+
+        // Check for explosives expert with dynamite
+        if (
+          entity.equipment &&
+          Array.isArray(entity.equipment) &&
+          entity.equipment.includes('Dynamite') &&
+          !entity.equipment.includes('JobExplosivesExpert')
+        ) {
+          this.addWarning(
+            'Miner has dynamite but is not an explosives expert - may be dangerous',
+            0,
+            0,
+            section
+          );
+        }
+      }
     }
 
     // Check for Tool Store in buildings
@@ -244,6 +609,16 @@ export class DatFileValidator {
       const hasToolStore = entities.some(e => e.type === 'BuildingToolStore_C');
       if (!hasToolStore) {
         this.addError('Level must have at least one Tool Store', 0, 0, 'buildings');
+      }
+
+      // Check if buildings needing power are connected
+      if (buildingsNeedingPower.length > 0 && powerStations.length === 0) {
+        this.addWarning(
+          `Level has ${buildingsNeedingPower.length} buildings that need power but no power stations`,
+          0,
+          0,
+          'buildings'
+        );
       }
     }
   }

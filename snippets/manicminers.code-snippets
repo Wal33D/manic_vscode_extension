@@ -30,7 +30,13 @@
       "}",
       "",
       "buildings{",
-      "\tBuildingToolStore_C,Translation: X=2000.000 Y=2000.000 Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tBuildingToolStore_C",
+      "\tTranslation: X=2000.000 Y=2000.000 Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tLevel=1",
+      "\tTeleport=False", 
+      "\tHealth=MAX",
+      "\tPowerpaths=X=0 Y=0 Z=1/",
+      "\t",
       "}"
     ],
     "description": "Creates a basic level template with all required sections"
@@ -216,5 +222,251 @@
     "prefix": "opencaves",
     "body": "opencaves:${1:x1},${2:y1}/${3:x2},${4:y2}/",
     "description": "Open cave connections"
+  },
+
+  "Full Building": {
+    "prefix": "building",
+    "body": [
+      "${1|BuildingToolStore_C,BuildingPowerStation_C,BuildingTeleportPad_C,BuildingDocks_C,BuildingCanteen_C,BuildingSupportStation_C,BuildingOreRefinery_C,BuildingGeologicalCenter_C,BuildingUpgradeStation_C,BuildingMiningLaser_C,BuildingSuperTeleport_C|}",
+      "Translation: X=${2:0.000} Y=${3:0.000} Z=${4:0.000} Rotation: P=${5:0.000000} Y=${6:0.000000} R=${7:0.000000} Scale X=${8:1.000} Y=${9:1.000} Z=${10:1.000}",
+      "Level=${11:1}",
+      "Teleport=${12|False,True|}",
+      "Health=${13|MAX,100.0|}",
+      "Powerpaths=X=${14:0} Y=${15:0} Z=${16:1}/",
+      ""
+    ],
+    "description": "Complete building with all properties"
+  },
+
+  "Full Vehicle": {
+    "prefix": "vehicle", 
+    "body": [
+      "${1|VehicleLoaderDozer_C,VehicleLMLC_C,VehicleChromeCrusher_C,VehicleRapidRider_C,VehicleCargoCarrier_C,VehicleSMLC_C,VehicleSmallTransportTruck_C,VehicleSmallDigger_C,VehicleTunnelScout_C,VehicleHoverScout_C,VehicleTunnelTransport_C,VehicleGraniteGrinder_C|}",
+      "Translation: X=${2:0.000} Y=${3:0.000} Z=${4:0.000} Rotation: P=${5:0.000000} Y=${6:0.000000} R=${7:0.000000} Scale X=${8:1.000} Y=${9:1.000} Z=${10:1.000}",
+      "upgrades=${11|NO,UpEngine/,UpDrill/,UpAddDrill/,UpLaser/,UpScanner/,UpCargoHold/,UpAddNav/|},HP=${12|MAX,100|},driver=${13|NO,1,2,3,4|}${14:,ID=1}",
+      ""
+    ],
+    "description": "Complete vehicle with upgrades"
+  },
+
+  "Full Miner": {
+    "prefix": "miner",
+    "body": [
+      "ID=${1:1}${2:/Chief}",
+      "Translation: X=${3:0.000} Y=${4:0.000} Z=${5:0.000} Rotation: P=${6:0.000000} Y=${7:0.000000} R=${8:0.000000} Scale X=${9:1.000} Y=${10:1.000} Z=${11:1.000}",
+      "${12|Drill,Shovel,Hammer,Sandwich,Spanner|}/${13|JobDriver,JobSailor,JobPilot,JobGeologist,JobEngineer,JobExplosivesExpert|}/Level/",
+      ""
+    ],
+    "description": "Rock Raider with skills"
+  },
+
+  "Crystal Seam Wall": {
+    "prefix": "crystalwall",
+    "body": "${1|42,43,44,45,92,93,94,95|}",
+    "description": "Crystal seam tile (regular=42, corner=43, edge=44, intersect=45, +50 for reinforced)"
+  },
+
+  "Ore Seam Wall": {
+    "prefix": "orewall",
+    "body": "${1|46,47,48,49,96,97,98,99|}",
+    "description": "Ore seam tile (regular=46, corner=47, edge=48, intersect=49, +50 for reinforced)"
+  },
+
+  "Recharge Seam Wall": {
+    "prefix": "rechargewall",
+    "body": "${1|50,51,52,53,100,101,102,103|}",
+    "description": "Recharge seam tile (regular=50, corner=51, edge=52, intersect=53, +50 for reinforced)"
+  },
+
+  "Landslide Frequency Entry": {
+    "prefix": "landslide",
+    "body": "${1:30}:${2:x},${3:y}/${4:x2},${5:y2}/",
+    "description": "Landslide timing entry (time in seconds:coordinates)"
+  },
+
+  "Lava Spread Entry": {
+    "prefix": "lavaspread",
+    "body": "${1:60}:${2:x},${3:y}/${4:x2},${5:y2}/",
+    "description": "Lava spread timing entry (time in seconds:coordinates)"
+  },
+
+  "All Objectives": {
+    "prefix": "objectivesall",
+    "body": [
+      "objectives{",
+      "\tresources: ${1:100},${2:50},${3:0}",
+      "\tbuilding:${4|BuildingPowerStation_C,BuildingOreRefinery_C,BuildingGeologicalCenter_C|}",
+      "\tdiscovertile:${5:10},${6:10}/${7:Find the hidden cavern}",
+      "\tfindbuilding:${8:20},${9:20}",
+      "\tvariable:${10:FoundAllCrystals==true}/${11:Collect all crystals}",
+      "}"
+    ],
+    "description": "Example with all objective types"
+  },
+
+  "Power Network Layout": {
+    "prefix": "powernetwork",
+    "body": [
+      "buildings{",
+      "\t// Tool Store (self-powered, place first)",
+      "\tBuildingToolStore_C",
+      "\tTranslation: X=${1:3000.000} Y=${2:3000.000} Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tLevel=1",
+      "\tTeleport=False",
+      "\tHealth=MAX",
+      "\tPowerpaths=X=0 Y=0 Z=1/",
+      "\t",
+      "\t// Power Station (powers adjacent buildings)",
+      "\tBuildingPowerStation_C",
+      "\tTranslation: X=${3:3150.000} Y=${4:3000.000} Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tLevel=1",
+      "\tTeleport=False",
+      "\tHealth=MAX",
+      "\tPowerpaths=X=1 Y=0 Z=0/X=-1 Y=0 Z=0/X=0 Y=0 Z=1/X=0 Y=0 Z=-1/",
+      "\t",
+      "\t// Ore Refinery (needs power)",
+      "\tBuildingOreRefinery_C",
+      "\tTranslation: X=${5:3300.000} Y=${6:3000.000} Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tLevel=1",
+      "\tTeleport=False",
+      "\tHealth=MAX",
+      "\tPowerpaths=X=-1 Y=0 Z=0/",
+      "\t",
+      "}"
+    ],
+    "description": "Basic power network with Tool Store, Power Station, and Ore Refinery"
+  },
+
+  "Landslide Pattern": {
+    "prefix": "landslidepattern",
+    "body": [
+      "landslidefrequency{",
+      "\t// Early warning landslides",
+      "\t30:${1:10},${2:10}/${3:12},${4:10}/",
+      "\t",
+      "\t// Medium intensity",
+      "\t60:${5:15},${6:15}/${7:15},${8:16}/${9:15},${10:17}/",
+      "\t",
+      "\t// Late game challenge",
+      "\t120:${11:20},${12:20}/${13:21},${14:20}/${15:22},${16:20}/${17:20},${18:21}/",
+      "\t",
+      "\t// Continuous pressure",
+      "\t180:${19:25},${20:25}/",
+      "\t240:${21:25},${22:26}/",
+      "\t300:${23:25},${24:27}/",
+      "}"
+    ],
+    "description": "Progressive landslide pattern with increasing intensity"
+  },
+
+  "Lava Spread Pattern": {
+    "prefix": "lavaspreadpattern",
+    "body": [
+      "lavaspread{",
+      "\t// Initial lava spread from source",
+      "\t60:${1:5},${2:5}/${3:5},${4:6}/${5:6},${6:5}/",
+      "\t",
+      "\t// Expanding lava pool",
+      "\t120:${7:4},${8:5}/${9:5},${10:4}/${11:5},${12:7}/${13:7},${14:5}/",
+      "\t",
+      "\t// Major eruption",
+      "\t180:${15:3},${16:5}/${17:4},${18:4}/${19:4},${20:6}/${21:6},${22:4}/${23:6},${24:6}/${25:8},${26:5}/",
+      "\t",
+      "\t// Continuous flow",
+      "\t240:${27:5},${28:8}/",
+      "\t300:${29:5},${30:9}/",
+      "\t360:${31:5},${32:10}/",
+      "}"
+    ],
+    "description": "Spreading lava pattern simulating volcanic eruption"
+  },
+
+  "Vehicle Squad": {
+    "prefix": "vehiclesquad",
+    "body": [
+      "vehicles{",
+      "\t// Small digger with scanner for exploration",
+      "\tVehicleSmallDigger_C,Translation: X=${1:3000.000} Y=${2:3150.000} Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tupgrades=UpEngine/UpScanner/,HP=MAX,driver=Pilot_C,ID=Explorer1",
+      "\t",
+      "\t// Large digger for heavy drilling",
+      "\tVehicleLargeDigger_C,Translation: X=${3:3150.000} Y=${4:3150.000} Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tupgrades=UpDrill/UpAddDrill/UpCargoHold/,HP=MAX,driver=Pilot_C,ID=Driller1",
+      "\t",
+      "\t// Cargo carrier for resource transport",
+      "\tVehicleCargoCarrier_C,Translation: X=${5:3300.000} Y=${6:3150.000} Z=0.000 Rotation: P=0.000000 Y=0.000000 R=0.000000 Scale X=1.000 Y=1.000 Z=1.000",
+      "\tupgrades=UpEngine/UpCargoHold/,HP=MAX,driver=Pilot_C,ID=Hauler1",
+      "\t",
+      "}"
+    ],
+    "description": "Balanced vehicle squad for exploration, drilling, and transport"
+  },
+
+  "Mining Operation Script": {
+    "prefix": "miningscript",
+    "body": [
+      "script{",
+      "\t// Variables",
+      "\tint crystalsFound=0",
+      "\tint oreCollected=0",
+      "\tbool mineralsDiscovered=false",
+      "\t",
+      "\t// Initial briefing",
+      "\tOnLevel::;",
+      "\t\tmsg:5:Establish mining operations and collect resources",
+      "\t\twait:2",
+      "\t\tpan:${1:20},${2:20}",
+      "\t\tmsg:3:This looks like a good spot for our base",
+      "\t",
+      "\t// Resource discovery events",
+      "\t((crystalsFound>10)) CrystalBonus;",
+      "\t\tmsg:3:We've found a crystal cache!",
+      "\t\tdrill:${3:25},${4:25},42",
+      "\t",
+      "\t((oreCollected>20)) OreBonus;",
+      "\t\tmsg:3:Rich ore veins discovered!",
+      "\t\tdrill:${5:30},${6:30},46",
+      "\t",
+      "\t// Danger events",
+      "\t((GetRandom<20)) MonsterAttack;",
+      "\t\tshake:5",
+      "\t\tmsg:3:Rock monsters incoming!",
+      "\t\temerge:CreatureRockMonster_C:${7:35},${8:35}",
+      "\t",
+      "}"
+    ],
+    "description": "Complete mining operation script with resource discovery and danger events"
+  },
+
+  "Timed Challenge": {
+    "prefix": "timedchallenge",
+    "body": [
+      "info{",
+      "\t// ... other info fields ...",
+      "\toxygen:${1:600} // 10 minutes time limit",
+      "}",
+      "",
+      "objectives{",
+      "\tresources: ${2:50},${3:25},0",
+      "\tbuilding:BuildingGeologicalCenter_C",
+      "}",
+      "",
+      "script{",
+      "\t// Timer warnings",
+      "\t((oxygen<300)) HalfTimeWarning;",
+      "\t\tmsg:5:Warning: 5 minutes remaining!",
+      "\t\tshake:3",
+      "\t",
+      "\t((oxygen<60)) UrgentWarning;",
+      "\t\tmsg:5:CRITICAL: 1 minute remaining!",
+      "\t\tshake:10",
+      "\t",
+      "\t// Optional: Stop timer on objective completion",
+      "\t((resources.crystals>=50)) ObjectiveComplete;",
+      "\t\tstoptimer",
+      "\t\tmsg:5:Well done! Timer stopped.",
+      "}"
+    ],
+    "description": "Timed challenge setup with oxygen limit and timer warnings"
   }
 }
