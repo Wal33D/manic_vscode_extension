@@ -31,6 +31,31 @@ Full syntax highlighting for all DAT file sections including:
 - Explains what each field controls
 - Special support for camera position components
 
+### 🗺️ Visual Map Preview
+- Real-time visual representation of your level
+- Zoom controls and tile information on hover
+- Click tiles to jump to their location in the editor
+- **NEW**: Multi-tile selection with Shift+drag
+- **NEW**: Toggle grid lines and tile IDs
+- **NEW**: Keyboard shortcuts for all controls
+- **NEW**: Performance optimizations for large maps
+
+### ⚡ Quick Actions
+- Convert tiles between normal and reinforced variants
+- Replace tiles with common types
+- Fill areas and replace all instances of a tile type
+- Context-sensitive actions in the tiles section
+- **NEW**: Custom tile sets for frequently used combinations
+- **NEW**: Save and reuse your favorite tile patterns
+
+### 🎯 Objective Builder
+- Visual interface for creating level objectives
+- Support for all objective types (resources, buildings, discovery, etc.)
+- Real-time preview of objective syntax
+- Parameter validation and helpful examples
+- Analyze existing objectives with detailed reports
+- Convert between objective formats easily
+
 ### 🔧 Language Configuration
 - Comment support (line `//` and block `/* */`)
 - Auto-closing pairs for brackets and quotes
@@ -119,12 +144,15 @@ Initial release featuring:
 
 ## Roadmap
 
-- [ ] Extend IntelliSense to all sections
-- [ ] Add validation and diagnostics
-- [ ] Implement code snippets
-- [ ] Add level preview functionality
-- [ ] Support for go-to-definition
+- [x] Extend IntelliSense to all sections
+- [x] Add validation and diagnostics
+- [x] Implement code snippets
+- [x] Add level preview functionality
+- [x] Support for go-to-definition
 - [ ] Auto-formatting support
+- [ ] Map export functionality
+- [ ] Collaborative editing support
+- [ ] AI-powered map generation
 
 ## License
 

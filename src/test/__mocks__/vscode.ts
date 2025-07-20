@@ -98,10 +98,25 @@ export const window = {
   showInformationMessage: jest.fn(),
   showErrorMessage: jest.fn(),
   showWarningMessage: jest.fn(),
+  showInputBox: jest.fn(),
+  showQuickPick: jest.fn(),
+  registerWebviewViewProvider: jest.fn(),
+  onDidChangeActiveTextEditor: jest.fn(() => ({ dispose: jest.fn() })),
+  activeTextEditor: undefined,
+  setStatusBarMessage: jest.fn(),
+  withProgress: jest.fn((_options, task) => task({ report: jest.fn() })),
+  createWebviewPanel: jest.fn(() => ({
+    webview: {
+      html: '',
+      asWebviewUri: jest.fn(uri => uri),
+    },
+    dispose: jest.fn(),
+  })),
 };
 
 export const commands = {
   registerCommand: jest.fn(),
+  executeCommand: jest.fn(),
 };
 
 export const languages = {
@@ -109,7 +124,83 @@ export const languages = {
   registerHoverProvider: jest.fn(),
   registerDefinitionProvider: jest.fn(),
   registerReferenceProvider: jest.fn(),
+  registerCodeActionsProvider: jest.fn(),
+  createDiagnosticCollection: jest.fn(() => ({
+    set: jest.fn(),
+    delete: jest.fn(),
+    clear: jest.fn(),
+    dispose: jest.fn(),
+  })),
 };
+
+export const workspace = {
+  onDidChangeTextDocument: jest.fn(() => ({ dispose: jest.fn() })),
+  onDidCloseTextDocument: jest.fn(() => ({ dispose: jest.fn() })),
+  openTextDocument: jest.fn(),
+  applyEdit: jest.fn(),
+};
+
+export enum CodeActionKind {
+  QuickFix = 'quickfix',
+  Refactor = 'refactor',
+}
+
+export class CodeAction {
+  edit?: WorkspaceEdit;
+  command?: any;
+  constructor(
+    public title: string,
+    public kind: CodeActionKind
+  ) {}
+}
+
+export class WorkspaceEdit {
+  replace = jest.fn();
+  insert = jest.fn();
+}
+
+export interface CodeActionContext {
+  diagnostics: any[];
+  only?: CodeActionKind[];
+}
+
+export enum DiagnosticSeverity {
+  Error = 0,
+  Warning = 1,
+  Information = 2,
+  Hint = 3,
+}
+
+export class Diagnostic {
+  constructor(
+    public range: Range,
+    public message: string,
+    public severity?: DiagnosticSeverity
+  ) {}
+
+  code?: string | number;
+  source?: string;
+}
+
+export enum ProgressLocation {
+  SourceControl = 1,
+  Window = 10,
+  Notification = 15,
+}
+
+export enum ViewColumn {
+  Active = -1,
+  Beside = -2,
+  One = 1,
+  Two = 2,
+  Three = 3,
+  Four = 4,
+  Five = 5,
+  Six = 6,
+  Seven = 7,
+  Eight = 8,
+  Nine = 9,
+}
 
 // Mock TextDocument
 export class TextDocument {
