@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2025-07-20
+
 ### Added
+- CI workflow badge to README
+- License badge to README
 - Comprehensive project documentation
 - Testing infrastructure with Jest
 - Code quality tools (Prettier, ESLint)
 - GitHub Actions CI/CD pipeline
 - Professional project structure
+
+### Changed
+- Updated version from 0.0.1 to 0.1.0
 
 ## [0.0.1] - 2024-01-20
 
@@ -36,5 +43,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - No validation or diagnostics yet
 - Limited to basic language features
 
-[Unreleased]: https://github.com/yourusername/manic_vscode_extension/compare/v0.0.1...HEAD
-[0.0.1]: https://github.com/yourusername/manic_vscode_extension/releases/tag/v0.0.1
+[Unreleased]: https://github.com/Wal33D/manic_vscode_extension/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/Wal33D/manic_vscode_extension/compare/v0.0.1...v0.1.0
+[0.0.1]: https://github.com/Wal33D/manic_vscode_extension/releases/tag/v0.0.1
