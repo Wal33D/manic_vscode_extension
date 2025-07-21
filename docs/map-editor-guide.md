@@ -136,11 +136,78 @@ To switch back to the text editor:
 - Try reducing brush size for better performance
 - Very large maps (200x200+) may have some lag
 
+## Advanced Features
+
+### 📋 Copy/Paste/Move
+- **Copy**: Select a region and press `Ctrl+C` to copy
+- **Paste**: Press `Ctrl+V` and click where to paste
+- **Move**: Select a region and press `M` to move it
+- **Delete**: Select a region and press `Delete` to clear it
+
+### 🔍 Zoom and Pan
+- **Zoom In/Out**: Use `+`/`-` keys or mouse wheel with Ctrl
+- **Reset Zoom**: Press `0` to reset to 100%
+- **Pan**: Click and drag with middle mouse or Shift+drag
+
+### 🗺️ Minimap
+- Shows overview of entire map in the sidebar
+- Click to jump to any location
+- Drag the viewport indicator to pan
+
+### 🎨 Tile Patterns
+- **Save Pattern**: Select a region and click "Save Pattern"
+- **Use Pattern**: Click a saved pattern and use the Stamp tool (T)
+- Patterns are saved per workspace
+
+### ↔️ Mirror Modes
+- **Horizontal**: Press `H` to mirror horizontally
+- **Vertical**: Press `V` to mirror vertically  
+- **Both**: Press `B` to mirror in both directions
+- **Off**: Select "Off" button to disable mirroring
+
+### 🎭 Layers
+- **Add Layer**: Click "New Layer" button
+- **Toggle Visibility**: Click the eye icon on each layer
+- **Adjust Opacity**: Use the opacity slider
+- **Delete Layer**: Hover and click the trash icon
+- **Active Layer**: Click to select which layer to edit
+- Base layer cannot be deleted
+
+### 💾 Export
+- **Export to Image**: Press `E` or click Export button
+- Supports PNG and JPEG formats
+- Option to include grid lines in export
+
+## Additional Keyboard Shortcuts
+
+### Selection Mode (S)
+- **Ctrl+C**: Copy selection
+- **Ctrl+V**: Paste selection
+- **Delete**: Delete selection
+- **M**: Move selection
+
+### Navigation
+- **Mouse Wheel + Ctrl**: Zoom in/out
+- **Middle Mouse Drag**: Pan around map
+- **Shift + Left Drag**: Pan around map
+
+### Mirror Modes
+- **H**: Toggle horizontal mirror
+- **V**: Toggle vertical mirror
+- **B**: Toggle both mirrors
+
+## Performance Tips
+
+1. **Large Maps**: For maps over 100x100, use smaller brush sizes
+2. **Layers**: Keep layer count reasonable (under 10) for best performance
+3. **Patterns**: Large patterns may cause brief lag when stamping
+4. **Zoom**: Working at 100% zoom provides best performance
+
 ## Future Enhancements
 
 Planned features for future releases:
-- Copy/paste tile regions
-- Tile stamps and patterns
-- Mirror/rotate tools
-- Multi-layer editing
-- Export to image formats
+- Auto-tiling system for intelligent tile placement
+- Map validation and error checking
+- Pre-made map templates
+- Advanced selection tools (magic wand, lasso)
+- Animated tile preview
