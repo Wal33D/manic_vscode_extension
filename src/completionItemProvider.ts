@@ -54,31 +54,53 @@ const infoFieldCompletions: Map<string, { detail: string; documentation: string 
 
 // Script commands
 const scriptCommands = [
-  { name: 'msg', detail: 'Display message', documentation: 'Shows a message to the player' },
-  {
-    name: 'pan',
-    detail: 'Pan camera',
-    documentation: 'Pan camera to coordinates (e.g., pan:10,15)',
-  },
-  { name: 'wait', detail: 'Wait duration', documentation: 'Wait for specified seconds' },
+  // Messages and UI
+  { name: 'msg', detail: 'Display message', documentation: 'Shows a message to the player (msg:MessageString)' },
+  { name: 'playsound', detail: 'Play sound', documentation: 'Play a sound file (playsound:soundfile)' },
+  { name: 'sound', detail: 'Play sound', documentation: 'Play a sound file (sound:soundfile)' },
+  
+  // Camera control
+  { name: 'pan', detail: 'Pan camera', documentation: 'Pan camera to coordinates (pan:x,y)' },
+  { name: 'camera', detail: 'Set camera position', documentation: 'Set camera position and angle' },
+  { name: 'shake', detail: 'Shake screen', documentation: 'Shake the screen with intensity (shake:intensity)' },
+  
+  // Time control
+  { name: 'wait', detail: 'Wait duration', documentation: 'Wait for specified seconds (wait:seconds)' },
   { name: 'truewait', detail: 'Blocking wait', documentation: 'Wait that blocks other events' },
-  { name: 'shake', detail: 'Shake screen', documentation: 'Shake the screen with intensity' },
-  {
-    name: 'drill',
-    detail: 'Drill tile',
-    documentation: 'Drill at coordinates (e.g., drill:10,15,38)',
-  },
-  { name: 'place', detail: 'Place tile', documentation: 'Place tile at coordinates' },
-  {
-    name: 'emerge',
-    detail: 'Spawn creature',
-    documentation: 'Make creature emerge (e.g., emerge:CreatureLavaMonster_C:10,15)',
-  },
-  { name: 'sound', detail: 'Play sound', documentation: 'Play a sound file' },
+  
+  // Timer management
+  { name: 'timer', detail: 'Define timer', documentation: 'Define a timer (timer TimerName=delay[,min,max][,event])' },
+  { name: 'starttimer', detail: 'Start timer', documentation: 'Start a defined timer (starttimer:TimerName)' },
+  { name: 'stoptimer', detail: 'Stop timer', documentation: 'Stop a running timer (stoptimer:TimerName)' },
+  
+  // Terrain modification
+  { name: 'drill', detail: 'Drill tile', documentation: 'Drill at coordinates (drill:x,y[,tileId])' },
+  { name: 'place', detail: 'Place tile', documentation: 'Place tile at coordinates (place:x,y,tileId)' },
+  { name: 'reinforce', detail: 'Reinforce wall', documentation: 'Reinforce wall at coordinates (reinforce:x,y)' },
+  
+  // Entity spawning
+  { name: 'spawn', detail: 'Spawn entity', documentation: 'Spawn an entity (spawn:type,x,y[,properties])' },
+  { name: 'emerge', detail: 'Spawn creature', documentation: 'Make creature emerge (emerge:CreatureType:x,y)' },
+  { name: 'teleport', detail: 'Teleport entity', documentation: 'Teleport entity to location' },
+  { name: 'destroy', detail: 'Destroy entity', documentation: 'Destroy entity at location or by ID' },
+  
+  // Entity control
   { name: 'enable', detail: 'Enable entity', documentation: 'Enable a building or entity' },
   { name: 'disable', detail: 'Disable entity', documentation: 'Disable a building or entity' },
   { name: 'wake', detail: 'Wake creature', documentation: 'Wake a sleeping creature' },
-  { name: 'stoptimer', detail: 'Stop timer', documentation: 'Stop a running timer' },
+  { name: 'setproperty', detail: 'Set entity property', documentation: 'Set property of an entity' },
+  
+  // Game flow
+  { name: 'objective', detail: 'Set objective', documentation: 'Set or update an objective' },
+  { name: 'win', detail: 'Win level', documentation: 'Trigger level win condition' },
+  { name: 'lose', detail: 'Lose level', documentation: 'Trigger level lose condition' },
+  
+  // Conditional logic
+  { name: 'if', detail: 'If condition', documentation: 'Start conditional block (if:condition)' },
+  { name: 'then', detail: 'Then block', documentation: 'Execute if condition is true' },
+  { name: 'else', detail: 'Else block', documentation: 'Execute if condition is false' },
+  { name: 'endif', detail: 'End if', documentation: 'End conditional block' },
+  { name: 'when', detail: 'When event', documentation: 'Define event trigger (when(condition)[event])' },
 ];
 
 export class DatCompletionItemProvider implements vscode.CompletionItemProvider {
@@ -602,32 +624,77 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
   ): vscode.CompletionItem[] {
     const completionItems: vscode.CompletionItem[] = [];
 
-    // Variable type completions
+    // Variable type completions at the start of a line
     if (linePrefix.match(/^\s*$/)) {
-      const types = ['int', 'string', 'float', 'bool'];
+      // Variable types
+      const types = ['int', 'string', 'float', 'bool', 'timer'];
       for (const type of types) {
         const item = new vscode.CompletionItem(type, vscode.CompletionItemKind.Keyword);
-        item.insertText = new vscode.SnippetString(`${type} \${1:varName}=\${2:value}`);
-        item.detail = `Declare ${type} variable`;
+        if (type === 'timer') {
+          item.insertText = new vscode.SnippetString('timer ${1:TimerName}=${2:5},${3:3},${4:8},${5:EventName}');
+          item.detail = 'Declare timer variable';
+          item.documentation = new vscode.MarkdownString('Timer format: delay[,min,max][,event]');
+        } else {
+          item.insertText = new vscode.SnippetString(`${type} \${1:varName}=\${2:value}`);
+          item.detail = `Declare ${type} variable`;
+        }
         completionItems.push(item);
       }
 
       // Event declaration
-      const eventItem = new vscode.CompletionItem('event', vscode.CompletionItemKind.Snippet);
-      eventItem.insertText = new vscode.SnippetString('${1:EventName}::;\n$0');
-      eventItem.detail = 'Declare new event';
+      const eventItem = new vscode.CompletionItem('when', vscode.CompletionItemKind.Snippet);
+      eventItem.insertText = new vscode.SnippetString('when(${1:condition})[${2:EventName}]');
+      eventItem.detail = 'Declare conditional event';
+      eventItem.documentation = new vscode.MarkdownString('Triggers event when condition is met');
       completionItems.push(eventItem);
+
+      // Comment
+      const commentItem = new vscode.CompletionItem('#', vscode.CompletionItemKind.Text);
+      commentItem.insertText = '# ';
+      commentItem.detail = 'Add comment';
+      completionItems.push(commentItem);
     }
 
-    // Script command completions
-    if (linePrefix.match(/^\s+$/)) {
+    // Script command completions (after :: or indented)
+    if (linePrefix.match(/^\s+$/) || linePrefix.match(/::\s*$/)) {
       for (const cmd of scriptCommands) {
         const item = new vscode.CompletionItem(cmd.name, vscode.CompletionItemKind.Function);
         item.detail = cmd.detail;
         item.documentation = new vscode.MarkdownString(cmd.documentation);
-        item.insertText = new vscode.SnippetString(`${cmd.name}:\${1:params};`);
+        
+        // Provide specific snippets for common commands
+        switch (cmd.name) {
+          case 'msg':
+            item.insertText = new vscode.SnippetString('msg:${1:Your message here};');
+            break;
+          case 'wait':
+            item.insertText = new vscode.SnippetString('wait:${1:5};');
+            break;
+          case 'spawn':
+            item.insertText = new vscode.SnippetString('spawn:${1:CreatureType},${2:x},${3:y};');
+            break;
+          case 'drill':
+            item.insertText = new vscode.SnippetString('drill:${1:x},${2:y};');
+            break;
+          case 'timer':
+            item.insertText = new vscode.SnippetString('timer ${1:name}=${2:delay};');
+            break;
+          case 'when':
+            item.insertText = new vscode.SnippetString('when(${1:time=10})[${2:EventName}]');
+            break;
+          default:
+            item.insertText = new vscode.SnippetString(`${cmd.name}:\${1:params};`);
+        }
         completionItems.push(item);
       }
+    }
+
+    // Event handler completion (after event name)
+    if (linePrefix.match(/^\s*\w+$/)) {
+      const handlerItem = new vscode.CompletionItem('::', vscode.CompletionItemKind.Operator);
+      handlerItem.insertText = new vscode.SnippetString('::$0');
+      handlerItem.detail = 'Define event handler';
+      completionItems.push(handlerItem);
     }
 
     return completionItems;
