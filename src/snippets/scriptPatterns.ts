@@ -27,9 +27,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   IntroShown:true;
   msg:WelcomeMessage;
   objective:FirstObjective;
-}`
+}`,
   },
-  
+
   {
     name: 'Multi-Stage Progression',
     category: 'state',
@@ -60,9 +60,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   QuestStage:3;
   msg:VictoryMessage;
   win:;
-}`
+}`,
   },
-  
+
   // Objective Patterns
   {
     name: 'Sequential Objectives',
@@ -98,9 +98,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   Obj3Complete:true;
   msg:AllObjectivesComplete;
   win:;
-}`
+}`,
   },
-  
+
   // Resource Patterns
   {
     name: 'Hidden Resource Caches',
@@ -143,9 +143,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   AllCachesBonus::
   msg:MasterExplorer;
   crystals:50;
-}`
+}`,
   },
-  
+
   // Timing Patterns
   {
     name: 'Basic Timer Challenge',
@@ -185,9 +185,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   stoptimer:MissionTimer;
   msg:CompletedInTime;
   win:;
-}`
+}`,
   },
-  
+
   {
     name: 'Escalating Difficulty',
     category: 'timing',
@@ -211,9 +211,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   msg:FinalChallenge;
   generatelandslide:\${5:15},\${6:15},10;
   emerge:\${5:15},\${6:15},A,CreatureLavaMonster_C,5;
-}`
+}`,
   },
-  
+
   // Tutorial Patterns
   {
     name: 'Step-by-Step Tutorial',
@@ -254,9 +254,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   removearrow:TutorialArrow;
   msg:TutorialComplete;
   objective:CompleteTheMission;
-}`
+}`,
   },
-  
+
   // Combat Patterns
   {
     name: 'Wave Defense',
@@ -296,9 +296,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   Victory::
   msg:AllWavesComplete;
   win:;
-}`
+}`,
   },
-  
+
   {
     name: 'Boss Fight',
     category: 'combat',
@@ -342,9 +342,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   crystals:100;
   objective:Victory;
   win:;
-}`
+}`,
   },
-  
+
   // Exploration Patterns
   {
     name: 'Discovery Rewards',
@@ -388,9 +388,9 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   msg:AllCavesFound;
   ore:50;
   objective:MasterExplorer;
-}`
+}`,
   },
-  
+
   {
     name: 'Dynamic Map Changes',
     category: 'exploration',
@@ -420,8 +420,8 @@ export const SCRIPT_PATTERNS: ScriptPattern[] = [
   # Reveal bonus
   place:\${10:11},\${12:17},42;  # Crystal seam
   msg:SecretAreaRevealed;
-}`
-  }
+}`,
+  },
 ];
 
 /**
@@ -436,8 +436,8 @@ export function getPatternsByCategory(category: ScriptPattern['category']): Scri
  */
 export function searchPatterns(query: string): ScriptPattern[] {
   const lowerQuery = query.toLowerCase();
-  return SCRIPT_PATTERNS.filter(p => 
-    p.name.toLowerCase().includes(lowerQuery) ||
-    p.description.toLowerCase().includes(lowerQuery)
+  return SCRIPT_PATTERNS.filter(
+    p =>
+      p.name.toLowerCase().includes(lowerQuery) || p.description.toLowerCase().includes(lowerQuery)
   );
 }

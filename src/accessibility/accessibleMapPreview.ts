@@ -69,10 +69,10 @@ export class AccessibleMapPreviewProvider implements vscode.WebviewViewProvider 
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
     const scriptUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'media', 'accessibleMapPreview.js')
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'mapPreview.js')
     );
     const styleUri = webview.asWebviewUri(
-      vscode.Uri.joinPath(this._extensionUri, 'media', 'accessibleMapPreview.css')
+      vscode.Uri.joinPath(this._extensionUri, 'media', 'mapPreview.css')
     );
 
     const accessibilityOptions = this.accessibilityManager.getOptions();
@@ -200,12 +200,14 @@ export class AccessibleMapPreviewProvider implements vscode.WebviewViewProvider 
       const tileRows = tilesSection.content
         .split('\n')
         .filter((line: string) => line.trim().length > 0)
-        .map((line: string) =>
-          line
-            .split(',')
-            .filter((tile: string) => tile.trim().length > 0)
-            .map((tile: string) => parseInt(tile.trim()))
-        );
+        .map((line: string) => {
+          const tiles = line.split(',').map((tile: string) => tile.trim());
+          // Remove last element if it's empty (trailing comma)
+          if (tiles[tiles.length - 1] === '') {
+            tiles.pop();
+          }
+          return tiles.map((tile: string) => parseInt(tile) || 0);
+        });
 
       // Get map dimensions from info section
       const infoSection = parser.getSection('info');
@@ -213,8 +215,8 @@ export class AccessibleMapPreviewProvider implements vscode.WebviewViewProvider 
       let colcount = tileRows[0]?.length || 0;
 
       if (infoSection) {
-        const rowMatch = infoSection.content.match(/rowcount:\s*(\d+)/);
-        const colMatch = infoSection.content.match(/colcount:\s*(\d+)/);
+        const rowMatch = infoSection.content.match(/rowcount:\s*(\d+)/i);
+        const colMatch = infoSection.content.match(/colcount:\s*(\d+)/i);
         if (rowMatch) {
           rowcount = parseInt(rowMatch[1]);
         }

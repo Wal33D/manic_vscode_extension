@@ -16,7 +16,7 @@ export function getColorMap(): ColorMap {
     2: { r: 100, g: 70, b: 50 }, // Rubble 1
     3: { r: 90, g: 60, b: 40 }, // Rubble 2
     4: { r: 80, g: 50, b: 30 }, // Rubble 3
-    5: { r: 70, g: 40, b: 20 }, // Rubble 4
+    5: { r: 92, g: 58, b: 40 }, // Rubble 4 / Hot rock
 
     // Hazards
     6: { r: 255, g: 50, b: 0 }, // Lava
@@ -42,10 +42,10 @@ export function getColorMap(): ColorMap {
     36: { r: 57, g: 33, b: 30 }, // Hard Rock variant
     37: { r: 47, g: 23, b: 20 }, // Hard Rock variant
 
-    38: { r: 20, g: 20, b: 20 }, // Solid Rock (impenetrable)
-    39: { r: 15, g: 15, b: 15 }, // Solid Rock variant
-    40: { r: 10, g: 10, b: 10 }, // Solid Rock variant
-    41: { r: 5, g: 5, b: 5 }, // Solid Rock variant
+    38: { r: 0, g: 0, b: 0, a: 0 }, // Solid Rock (impenetrable) - fully transparent
+    39: { r: 15, g: 15, b: 15, a: 0.1 }, // Solid Rock variant
+    40: { r: 10, g: 10, b: 10, a: 0.1 }, // Solid Rock variant
+    41: { r: 5, g: 5, b: 5, a: 0.1 }, // Solid Rock variant
 
     // Resources
     42: { r: 206, g: 233, b: 104 }, // Energy Crystal Seam
@@ -87,10 +87,10 @@ export function getColorMap(): ColorMap {
     86: { r: 57, g: 33, b: 30, a: 0.7 }, // Reinforced Hard Rock variant
     87: { r: 47, g: 23, b: 20, a: 0.7 }, // Reinforced Hard Rock variant
 
-    88: { r: 20, g: 20, b: 20, a: 0.7 }, // Reinforced Solid Rock
-    89: { r: 15, g: 15, b: 15, a: 0.7 }, // Reinforced Solid Rock variant
-    90: { r: 10, g: 10, b: 10, a: 0.7 }, // Reinforced Solid Rock variant
-    91: { r: 5, g: 5, b: 5, a: 0.7 }, // Reinforced Solid Rock variant
+    88: { r: 20, g: 20, b: 20, a: 0.1 }, // Reinforced Solid Rock
+    89: { r: 15, g: 15, b: 15, a: 0.1 }, // Reinforced Solid Rock variant
+    90: { r: 10, g: 10, b: 10, a: 0.1 }, // Reinforced Solid Rock variant
+    91: { r: 5, g: 5, b: 5, a: 0.1 }, // Reinforced Solid Rock variant
 
     92: { r: 206, g: 233, b: 104, a: 0.7 }, // Reinforced Crystal
     93: { r: 196, g: 223, b: 94, a: 0.7 }, // Reinforced Crystal variant

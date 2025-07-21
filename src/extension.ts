@@ -245,7 +245,7 @@ script{
 
   // Register Smart Suggestion Commands
   registerSmartSuggestionCommands(context);
-  
+
   // Register Script Pattern Commands
   registerScriptPatternCommands(context);
 

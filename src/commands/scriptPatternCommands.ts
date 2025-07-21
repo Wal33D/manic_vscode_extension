@@ -14,16 +14,16 @@ export function registerScriptPatternCommands(context: vscode.ExtensionContext):
         vscode.window.showErrorMessage('No active editor');
         return;
       }
-      
+
       // Check if we're in a script section
       const document = editor.document;
       const position = editor.selection.active;
       const currentLine = document.lineAt(position).text;
-      
+
       // Get all text up to current position to check context
       const textBefore = document.getText(new vscode.Range(new vscode.Position(0, 0), position));
       const inScriptSection = textBefore.includes('script{') && !textBefore.includes('script{.*}');
-      
+
       if (!inScriptSection && !currentLine.includes('script{')) {
         const proceed = await vscode.window.showWarningMessage(
           'You are not in a script section. Insert pattern anyway?',
@@ -34,7 +34,7 @@ export function registerScriptPatternCommands(context: vscode.ExtensionContext):
           return;
         }
       }
-      
+
       // Show category selection
       const categories = [
         { label: '$(symbol-variable) State Management', value: 'state' },
@@ -44,51 +44,61 @@ export function registerScriptPatternCommands(context: vscode.ExtensionContext):
         { label: '$(mortarboard) Tutorial', value: 'tutorial' },
         { label: '$(flame) Combat', value: 'combat' },
         { label: '$(compass) Exploration', value: 'exploration' },
-        { label: '$(list-unordered) All Patterns', value: 'all' }
+        { label: '$(list-unordered) All Patterns', value: 'all' },
       ];
-      
+
       const selectedCategory = await vscode.window.showQuickPick(categories, {
-        placeHolder: 'Select pattern category'
+        placeHolder: 'Select pattern category',
       });
-      
+
       if (!selectedCategory) {
         return;
       }
-      
+
       // Get patterns for selected category
-      const patterns = selectedCategory.value === 'all' 
-        ? SCRIPT_PATTERNS 
-        : getPatternsByCategory(selectedCategory.value as 'state' | 'objectives' | 'resources' | 'timing' | 'tutorial' | 'combat' | 'exploration');
-      
+      const patterns =
+        selectedCategory.value === 'all'
+          ? SCRIPT_PATTERNS
+          : getPatternsByCategory(
+              selectedCategory.value as
+                | 'state'
+                | 'objectives'
+                | 'resources'
+                | 'timing'
+                | 'tutorial'
+                | 'combat'
+                | 'exploration'
+            );
+
       // Show pattern selection
       const patternItems = patterns.map(pattern => ({
         label: pattern.name,
         description: pattern.description,
         detail: `Category: ${pattern.category}`,
-        pattern
+        pattern,
       }));
-      
+
       const selectedPattern = await vscode.window.showQuickPick(patternItems, {
         placeHolder: 'Select a script pattern to insert',
         matchOnDescription: true,
-        matchOnDetail: true
+        matchOnDetail: true,
       });
-      
+
       if (!selectedPattern) {
         return;
       }
-      
+
       // Insert the pattern
       const snippet = new vscode.SnippetString(selectedPattern.pattern.snippet);
       await editor.insertSnippet(snippet);
-      
+
       // Show info message
       vscode.window.showInformationMessage(
         `Inserted "${selectedPattern.pattern.name}" pattern. Tab through placeholders to customize.`
       );
     }
   );
-  
+
   // Command to show pattern documentation
   const showPatternDocsCommand = vscode.commands.registerCommand(
     'manicMiners.showScriptPatternDocs',
@@ -98,14 +108,14 @@ export function registerScriptPatternCommands(context: vscode.ExtensionContext):
         'Script Pattern Reference',
         vscode.ViewColumn.Beside,
         {
-          enableScripts: true
+          enableScripts: true,
         }
       );
-      
+
       panel.webview.html = getPatternDocsHtml();
     }
   );
-  
+
   context.subscriptions.push(insertPatternCommand, showPatternDocsCommand);
 }
 
@@ -113,8 +123,16 @@ export function registerScriptPatternCommands(context: vscode.ExtensionContext):
  * Generate HTML documentation for patterns
  */
 function getPatternDocsHtml(): string {
-  const categories = ['state', 'objectives', 'resources', 'timing', 'tutorial', 'combat', 'exploration'];
-  
+  const categories = [
+    'state',
+    'objectives',
+    'resources',
+    'timing',
+    'tutorial',
+    'combat',
+    'exploration',
+  ];
+
   let html = `
     <!DOCTYPE html>
     <html lang="en">
@@ -169,18 +187,27 @@ function getPatternDocsHtml(): string {
       <h1>Manic Miners Script Pattern Reference</h1>
       <p>Common scripting patterns for creating engaging gameplay. Click "Insert Script Pattern" in the Command Palette to use these in your maps.</p>
   `;
-  
+
   for (const category of categories) {
-    const patterns = getPatternsByCategory(category as 'state' | 'objectives' | 'resources' | 'timing' | 'tutorial' | 'combat' | 'exploration');
+    const patterns = getPatternsByCategory(
+      category as
+        | 'state'
+        | 'objectives'
+        | 'resources'
+        | 'timing'
+        | 'tutorial'
+        | 'combat'
+        | 'exploration'
+    );
     if (patterns.length === 0) {
       continue;
     }
-    
+
     html += `
       <div class="category">
         <h2>${formatCategoryName(category)}</h2>
     `;
-    
+
     for (const pattern of patterns) {
       const highlightedCode = highlightScriptCode(pattern.snippet);
       html += `
@@ -191,15 +218,15 @@ function getPatternDocsHtml(): string {
         </div>
       `;
     }
-    
+
     html += '</div>';
   }
-  
+
   html += `
     </body>
     </html>
   `;
-  
+
   return html;
 }
 
@@ -214,15 +241,17 @@ function formatCategoryName(category: string): string {
  * Simple syntax highlighting for script code
  */
 function highlightScriptCode(code: string): string {
-  return code
-    // Comments
-    .replace(/(#[^\n]*)/g, '<span class="comment">$1</span>')
-    // Keywords
-    .replace(/\b(when|if|else|and|or|not|true|false|init)\b/g, '<span class="keyword">$1</span>')
-    // Numbers
-    .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
-    // Strings (simple approach)
-    .replace(/(\w+):/g, '<span class="function">$1</span>:')
-    // Variables
-    .replace(/\$\{(\d+):([^}]+)\}/g, '${$1:$2}');
+  return (
+    code
+      // Comments
+      .replace(/(#[^\n]*)/g, '<span class="comment">$1</span>')
+      // Keywords
+      .replace(/\b(when|if|else|and|or|not|true|false|init)\b/g, '<span class="keyword">$1</span>')
+      // Numbers
+      .replace(/\b(\d+)\b/g, '<span class="number">$1</span>')
+      // Strings (simple approach)
+      .replace(/(\w+):/g, '<span class="function">$1</span>:')
+      // Variables
+      .replace(/\$\{(\d+):([^}]+)\}/g, '${$1:$2}')
+  );
 }
