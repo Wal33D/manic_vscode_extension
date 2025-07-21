@@ -43,7 +43,7 @@ export class EnhancedScriptValidator {
 
     // Second pass: validate events and commands
     this.validateEvents(script);
-    
+
     // Third pass: detect advanced patterns
     this.detectAdvancedPatterns(script);
 
@@ -459,11 +459,11 @@ export class EnhancedScriptValidator {
    */
   private detectAdvancedPatterns(script: ScriptSection): void {
     const scriptContent = this.reconstructScriptContent(script);
-    
+
     // Detect mutex patterns
     const mutexDetector = new MutexDetector();
     const mutexPatterns = mutexDetector.detectPatterns(scriptContent);
-    
+
     mutexPatterns.forEach(pattern => {
       const patternType = pattern.type.replace(/_/g, ' ');
       this.addWarning(
@@ -472,7 +472,7 @@ export class EnhancedScriptValidator {
         0,
         'script'
       );
-      
+
       if (pattern.type === 'global_cooldown' && pattern.relatedEvents.length > 3) {
         this.addWarning(
           `Variable '${pattern.variableName}' is used as cooldown for ${pattern.relatedEvents.length} events - consider separate cooldowns`,
@@ -482,11 +482,11 @@ export class EnhancedScriptValidator {
         );
       }
     });
-    
+
     // Detect state machines
     const stateMachineDetector = new StateMachineDetector();
     const stateMachines = stateMachineDetector.detectStateMachines(scriptContent);
-    
+
     stateMachines.forEach(machine => {
       this.addWarning(
         `Detected state machine with variable '${machine.variableName}' (${machine.states.size} states, ${machine.transitions.length} transitions)`,
@@ -494,11 +494,11 @@ export class EnhancedScriptValidator {
         0,
         'script'
       );
-      
+
       // Check for unreachable states
       const reachableStates = new Set<number>([machine.initialState]);
       machine.transitions.forEach(t => reachableStates.add(t.to));
-      
+
       machine.states.forEach((name, state) => {
         if (!reachableStates.has(state) && state !== machine.initialState) {
           this.addError(
@@ -509,11 +509,12 @@ export class EnhancedScriptValidator {
           );
         }
       });
-      
+
       // Check for dead-end states
       const hasOutgoing = new Set(machine.transitions.map(t => t.from));
       machine.states.forEach((name, state) => {
-        if (!hasOutgoing.has(state) && state !== 0) { // Assuming 0 is often a terminal state
+        if (!hasOutgoing.has(state) && state !== 0) {
+          // Assuming 0 is often a terminal state
           this.addWarning(
             `State '${name}' (${state}) in machine '${machine.variableName}' has no outgoing transitions`,
             0,
@@ -523,11 +524,11 @@ export class EnhancedScriptValidator {
         }
       });
     });
-    
+
     // Analyze resource flow
     const resourceAnalyzer = new ResourceFlowAnalyzer();
     const resourceFlows = resourceAnalyzer.analyzeResourceFlow(scriptContent);
-    
+
     resourceFlows.forEach((flow, resource) => {
       if (flow.balance < 0) {
         this.addWarning(
@@ -537,7 +538,7 @@ export class EnhancedScriptValidator {
           'script'
         );
       }
-      
+
       if (resource === 'crystals' && flow.sinks.length > 0 && flow.sources.length === 0) {
         this.addError(
           `Crystals required for objectives but no crystal sources found in script`,
@@ -547,11 +548,11 @@ export class EnhancedScriptValidator {
         );
       }
     });
-    
+
     // Analyze performance
     const performanceAnalyzer = new PerformanceAnalyzer();
     const metrics = performanceAnalyzer.analyzePerformance(scriptContent);
-    
+
     if (metrics.estimatedLoad === 'critical') {
       this.addError(
         `Script has critical performance load - Events: ${metrics.eventCount}, Complexity: ${metrics.conditionComplexity}, Timers: ${metrics.timerCount}, Spawners: ${metrics.spawnerCount}`,
@@ -560,23 +561,18 @@ export class EnhancedScriptValidator {
         'script'
       );
     } else if (metrics.estimatedLoad === 'high') {
-      this.addWarning(
-        `Script has high performance load - consider optimization`,
-        0,
-        0,
-        'script'
-      );
+      this.addWarning(`Script has high performance load - consider optimization`, 0, 0, 'script');
     }
-    
+
     const recommendations = performanceAnalyzer.getRecommendations(metrics);
     recommendations.forEach(rec => {
       this.addWarning(rec, 0, 0, 'script');
     });
-    
+
     // Detect circular dependencies
     const circularDetector = new CircularDependencyDetector();
     const circularDeps = circularDetector.detectCircularDependencies(scriptContent);
-    
+
     circularDeps.forEach(dep => {
       this.addError(
         `Circular dependency detected: ${dep.events.join(' → ')}`,
@@ -585,15 +581,15 @@ export class EnhancedScriptValidator {
         'script'
       );
     });
-    
+
     // Detect potential deadlocks
     const deadlockDetector = new DeadlockDetector();
     const deadlocks = deadlockDetector.detectDeadlocks(scriptContent);
-    
+
     deadlocks.forEach(deadlock => {
       const severity = deadlock.riskLevel === 'high' ? 'error' : 'warning';
       const message = `Potential deadlock between events [${deadlock.events.join(', ')}] on resources [${deadlock.sharedResources.join(', ')}]`;
-      
+
       if (severity === 'error') {
         this.addError(message, deadlock.line, 0, 'script');
       } else {
@@ -601,18 +597,18 @@ export class EnhancedScriptValidator {
       }
     });
   }
-  
+
   /**
    * Reconstruct script content from parsed structure
    */
   private reconstructScriptContent(script: ScriptSection): string {
     const lines: string[] = [];
-    
+
     // Add variables
     script.variables.forEach((value, name) => {
       lines.push(`${name}=${value}`);
     });
-    
+
     // Add events
     script.events.forEach(event => {
       if (event.condition) {
@@ -624,7 +620,7 @@ export class EnhancedScriptValidator {
         lines.push(`${cmd.command}${params};`);
       });
     });
-    
+
     return lines.join('\n');
   }
 

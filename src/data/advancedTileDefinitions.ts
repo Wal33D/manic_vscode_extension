@@ -5,13 +5,13 @@ import { TileType } from '../types/datFileTypes';
  * Determines drill difficulty and time required
  */
 export enum Hardness {
-  NONE = 0,    // No drilling needed (floors, water, lava)
-  RUBBLE = 1,  // Very easy to clear (landslide debris)
-  DIRT = 2,    // Basic wall, quick to drill
-  LOOSE = 3,   // Loose rock, moderate drilling time
-  SEAM = 4,    // Resource seams, takes time but yields resources
-  HARD = 5,    // Hard rock, slow drilling
-  SOLID = 6,   // Cannot be drilled (impenetrable)
+  NONE = 0, // No drilling needed (floors, water, lava)
+  RUBBLE = 1, // Very easy to clear (landslide debris)
+  DIRT = 2, // Basic wall, quick to drill
+  LOOSE = 3, // Loose rock, moderate drilling time
+  SEAM = 4, // Resource seams, takes time but yields resources
+  HARD = 5, // Hard rock, slow drilling
+  SOLID = 6, // Cannot be drilled (impenetrable)
 }
 
 /**
@@ -28,30 +28,30 @@ export interface AdvancedTileDefinition {
   name: string;
   description: string;
   category: 'ground' | 'wall' | 'resource' | 'hazard' | 'special' | 'rubble';
-  
+
   // Physical properties
   hardness: Hardness;
   isWall: boolean;
   isFloor: boolean;
   isFluid: boolean;
-  
+
   // Movement and building
   canWalk: boolean;
   canDrill: boolean;
   canBuild: boolean;
   canLandslide: boolean;
-  
+
   // Terrain properties
-  maxSlope?: number;  // Maximum allowed height difference (undefined = no limit)
-  
+  maxSlope?: number; // Maximum allowed height difference (undefined = no limit)
+
   // Resource yields
-  crystalYield: number;  // Number of crystals when drilled
-  oreYield: number;      // Number of ore when drilled
-  studsYield: number;    // Number of studs when drilled
-  
+  crystalYield: number; // Number of crystals when drilled
+  oreYield: number; // Number of ore when drilled
+  studsYield: number; // Number of studs when drilled
+
   // Special behaviors
   trigger: TileTrigger;
-  
+
   // Visual properties
   color?: { r: number; g: number; b: number; a?: number };
 }
@@ -107,7 +107,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 255, g: 255, b: 0 },
     },
   ],
-  
+
   // Wall tiles - Dirt
   [
     TileType.SolidRock,
@@ -131,7 +131,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 169, g: 109, b: 82 },
     },
   ],
-  
+
   // Wall tiles - Loose Rock
   [
     TileType.LooseRock,
@@ -177,7 +177,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 139, g: 104, b: 86 },
     },
   ],
-  
+
   // Wall tiles - Hard Rock
   [
     TileType.EnergyCrystalSeam,
@@ -245,7 +245,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 30, g: 30, b: 30 },
     },
   ],
-  
+
   // Wall tiles - Solid Rock
   [
     TileType.SolidWall,
@@ -269,7 +269,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 0, g: 0, b: 0, a: 0 },
     },
   ],
-  
+
   // Resource tiles
   [
     TileType.OreSeam,
@@ -286,10 +286,10 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       canDrill: true,
       canBuild: false,
       canLandslide: false,
-      crystalYield: 5,  // Yields 5 crystals when drilled
+      crystalYield: 5, // Yields 5 crystals when drilled
       oreYield: 0,
       studsYield: 0,
-      trigger: 'spawn',  // May spawn creatures when drilled
+      trigger: 'spawn', // May spawn creatures when drilled
       color: { r: 206, g: 233, b: 104 },
     },
   ],
@@ -309,7 +309,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       canBuild: false,
       canLandslide: false,
       crystalYield: 0,
-      oreYield: 3,  // Yields 3 ore when drilled
+      oreYield: 3, // Yields 3 ore when drilled
       studsYield: 0,
       trigger: null,
       color: { r: 200, g: 85, b: 30 },
@@ -359,7 +359,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 255, g: 200, b: 0 },
     },
   ],
-  
+
   // Hazard tiles - Fluids
   [
     TileType.Lava,
@@ -376,7 +376,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       canDrill: false,
       canBuild: false,
       canLandslide: false,
-      maxSlope: undefined,  // Water flows at any slope
+      maxSlope: undefined, // Water flows at any slope
       crystalYield: 0,
       oreYield: 0,
       studsYield: 0,
@@ -476,7 +476,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 255, g: 70, b: 10, a: 0.9 },
     },
   ],
-  
+
   // Hazard tiles - Other
   [
     5,
@@ -566,7 +566,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 150, g: 150, b: 20 },
     },
   ],
-  
+
   // Rubble tiles
   [
     60,
@@ -810,7 +810,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 80, g: 60, b: 40 },
     },
   ],
-  
+
   // Erosion tiles
   [
     TileType.Erosion1,
@@ -878,7 +878,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       color: { r: 90, g: 70, b: 50 },
     },
   ],
-  
+
   // Special tiles
   [
     TileType.DiggableTerrain,
@@ -964,7 +964,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       canDrill: true,
       canBuild: false,
       canLandslide: false,
-      maxSlope: 1,  // Very limited slope on ice
+      maxSlope: 1, // Very limited slope on ice
       crystalYield: 0,
       oreYield: 0,
       studsYield: 0,
@@ -987,7 +987,7 @@ export const ADVANCED_TILE_DEFINITIONS: Map<number, AdvancedTileDefinition> = ne
       canDrill: false,
       canBuild: false,
       canLandslide: false,
-      maxSlope: 0,  // Must be perfectly flat
+      maxSlope: 0, // Must be perfectly flat
       crystalYield: 0,
       oreYield: 0,
       studsYield: 0,
@@ -1053,14 +1053,22 @@ export function getAdvancedTileInfo(tileId: number): AdvancedTileDefinition | un
  */
 export function getHardnessName(hardness: Hardness): string {
   switch (hardness) {
-    case Hardness.NONE: return 'None';
-    case Hardness.RUBBLE: return 'Rubble';
-    case Hardness.DIRT: return 'Dirt';
-    case Hardness.LOOSE: return 'Loose Rock';
-    case Hardness.SEAM: return 'Resource Seam';
-    case Hardness.HARD: return 'Hard Rock';
-    case Hardness.SOLID: return 'Solid Rock';
-    default: return 'Unknown';
+    case Hardness.NONE:
+      return 'None';
+    case Hardness.RUBBLE:
+      return 'Rubble';
+    case Hardness.DIRT:
+      return 'Dirt';
+    case Hardness.LOOSE:
+      return 'Loose Rock';
+    case Hardness.SEAM:
+      return 'Resource Seam';
+    case Hardness.HARD:
+      return 'Hard Rock';
+    case Hardness.SOLID:
+      return 'Solid Rock';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -1069,14 +1077,22 @@ export function getHardnessName(hardness: Hardness): string {
  */
 export function getDrillTimeEstimate(hardness: Hardness): string {
   switch (hardness) {
-    case Hardness.NONE: return 'Not drillable';
-    case Hardness.RUBBLE: return 'Very fast (~2s)';
-    case Hardness.DIRT: return 'Fast (~5s)';
-    case Hardness.LOOSE: return 'Moderate (~10s)';
-    case Hardness.SEAM: return 'Slow (~15s)';
-    case Hardness.HARD: return 'Very slow (~20s)';
-    case Hardness.SOLID: return 'Cannot be drilled';
-    default: return 'Unknown';
+    case Hardness.NONE:
+      return 'Not drillable';
+    case Hardness.RUBBLE:
+      return 'Very fast (~2s)';
+    case Hardness.DIRT:
+      return 'Fast (~5s)';
+    case Hardness.LOOSE:
+      return 'Moderate (~10s)';
+    case Hardness.SEAM:
+      return 'Slow (~15s)';
+    case Hardness.HARD:
+      return 'Very slow (~20s)';
+    case Hardness.SOLID:
+      return 'Cannot be drilled';
+    default:
+      return 'Unknown';
   }
 }
 
@@ -1086,9 +1102,13 @@ export function getDrillTimeEstimate(hardness: Hardness): string {
 export function getTilesWithResource(resource: 'crystal' | 'ore' | 'studs'): number[] {
   const tiles: number[] = [];
   ADVANCED_TILE_DEFINITIONS.forEach((tile, id) => {
-    if (resource === 'crystal' && tile.crystalYield > 0) tiles.push(id);
-    else if (resource === 'ore' && tile.oreYield > 0) tiles.push(id);
-    else if (resource === 'studs' && tile.studsYield > 0) tiles.push(id);
+    if (resource === 'crystal' && tile.crystalYield > 0) {
+      tiles.push(id);
+    } else if (resource === 'ore' && tile.oreYield > 0) {
+      tiles.push(id);
+    } else if (resource === 'studs' && tile.studsYield > 0) {
+      tiles.push(id);
+    }
   });
   return tiles;
 }
@@ -1099,7 +1119,9 @@ export function getTilesWithResource(resource: 'crystal' | 'ore' | 'studs'): num
 export function getTilesByHardness(hardness: Hardness): number[] {
   const tiles: number[] = [];
   ADVANCED_TILE_DEFINITIONS.forEach((tile, id) => {
-    if (tile.hardness === hardness) tiles.push(id);
+    if (tile.hardness === hardness) {
+      tiles.push(id);
+    }
   });
   return tiles;
 }
@@ -1109,7 +1131,7 @@ export function getTilesByHardness(hardness: Hardness): number[] {
  */
 export function getTilesWithTriggers(): Map<TileTrigger, number[]> {
   const triggers = new Map<TileTrigger, number[]>();
-  
+
   ADVANCED_TILE_DEFINITIONS.forEach((tile, id) => {
     if (tile.trigger !== null) {
       if (!triggers.has(tile.trigger)) {
@@ -1118,7 +1140,7 @@ export function getTilesWithTriggers(): Map<TileTrigger, number[]> {
       triggers.get(tile.trigger)!.push(id);
     }
   });
-  
+
   return triggers;
 }
 
@@ -1127,8 +1149,12 @@ export function getTilesWithTriggers(): Map<TileTrigger, number[]> {
  */
 export function canBuildAtSlope(tileId: number, currentSlope: number): boolean {
   const tile = getAdvancedTileInfo(tileId);
-  if (!tile || !tile.canBuild) return false;
-  if (tile.maxSlope === undefined) return true;
+  if (!tile || !tile.canBuild) {
+    return false;
+  }
+  if (tile.maxSlope === undefined) {
+    return true;
+  }
   return currentSlope <= tile.maxSlope;
 }
 
@@ -1163,7 +1189,11 @@ export function isHazardTile(tileId: number): boolean {
 /**
  * Get total resource yield from drilling a tile
  */
-export function getTileResourceYield(tileId: number): { crystals: number; ore: number; studs: number } {
+export function getTileResourceYield(tileId: number): {
+  crystals: number;
+  ore: number;
+  studs: number;
+} {
   const tile = getAdvancedTileInfo(tileId);
   return {
     crystals: tile?.crystalYield ?? 0,
