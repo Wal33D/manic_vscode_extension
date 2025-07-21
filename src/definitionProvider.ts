@@ -32,6 +32,27 @@ export class DatDefinitionProvider implements vscode.DefinitionProvider {
         return this.findEntityDefinition(document, entityId, parser);
       }
 
+      // Check for event references in when() conditions
+      const whenMatch = lineText.match(/when\s*\([^)]*\)\s*\[(\w+)\]/);
+      if (whenMatch && position.character >= lineText.indexOf(whenMatch[1])) {
+        const eventName = whenMatch[1];
+        return this.findEventDefinition(document, eventName, parser);
+      }
+
+      // Check for timer event references
+      const timerMatch = lineText.match(/timer\s+(\w+)\s*=.*?,\s*(\w+)\s*$/);
+      if (timerMatch && timerMatch[2] && position.character >= lineText.indexOf(timerMatch[2])) {
+        const eventName = timerMatch[2];
+        return this.findEventDefinition(document, eventName, parser);
+      }
+
+      // Check for variable references
+      const varRefMatch = lineText.match(/(\w+)\s*:/);
+      if (varRefMatch && !lineText.includes('::') && position.character <= lineText.indexOf(':')) {
+        const varName = varRefMatch[1];
+        return this.findVariableDefinition(document, varName, parser);
+      }
+
       // Check for event references
       if (lineText.includes('::') || lineText.includes('))')) {
         const eventName = this.extractEventName(lineText);
@@ -155,9 +176,18 @@ export class DatDefinitionProvider implements vscode.DefinitionProvider {
 
     const lines = scriptSection.content.split('\n');
     for (let i = 0; i < lines.length; i++) {
-      // Look for variable definition
-      const varMatch = lines[i].match(/(?:int|string|float|bool)\s+(\w+)\s*=/);
-      if (varMatch && varMatch[1] === varName) {
+      // Look for typed variable definition
+      const typedVarMatch = lines[i].match(/(?:int|string|float|bool|timer|arrow)\s+(\w+)\s*=/);
+      if (typedVarMatch && typedVarMatch[1] === varName) {
+        return new vscode.Location(
+          document.uri,
+          new vscode.Position(scriptSection.startLine + i + 1, 0)
+        );
+      }
+
+      // Look for untyped variable definition (legacy format)
+      const untypedVarMatch = lines[i].match(/^\s*(\w+)\s*=/);
+      if (untypedVarMatch && untypedVarMatch[1] === varName) {
         return new vscode.Location(
           document.uri,
           new vscode.Position(scriptSection.startLine + i + 1, 0)
@@ -169,15 +199,22 @@ export class DatDefinitionProvider implements vscode.DefinitionProvider {
   }
 
   private extractEventName(lineText: string): string | undefined {
-    // Extract event name from event call or definition
-    const eventCallMatch = lineText.match(/\)\)\s*(\w+)\s*;/);
+    // Extract event name from event call (e.g., EventName::)
+    const eventCallMatch = lineText.match(/(\w+)\s*::(?!:)/);
     if (eventCallMatch) {
       return eventCallMatch[1];
     }
 
-    const eventDefMatch = lineText.match(/(\w+)\s*::/);
+    // Extract event name from event definition
+    const eventDefMatch = lineText.match(/^\s*(\w+)\s*::/);
     if (eventDefMatch) {
       return eventDefMatch[1];
+    }
+
+    // Extract from old-style event calls (e.g., ))EventName;)
+    const oldStyleMatch = lineText.match(/\)\)\s*(\w+)\s*;/);
+    if (oldStyleMatch) {
+      return oldStyleMatch[1];
     }
 
     return undefined;

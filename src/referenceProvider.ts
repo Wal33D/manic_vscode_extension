@@ -48,13 +48,18 @@ export class DatReferenceProvider implements vscode.ReferenceProvider {
   }
 
   private isEventName(lineText: string): boolean {
-    return lineText.includes('::') || lineText.includes('))');
+    return (
+      lineText.includes('::') ||
+      lineText.includes('))') ||
+      lineText.match(/when\s*\([^)]*\)\s*\[\w+\]/) !== null
+    );
   }
 
   private isVariableName(lineText: string): boolean {
     return (
-      lineText.match(/(?:int|string|float|bool)\s+\w+\s*=/) !== null ||
-      lineText.includes('variable:')
+      lineText.match(/(?:int|string|float|bool|timer|arrow)\s+\w+\s*=/) !== null ||
+      lineText.includes('variable:') ||
+      lineText.match(/^\s*\w+\s*=/) !== null
     );
   }
 
@@ -161,9 +166,57 @@ export class DatReferenceProvider implements vscode.ReferenceProvider {
 
     const lines = scriptSection.content.split('\n');
     for (let i = 0; i < lines.length; i++) {
-      // Find event calls
-      const callRegex = new RegExp(`\\)\\)\\s*${eventName}\\s*;`);
-      if (callRegex.test(lines[i])) {
+      // Find event calls (EventName::)
+      const callRegex = new RegExp(`${eventName}\\s*::`);
+      if (callRegex.test(lines[i]) && !lines[i].match(new RegExp(`^\\s*${eventName}\\s*::`))) {
+        const line = scriptSection.startLine + i + 1;
+        const col = lines[i].indexOf(eventName);
+        references.push(
+          new vscode.Location(
+            document.uri,
+            new vscode.Range(
+              new vscode.Position(line, col),
+              new vscode.Position(line, col + eventName.length)
+            )
+          )
+        );
+      }
+
+      // Find event references in when() conditions
+      const whenRegex = new RegExp(`when\\s*\\([^)]*\\)\\s*\\[${eventName}\\]`);
+      if (whenRegex.test(lines[i])) {
+        const line = scriptSection.startLine + i + 1;
+        const col = lines[i].lastIndexOf(eventName);
+        references.push(
+          new vscode.Location(
+            document.uri,
+            new vscode.Range(
+              new vscode.Position(line, col),
+              new vscode.Position(line, col + eventName.length)
+            )
+          )
+        );
+      }
+
+      // Find in timer declarations
+      const timerRegex = new RegExp(`timer\\s+\\w+\\s*=.*,\\s*${eventName}\\s*$`);
+      if (timerRegex.test(lines[i])) {
+        const line = scriptSection.startLine + i + 1;
+        const col = lines[i].lastIndexOf(eventName);
+        references.push(
+          new vscode.Location(
+            document.uri,
+            new vscode.Range(
+              new vscode.Position(line, col),
+              new vscode.Position(line, col + eventName.length)
+            )
+          )
+        );
+      }
+
+      // Find old-style event calls
+      const oldCallRegex = new RegExp(`\\)\\)\\s*${eventName}\\s*;`);
+      if (oldCallRegex.test(lines[i])) {
         const line = scriptSection.startLine + i + 1;
         const col = lines[i].indexOf(eventName);
         references.push(

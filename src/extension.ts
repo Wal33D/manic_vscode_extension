@@ -30,11 +30,88 @@ import { registerAccessibilityCommands } from './accessibility/accessibilityComm
 import { HeatMapProvider } from './heatmap/heatMapProvider';
 import { Terrain3DProvider } from './terrain3d/terrain3DProvider';
 import { registerLevelGeneratorCommands } from './levelGenerators/levelGeneratorProvider';
+import { WelcomePageProvider } from './welcomePage';
+// Import package metadata for welcome/version tracking
+import { registerScriptPatternCommands } from './commands/scriptPatternCommands';
 
-export function activate(context: vscode.ExtensionContext) {
+export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
   (global as unknown as Record<string, vscode.ExtensionContext>).extensionContext = context;
   // Extension activated successfully
+
+  // Initialize welcome page provider and command
+  const welcomePageProvider = new WelcomePageProvider(context);
+  const showWelcomeCommand = vscode.commands.registerCommand('manicMiners.showWelcome', () => {
+    welcomePageProvider.show();
+  });
+  context.subscriptions.push(showWelcomeCommand);
+
+  // Always show welcome page on activation
+  await welcomePageProvider.show();
+
+  // Register new file command
+  const newFileCommand = vscode.commands.registerCommand('manicMiners.newFile', async () => {
+    const content = `info{
+Title=New Map
+Author=Unknown
+Description=A new Manic Miners map
+}
+
+tiles{
+4 4 4 4 4 4 4 4 4 4
+4 1 1 1 1 1 1 1 1 4
+4 1 0 0 0 0 0 0 1 4
+4 1 0 0 0 0 0 0 1 4
+4 1 0 0 0 0 0 0 1 4
+4 1 0 0 0 0 0 0 1 4
+4 1 0 0 0 0 0 0 1 4
+4 1 0 0 0 0 0 0 1 4
+4 1 1 1 1 1 1 1 1 4
+4 4 4 4 4 4 4 4 4 4
+}
+
+height{
+5 5 5 5 5 5 5 5 5 5
+5 3 3 3 3 3 3 3 3 5
+5 3 0 0 0 0 0 0 3 5
+5 3 0 0 0 0 0 0 3 5
+5 3 0 0 0 0 0 0 3 5
+5 3 0 0 0 0 0 0 3 5
+5 3 0 0 0 0 0 0 3 5
+5 3 0 0 0 0 0 0 3 5
+5 3 3 3 3 3 3 3 3 5
+5 5 5 5 5 5 5 5 5 5
+}
+
+resources{
+crystals: 5,5,10
+}
+
+buildings{
+ToolStore: 5,4,1,1,1
+}
+
+objectives{
+resources: crystals,5
+}
+
+script{
+; Your script here
+}`;
+
+    const doc = await vscode.workspace.openTextDocument({
+      content,
+      language: 'manicminers',
+    });
+    await vscode.window.showTextDocument(doc);
+  });
+  context.subscriptions.push(newFileCommand);
+
+  // Register show commands command
+  const showCommandsCommand = vscode.commands.registerCommand('manicMiners.showCommands', () => {
+    vscode.commands.executeCommand('workbench.action.showCommands', 'Manic Miners');
+  });
+  context.subscriptions.push(showCommandsCommand);
 
   const disposable = vscode.commands.registerCommand('dat.helloWorld', () => {
     vscode.window.showInformationMessage('Hello World from Manic Miners Dat File!');
@@ -168,6 +245,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register Smart Suggestion Commands
   registerSmartSuggestionCommands(context);
+  
+  // Register Script Pattern Commands
+  registerScriptPatternCommands(context);
 
   // Register Objective Builder Provider
   const objectiveBuilderProvider = new ObjectiveBuilderProvider(context.extensionUri);

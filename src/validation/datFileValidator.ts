@@ -1,12 +1,6 @@
-import {
-  DatFile,
-  ValidationError,
-  InfoSection,
-  Entity,
-  BuildingType,
-  ScriptSection,
-} from '../types/datFileTypes';
+import { DatFile, ValidationError, InfoSection, Entity, BuildingType } from '../types/datFileTypes';
 import { getTileInfo } from '../data/tileDefinitions';
+import { EnhancedScriptValidator } from './enhancedScriptValidator';
 import {
   getEnhancedTileInfo,
   isReinforcedTile,
@@ -63,7 +57,18 @@ export class DatFileValidator {
       this.validateGrid(datFile.lavaspread, datFile.info, 'lavaspread');
     }
     if (datFile.script) {
-      this.validateScript(datFile.script);
+      // Use enhanced script validator
+      const scriptValidator = new EnhancedScriptValidator();
+      const scriptErrors = scriptValidator.validate(datFile.script);
+
+      // Add script errors to our errors/warnings
+      for (const error of scriptErrors) {
+        if (error.severity === 'error') {
+          this.errors.push(error);
+        } else {
+          this.warnings.push(error);
+        }
+      }
     }
 
     return [...this.errors, ...this.warnings];
@@ -735,122 +740,6 @@ export class DatFileValidator {
       column,
       section,
     });
-  }
-
-  /**
-   * Validate script section
-   */
-  private validateScript(script: ScriptSection): void {
-    // Validate script variables
-    const definedVariables = new Set<string>();
-    const validScriptCommands = [
-      'msg',
-      'wait',
-      'spawn',
-      'timer',
-      'starttimer',
-      'stoptimer',
-      'playsound',
-      'camera',
-      'shake',
-      'objective',
-      'win',
-      'lose',
-      'drill',
-      'reinforce',
-      'place',
-      'teleport',
-      'destroy',
-      'setproperty',
-      'if',
-      'then',
-      'else',
-      'endif',
-      'when',
-    ];
-
-    // Track defined variables
-    script.variables.forEach((value: unknown, name: string) => {
-      definedVariables.add(name);
-
-      // Validate timer syntax
-      if (name.toLowerCase().includes('timer') && typeof value === 'string') {
-        const timerMatch = value.match(/^(\d+)(?:,(\d+))?(?:,(\d+))?(?:,(\w+))?$/);
-        if (!timerMatch) {
-          this.addError(
-            `Invalid timer syntax for '${name}': ${value}. Expected: delay[,min,max][,event]`,
-            0,
-            0,
-            'script'
-          );
-        }
-      }
-    });
-
-    // Validate events
-    const eventNames = new Set<string>();
-    for (const event of script.events) {
-      // Check for duplicate event names
-      if (eventNames.has(event.name)) {
-        this.addWarning(`Duplicate event name: ${event.name}`, 0, 0, 'script');
-      }
-      eventNames.add(event.name);
-
-      // Validate event condition
-      if (event.condition) {
-        // Check if condition references undefined variables
-        const conditionVars = event.condition.match(/\b[a-zA-Z_]\w*\b/g) || [];
-        for (const varName of conditionVars) {
-          if (
-            !definedVariables.has(varName) &&
-            !['time', 'crystals', 'ore', 'miners', 'buildings'].includes(varName)
-          ) {
-            this.addWarning(
-              `Event '${event.name}' references undefined variable: ${varName}`,
-              0,
-              0,
-              'script'
-            );
-          }
-        }
-      }
-
-      // Validate commands
-      for (const command of event.commands) {
-        if (!validScriptCommands.includes(command.command.toLowerCase())) {
-          this.addWarning(
-            `Unknown script command '${command.command}' in event '${event.name}'`,
-            0,
-            0,
-            'script'
-          );
-        }
-
-        // Validate specific command parameters
-        switch (command.command.toLowerCase()) {
-          case 'wait':
-            if (command.parameters.length !== 1 || isNaN(Number(command.parameters[0]))) {
-              this.addError(`'wait' command requires a single numeric parameter`, 0, 0, 'script');
-            }
-            break;
-          case 'spawn':
-            if (command.parameters.length < 3) {
-              this.addError(
-                `'spawn' command requires at least 3 parameters: type, x, y`,
-                0,
-                0,
-                'script'
-              );
-            }
-            break;
-          case 'timer':
-            if (command.parameters.length < 1) {
-              this.addError(`'timer' command requires a timer name`, 0, 0, 'script');
-            }
-            break;
-        }
-      }
-    }
   }
 
   /**

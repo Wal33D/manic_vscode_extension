@@ -41,7 +41,7 @@
     "Linters"
   ],
   "activationEvents": [
-    "onLanguage:manicminers"
+    "*"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -69,6 +69,24 @@
       {
         "command": "dat.helloWorld",
         "title": "Hello World"
+      },
+      {
+        "command": "manicMiners.showWelcome",
+        "title": "Show Welcome Page",
+        "category": "Manic Miners",
+        "icon": "$(home)"
+      },
+      {
+        "command": "manicMiners.newFile",
+        "title": "Create New Map",
+        "category": "Manic Miners",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "manicMiners.showCommands",
+        "title": "Show All Commands",
+        "category": "Manic Miners",
+        "icon": "$(list-unordered)"
       },
       {
         "command": "manicMiners.showMapPreview",
@@ -174,6 +192,18 @@
         "command": "manicMiners.replaceWithTileSetEnhanced",
         "title": "Replace with Tile Set (with Undo)",
         "category": "Manic Miners"
+      },
+      {
+        "command": "manicMiners.insertScriptPattern",
+        "title": "Insert Script Pattern",
+        "category": "Manic Miners",
+        "icon": "$(code)"
+      },
+      {
+        "command": "manicMiners.showScriptPatternDocs",
+        "title": "Show Script Pattern Reference",
+        "category": "Manic Miners",
+        "icon": "$(book)"
       },
       {
         "command": "manicMiners.showSmartSuggestions",

@@ -3,6 +3,13 @@ import { DatFileParser } from './parser/datFileParser';
 import { BuildingType, VehicleType, CreatureType, BiomeType } from './types/datFileTypes';
 import { getTileInfo } from './data/tileDefinitions';
 import { getEnhancedTileInfo, isReinforcedTile } from './data/enhancedTileDefinitions';
+import {
+  SCRIPT_COMMANDS,
+  SCRIPT_MACROS,
+  CREATURE_TYPES,
+  BUILDING_TYPES,
+  VEHICLE_TYPES,
+} from './validation/scriptCommands';
 
 // Info section fields with descriptions
 const infoFieldCompletions: Map<string, { detail: string; documentation: string }> = new Map([
@@ -52,8 +59,8 @@ const infoFieldCompletions: Map<string, { detail: string; documentation: string 
   ['erosionscale', { detail: 'Erosion scale', documentation: 'Erosion intensity multiplier' }],
 ]);
 
-// Script commands
-const scriptCommands = [
+// Script commands - DEPRECATED: Now using comprehensive list from scriptCommands.ts
+const scriptCommandsLegacy = [
   // Messages and UI
   {
     name: 'msg',
@@ -687,7 +694,7 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
     // Variable type completions at the start of a line
     if (linePrefix.match(/^\s*$/)) {
       // Variable types
-      const types = ['int', 'string', 'float', 'bool', 'timer'];
+      const types = ['int', 'string', 'float', 'bool', 'timer', 'arrow'];
       for (const type of types) {
         const item = new vscode.CompletionItem(type, vscode.CompletionItemKind.Keyword);
         if (type === 'timer') {
@@ -696,6 +703,10 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
           );
           item.detail = 'Declare timer variable';
           item.documentation = new vscode.MarkdownString('Timer format: delay[,min,max][,event]');
+        } else if (type === 'arrow') {
+          item.insertText = new vscode.SnippetString(`arrow \${1:ArrowName}=\${2:green}`);
+          item.detail = 'Declare arrow variable';
+          item.documentation = new vscode.MarkdownString('Arrow colors: green, red, yellow, blue');
         } else {
           item.insertText = new vscode.SnippetString(`${type} \${1:varName}=\${2:value}`);
           item.detail = `Declare ${type} variable`;
@@ -717,9 +728,40 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
       completionItems.push(commentItem);
     }
 
+    // Suggest script macros in conditions
+    if (
+      linePrefix.includes('when(') ||
+      linePrefix.includes('if(') ||
+      linePrefix.match(/[<>=!]/) ||
+      linePrefix.match(/\(\s*\w*$/)
+    ) {
+      // Add all script macros
+      for (const [macro, info] of Object.entries(SCRIPT_MACROS)) {
+        // Skip entity-specific macros for now
+        if (macro.includes('.')) {
+          continue;
+        }
+
+        const item = new vscode.CompletionItem(macro, vscode.CompletionItemKind.Variable);
+        item.detail = `${info.type} - ${info.description}`;
+
+        // Special handling for object macros
+        if (macro === 'buildings' || macro === 'creatures' || macro === 'vehicles') {
+          item.insertText = new vscode.SnippetString(
+            `${macro}.\${1|${macro === 'buildings' ? BUILDING_TYPES.join(',') : macro === 'creatures' ? CREATURE_TYPES.join(',') : VEHICLE_TYPES.join(',')}|}`
+          );
+          item.documentation = new vscode.MarkdownString(
+            `Access ${macro} counts by type\n\nExample: ${macro}.${macro === 'buildings' ? 'BuildingToolStore_C' : macro === 'creatures' ? 'CreatureRockMonster_C' : 'VehicleHoverScout_C'}`
+          );
+        }
+
+        completionItems.push(item);
+      }
+    }
+
     // Script command completions (after :: or indented)
     if (linePrefix.match(/^\s+$/) || linePrefix.match(/::\s*$/)) {
-      for (const cmd of scriptCommands) {
+      for (const cmd of scriptCommandsLegacy) {
         const item = new vscode.CompletionItem(cmd.name, vscode.CompletionItemKind.Function);
         item.detail = cmd.detail;
         item.documentation = new vscode.MarkdownString(cmd.documentation);
@@ -757,6 +799,39 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
       handlerItem.insertText = new vscode.SnippetString('::$0');
       handlerItem.detail = 'Define event handler';
       completionItems.push(handlerItem);
+    }
+
+    // Enhanced command completions using comprehensive list
+    if (linePrefix.match(/^\s+/) && !linePrefix.includes(':')) {
+      // Add commands from SCRIPT_COMMANDS
+      for (const [cmdName, cmdDef] of Object.entries(SCRIPT_COMMANDS)) {
+        // Skip if already added by legacy
+        if (completionItems.some(item => item.label === cmdName)) {
+          continue;
+        }
+
+        const item = new vscode.CompletionItem(cmdName, vscode.CompletionItemKind.Function);
+        item.detail = cmdDef.description;
+
+        const paramDesc = cmdDef.params.format || cmdDef.params.description;
+        item.documentation = new vscode.MarkdownString(
+          `**${cmdDef.name}**\n\n${cmdDef.description}\n\nParameters: ${paramDesc}\n\nCategory: ${cmdDef.category}`
+        );
+
+        // Add specific snippets based on parameter format
+        if (cmdDef.params.format) {
+          const params = cmdDef.params.format.split(',').map((p, i) => `\${${i + 1}:${p.trim()}}`);
+          item.insertText = new vscode.SnippetString(`${cmdName}:${params.join(',')};`);
+        } else if (cmdDef.params.max === 0) {
+          item.insertText = new vscode.SnippetString(`${cmdName}:;`);
+        } else {
+          const paramCount = cmdDef.params.min || 1;
+          const params = Array.from({ length: paramCount }, (_, i) => `\${${i + 1}:param${i + 1}}`);
+          item.insertText = new vscode.SnippetString(`${cmdName}:${params.join(',')};`);
+        }
+
+        completionItems.push(item);
+      }
     }
 
     return completionItems;
