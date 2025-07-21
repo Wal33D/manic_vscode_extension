@@ -125,6 +125,7 @@ export const window = {
     },
     dispose: jest.fn(),
     onDidDispose: jest.fn(),
+    reveal: jest.fn(),
   })),
   createStatusBarItem: jest.fn(() => ({
     text: '',
