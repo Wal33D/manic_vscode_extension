@@ -184,7 +184,20 @@ height{
 ```
 
 ## See Also
+
+### References
 - [Tile Reference](tile-reference.md) - Complete tile ID list
 - [Section Documentation](sections/) - Detailed section specifications
 - [Scripting Guide](../scripting/overview.md) - Script section details
 - [Common Patterns](../../technical-reference/common-patterns.md) - Best practices
+
+### Related Code Examples
+- [Basic Parser](../../technical-reference/code-examples/parsing/basic-parser.ts) - Parse DAT files
+- [Stream Parser](../../technical-reference/code-examples/parsing/stream-parser.ts) - Memory-efficient parsing
+- [Validation](../../technical-reference/code-examples/parsing/validation.ts) - Validate DAT files
+- [Map Analysis](../../technical-reference/code-examples/utilities/analysis.ts) - Analyze map properties
+
+### Related Documentation
+- [Parsing Patterns](../../technical-reference/parsing-patterns.md) - Advanced parsing techniques
+- [Performance Guide](../../technical-reference/performance.md) - Optimize large maps
+- [Quick Reference](../../quick-reference/cheat-sheet.md) - One-page format summary

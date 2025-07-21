@@ -267,9 +267,28 @@ script{
 ```
 
 ## See Also
+
+### Syntax Reference
 - [Variables](syntax/variables.md) - Data types and storage
 - [Events](syntax/events.md) - Available actions
 - [Triggers](syntax/triggers.md) - Event listeners
 - [Conditions](syntax/conditions.md) - Boolean logic
 - [Event Chains](syntax/event-chains.md) - Functions
+- [Macros](syntax/macros.md) - Built-in constants
+
+### Class Reference
+- [Buildings Class](classes/buildings.md) - Building properties
+- [Creatures Class](classes/creatures.md) - Creature properties
+- [Miners Class](classes/miners.md) - Miner properties
+- [Vehicles Class](classes/vehicles.md) - Vehicle properties
+
+### Code Examples
+- [Basic Triggers](../../technical-reference/code-examples/scripting/basic-triggers.dat) - Common patterns
+- [Event Chains](../../technical-reference/code-examples/scripting/event-chains.dat) - Advanced chains
+- [Advanced Logic](../../technical-reference/code-examples/scripting/advanced-logic.dat) - Complex systems
+
+### Related Documentation
 - [Script Section](../format/sections/script.md) - Format details
+- [Visual Blocks](visual-blocks.md) - Node-based scripting
+- [Performance Guide](../../technical-reference/performance.md#script-performance) - Optimization tips
+- [Quick Reference](../../quick-reference/script-commands.md) - Command syntax

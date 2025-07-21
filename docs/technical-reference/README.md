@@ -433,11 +433,52 @@ When adding new reference implementations:
 
 ## 📖 Additional Resources
 
-- [Common Patterns and Gotchas](./COMMON-PATTERNS.md) - Essential patterns and pitfalls to avoid
-- [Map Format Specification](#-map-file-format) - Detailed format documentation
-- Component-specific documentation in each subdirectory
+### Core Documentation
+- [Common Patterns and Gotchas](common-patterns.md) - Essential patterns and pitfalls to avoid
+- [Map Format Specification](../game-reference/format/overview.md) - Complete format documentation
+- [Performance Guide](performance.md) - Optimization techniques
+
+### Algorithm Documentation
+- [Cave Generation](algorithms/cave-generation.md) - Procedural cave algorithms
+- [Terrain Generation](algorithms/terrain-generation.md) - Biome-specific generation
+- [Resource Placement](algorithms/resource-placement.md) - Strategic placement
+- [Pathfinding](algorithms/pathfinding.md) - Navigation algorithms
+
+### Code Examples
+- [Parsing Examples](code-examples/parsing/) - Map file parsing
+- [Generation Examples](code-examples/generation/) - Map creation
+- [Visualization Examples](code-examples/visualization/) - Rendering maps
+- [Utility Examples](code-examples/utilities/) - Helper functions
+
+### Related Documentation
+- [DAT Format Overview](../game-reference/format/overview.md) - File format details
+- [Scripting Guide](../game-reference/scripting/overview.md) - Script programming
+- [Quick Reference](../quick-reference/cheat-sheet.md) - Quick lookup
+- [Extension User Guide](../extension/USER_GUIDE.md) - Using the VSCode extension
+
+### Cross-Reference by Task
+
+#### "I want to parse a map file"
+1. Start with [Basic Parser Example](code-examples/parsing/basic-parser.ts)
+2. Learn about [Parsing Patterns](parsing-patterns.md)
+3. See [Validation Example](code-examples/parsing/validation.ts)
+
+#### "I want to generate a map"
+1. Start with [Simple Cave Example](code-examples/generation/simple-cave.ts)
+2. Learn about [Cave Generation Algorithm](algorithms/cave-generation.md)
+3. Try [Biome-Specific Generation](code-examples/generation/biome-specific.ts)
+
+#### "I want to visualize a map"
+1. Start with [PNG Renderer Example](code-examples/visualization/png-renderer.ts)
+2. Learn about [Visualization Techniques](visualization-techniques.md)
+3. Create [Thumbnails](code-examples/visualization/thumbnail.ts) or [Heat Maps](code-examples/visualization/heat-map.ts)
+
+#### "I want to analyze a map"
+1. Use [Map Analysis Tools](code-examples/utilities/analysis.ts)
+2. Apply [Grid Operations](code-examples/utilities/grid-operations.ts)
+3. Implement [Pathfinding](code-examples/utilities/pathfinding.ts)
 
 ---
 
-For questions about the VSCode extension, see the main project README.
-For questions about these reference implementations, check each component's documentation.
+For questions about the VSCode extension, see the [main project README](../../README.md).
+For game format questions, see the [game reference documentation](../game-reference/README.md).
