@@ -5,9 +5,36 @@ import { getTileColor } from '../mapPreview/colorMap';
 import { getTileName } from '../data/tileDefinitions';
 
 export interface PaintTool {
-  type: 'paint' | 'fill' | 'line' | 'rectangle' | 'picker';
+  type: 'paint' | 'fill' | 'line' | 'rectangle' | 'picker' | 'select' | 'stamp';
   size: number;
   tileId: number;
+  mirrorMode?: 'horizontal' | 'vertical' | 'both' | 'off';
+}
+
+export interface SelectionData {
+  startRow: number;
+  startCol: number;
+  endRow: number;
+  endCol: number;
+  tiles: number[][];
+}
+
+export interface TilePattern {
+  id: string;
+  name: string;
+  tiles: number[][];
+  width: number;
+  height: number;
+}
+
+export interface MapLayer {
+  id: string;
+  name: string;
+  tiles: number[][];
+  visible: boolean;
+  opacity: number;
+  locked: boolean;
+  blendMode?: 'normal' | 'multiply' | 'screen' | 'overlay';
 }
 
 // Maximum map dimensions to prevent performance issues
@@ -18,6 +45,7 @@ const MIN_TILE_ID = 1;
 export class MapEditorProvider implements vscode.CustomTextEditorProvider {
   private static readonly viewType = 'manicMiners.mapEditor';
   private editHistory = new EditHistory(100);
+  private layers: Map<string, MapLayer[]> = new Map();
 
   public static register(context: vscode.ExtensionContext): vscode.Disposable {
     const provider = new MapEditorProvider(context);
@@ -78,6 +106,63 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
           break;
         case 'error':
           vscode.window.showErrorMessage(message.message || 'An error occurred in the map editor');
+          break;
+        case 'copy':
+          await this.handleCopy(webviewPanel.webview, message.selection);
+          break;
+        case 'paste':
+          await this.handlePaste(
+            document,
+            message.tiles,
+            message.row,
+            message.col,
+            message.description
+          );
+          break;
+        case 'delete':
+          await this.handleDelete(document, message.selection, message.description);
+          break;
+        case 'move':
+          await this.handleMove(
+            document,
+            message.selection,
+            message.targetRow,
+            message.targetCol,
+            message.description
+          );
+          break;
+        case 'export':
+          await this.handleExport(webviewPanel.webview, message.format, message.includeGrid);
+          break;
+        case 'saveExport':
+          await this.handleSaveExport(message.imageData, message.path);
+          break;
+        case 'savePattern':
+          await this.handleSavePattern(webviewPanel.webview, message.pattern);
+          break;
+        case 'deletePattern':
+          await this.handleDeletePattern(webviewPanel.webview, message.patternId);
+          break;
+        case 'stampPattern':
+          await this.handleStampPattern(
+            document,
+            message.pattern,
+            message.row,
+            message.col,
+            message.description
+          );
+          break;
+        case 'createLayer':
+          await this.handleCreateLayer(webviewPanel.webview, message.name);
+          break;
+        case 'deleteLayer':
+          await this.handleDeleteLayer(webviewPanel.webview, message.layerId);
+          break;
+        case 'updateLayer':
+          await this.handleUpdateLayer(webviewPanel.webview, message.layer);
+          break;
+        case 'mergeLayersDown':
+          await this.handleMergeLayersDown(webviewPanel.webview, document, message.layerId);
           break;
       }
     });
@@ -262,6 +347,347 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
     }
   }
 
+  private async handleCopy(webview: vscode.Webview, selection: SelectionData): Promise<void> {
+    try {
+      if (!selection) {
+        vscode.window.showErrorMessage('Invalid selection data');
+        return;
+      }
+
+      webview.postMessage({
+        type: 'copyComplete',
+        selection: selection,
+      });
+
+      vscode.window.showInformationMessage(
+        `Copied ${Math.abs(selection.endRow - selection.startRow) + 1}x${Math.abs(selection.endCol - selection.startCol) + 1} tile region`
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error copying selection: ${errorMessage}`);
+    }
+  }
+
+  private async handlePaste(
+    document: vscode.TextDocument,
+    tiles: { row: number; col: number; tileId: number }[],
+    _targetRow: number,
+    _targetCol: number,
+    description: string
+  ): Promise<void> {
+    try {
+      if (!Array.isArray(tiles) || tiles.length === 0) {
+        vscode.window.showErrorMessage('No tiles to paste');
+        return;
+      }
+
+      await this.handlePaint(document, tiles, description);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error pasting tiles: ${errorMessage}`);
+    }
+  }
+
+  private async handleDelete(
+    document: vscode.TextDocument,
+    selection: SelectionData,
+    description: string
+  ): Promise<void> {
+    try {
+      if (!selection) {
+        vscode.window.showErrorMessage('Invalid selection for deletion');
+        return;
+      }
+
+      const tilesToDelete: { row: number; col: number; tileId: number }[] = [];
+      for (let row = selection.startRow; row <= selection.endRow; row++) {
+        for (let col = selection.startCol; col <= selection.endCol; col++) {
+          tilesToDelete.push({ row, col, tileId: 1 }); // Ground tile
+        }
+      }
+
+      await this.handlePaint(document, tilesToDelete, description);
+
+      vscode.window.showInformationMessage(
+        `Deleted ${Math.abs(selection.endRow - selection.startRow) + 1}x${Math.abs(selection.endCol - selection.startCol) + 1} tile region`
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error deleting selection: ${errorMessage}`);
+    }
+  }
+
+  private async handleMove(
+    document: vscode.TextDocument,
+    selection: SelectionData,
+    targetRow: number,
+    targetCol: number,
+    description: string
+  ): Promise<void> {
+    try {
+      if (!selection || !selection.tiles) {
+        vscode.window.showErrorMessage('Invalid move operation');
+        return;
+      }
+
+      await this.handleDelete(document, selection, `${description} - delete source`);
+
+      const tilesToPaste: { row: number; col: number; tileId: number }[] = [];
+      for (let r = 0; r < selection.tiles.length; r++) {
+        for (let c = 0; c < selection.tiles[r].length; c++) {
+          const newRow = targetRow + r;
+          const newCol = targetCol + c;
+          tilesToPaste.push({
+            row: newRow,
+            col: newCol,
+            tileId: selection.tiles[r][c],
+          });
+        }
+      }
+
+      await this.handlePaint(document, tilesToPaste, `${description} - paste at target`);
+
+      vscode.window.showInformationMessage(
+        `Moved ${selection.tiles.length}x${selection.tiles[0].length} tile region`
+      );
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error moving selection: ${errorMessage}`);
+    }
+  }
+
+  private async handleExport(
+    webview: vscode.Webview,
+    format: string,
+    includeGrid: boolean
+  ): Promise<void> {
+    try {
+      const saveOptions: vscode.SaveDialogOptions = {
+        filters: format === 'png' ? { 'PNG Image': ['png'] } : { 'JPEG Image': ['jpg', 'jpeg'] },
+        defaultUri: vscode.Uri.file(`map_export.${format}`),
+      };
+
+      const saveUri = await vscode.window.showSaveDialog(saveOptions);
+
+      if (saveUri) {
+        webview.postMessage({
+          type: 'requestExport',
+          path: saveUri.fsPath,
+          format,
+          includeGrid,
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error exporting map: ${errorMessage}`);
+    }
+  }
+
+  private async handleSaveExport(imageData: string, path: string): Promise<void> {
+    try {
+      const base64Data = imageData.replace(/^data:image\/\w+;base64,/, '');
+      const buffer = Buffer.from(base64Data, 'base64');
+
+      await vscode.workspace.fs.writeFile(vscode.Uri.file(path), buffer);
+
+      vscode.window.showInformationMessage(`Map exported successfully to ${path}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error saving exported map: ${errorMessage}`);
+    }
+  }
+
+  private async handleSavePattern(webview: vscode.Webview, pattern: TilePattern): Promise<void> {
+    try {
+      const patterns = this.context.workspaceState.get<TilePattern[]>('tilePatterns', []);
+
+      const existingIndex = patterns.findIndex(p => p.name === pattern.name);
+      if (existingIndex >= 0) {
+        const replace = await vscode.window.showQuickPick(['Yes', 'No'], {
+          placeHolder: `Pattern "${pattern.name}" already exists. Replace it?`,
+        });
+        if (replace !== 'Yes') {
+          return;
+        }
+        patterns[existingIndex] = pattern;
+      } else {
+        patterns.push(pattern);
+      }
+
+      await this.context.workspaceState.update('tilePatterns', patterns);
+
+      webview.postMessage({
+        type: 'patternsUpdated',
+        patterns: patterns,
+      });
+
+      vscode.window.showInformationMessage(`Pattern "${pattern.name}" saved successfully`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error saving pattern: ${errorMessage}`);
+    }
+  }
+
+  private async handleDeletePattern(webview: vscode.Webview, patternId: string): Promise<void> {
+    try {
+      let patterns = this.context.workspaceState.get<TilePattern[]>('tilePatterns', []);
+      patterns = patterns.filter(p => p.id !== patternId);
+
+      await this.context.workspaceState.update('tilePatterns', patterns);
+
+      webview.postMessage({
+        type: 'patternsUpdated',
+        patterns: patterns,
+      });
+
+      vscode.window.showInformationMessage('Pattern deleted successfully');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error deleting pattern: ${errorMessage}`);
+    }
+  }
+
+  private async handleStampPattern(
+    document: vscode.TextDocument,
+    pattern: TilePattern,
+    row: number,
+    col: number,
+    description: string
+  ): Promise<void> {
+    try {
+      const tiles: { row: number; col: number; tileId: number }[] = [];
+
+      for (let r = 0; r < pattern.height; r++) {
+        for (let c = 0; c < pattern.width; c++) {
+          const targetRow = row + r;
+          const targetCol = col + c;
+
+          tiles.push({
+            row: targetRow,
+            col: targetCol,
+            tileId: pattern.tiles[r][c],
+          });
+        }
+      }
+
+      await this.handlePaint(document, tiles, description);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error stamping pattern: ${errorMessage}`);
+    }
+  }
+
+  private async handleCreateLayer(webview: vscode.Webview, name: string): Promise<void> {
+    try {
+      const documentUri = webview.toString();
+      const layers = this.layers.get(documentUri) || [];
+
+      const newLayer: MapLayer = {
+        id: Date.now().toString(),
+        name: name || `Layer ${layers.length + 1}`,
+        tiles: [], // Will be initialized when we have map dimensions
+        visible: true,
+        opacity: 1.0,
+        locked: false,
+        blendMode: 'normal',
+      };
+
+      layers.push(newLayer);
+      this.layers.set(documentUri, layers);
+
+      webview.postMessage({
+        type: 'layersUpdated',
+        layers: layers,
+      });
+
+      vscode.window.showInformationMessage(`Layer "${newLayer.name}" created`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error creating layer: ${errorMessage}`);
+    }
+  }
+
+  private async handleDeleteLayer(webview: vscode.Webview, layerId: string): Promise<void> {
+    try {
+      const documentUri = webview.toString();
+      let layers = this.layers.get(documentUri) || [];
+
+      layers = layers.filter(l => l.id !== layerId);
+      this.layers.set(documentUri, layers);
+
+      webview.postMessage({
+        type: 'layersUpdated',
+        layers: layers,
+      });
+
+      vscode.window.showInformationMessage('Layer deleted successfully');
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error deleting layer: ${errorMessage}`);
+    }
+  }
+
+  private async handleUpdateLayer(webview: vscode.Webview, layer: MapLayer): Promise<void> {
+    try {
+      const documentUri = webview.toString();
+      const layers = this.layers.get(documentUri) || [];
+
+      const index = layers.findIndex(l => l.id === layer.id);
+      if (index >= 0) {
+        layers[index] = layer;
+        this.layers.set(documentUri, layers);
+
+        webview.postMessage({
+          type: 'layersUpdated',
+          layers: layers,
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error updating layer: ${errorMessage}`);
+    }
+  }
+
+  private async handleMergeLayersDown(
+    webview: vscode.Webview,
+    _document: vscode.TextDocument,
+    layerId: string
+  ): Promise<void> {
+    try {
+      const documentUri = webview.toString();
+      const layers = this.layers.get(documentUri) || [];
+
+      const layerIndex = layers.findIndex(l => l.id === layerId);
+      if (layerIndex > 0) {
+        const topLayer = layers[layerIndex];
+        const bottomLayer = layers[layerIndex - 1];
+
+        // Merge tiles
+        for (let r = 0; r < topLayer.tiles.length; r++) {
+          for (let c = 0; c < topLayer.tiles[r].length; c++) {
+            if (topLayer.tiles[r][c] !== 0) {
+              bottomLayer.tiles[r][c] = topLayer.tiles[r][c];
+            }
+          }
+        }
+
+        // Remove top layer
+        layers.splice(layerIndex, 1);
+        this.layers.set(documentUri, layers);
+
+        webview.postMessage({
+          type: 'layersUpdated',
+          layers: layers,
+        });
+
+        vscode.window.showInformationMessage('Layers merged successfully');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error merging layers: ${errorMessage}`);
+    }
+  }
+
   private updateWebview(webview: vscode.Webview, document: vscode.TextDocument): void {
     try {
       const parser = new DatFileParser(document.getText());
@@ -315,6 +741,25 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
       tileColors[tileId] = `rgb(${color.r}, ${color.g}, ${color.b})`;
     }
 
+    // Get saved patterns
+    const patterns = this.context.workspaceState.get<TilePattern[]>('tilePatterns', []);
+
+    // Initialize layers for this document
+    const documentUri = webview.toString();
+    if (!this.layers.has(documentUri)) {
+      const baseLayer: MapLayer = {
+        id: 'base',
+        name: 'Base Layer',
+        tiles: tiles,
+        visible: true,
+        opacity: 1.0,
+        locked: false,
+        blendMode: 'normal',
+      };
+      this.layers.set(documentUri, [baseLayer]);
+    }
+    const layers = this.layers.get(documentUri) || [];
+
     return `<!DOCTYPE html>
     <html lang="en">
     <head>
@@ -334,6 +779,8 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             <button class="tool-btn" data-tool="line" title="Line (L)">📏 Line</button>
             <button class="tool-btn" data-tool="rectangle" title="Rectangle (R)">⬜ Rectangle</button>
             <button class="tool-btn" data-tool="picker" title="Picker (K)">💉 Picker</button>
+            <button class="tool-btn" data-tool="select" title="Select (S)">⬛ Select</button>
+            <button class="tool-btn" data-tool="stamp" title="Stamp (T)">🎨 Stamp</button>
           </div>
           
           <div class="tool-group">
@@ -351,6 +798,36 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
           <div class="tool-group">
             <button id="undoBtn" title="Undo (Ctrl+Z)">↶ Undo</button>
             <button id="redoBtn" title="Redo (Ctrl+Y)">↷ Redo</button>
+          </div>
+          
+          <div class="tool-group">
+            <button id="copyBtn" title="Copy (Ctrl+C)" disabled>📋 Copy</button>
+            <button id="pasteBtn" title="Paste (Ctrl+V)" disabled>📄 Paste</button>
+            <button id="deleteBtn" title="Delete (Delete)" disabled>🗑️ Delete</button>
+            <button id="moveBtn" title="Move (M)" disabled>↔️ Move</button>
+          </div>
+          
+          <div class="tool-group">
+            <button id="zoomInBtn" title="Zoom In (+)">🔍+</button>
+            <button id="zoomOutBtn" title="Zoom Out (-)">🔍-</button>
+            <button id="zoomResetBtn" title="Reset Zoom (0)">🔍 100%</button>
+            <span id="zoomLevel">100%</span>
+          </div>
+          
+          <div class="tool-group">
+            <button id="gridToggleBtn" class="active" title="Toggle Grid (G)">⊞ Grid</button>
+          </div>
+          
+          <div class="tool-group">
+            <button id="exportBtn" title="Export Map (E)">💾 Export</button>
+          </div>
+          
+          <div class="tool-group">
+            <label>Mirror:</label>
+            <button class="mirror-btn active" data-mirror="off" title="No Mirror">Off</button>
+            <button class="mirror-btn" data-mirror="horizontal" title="Mirror Horizontally">↔️</button>
+            <button class="mirror-btn" data-mirror="vertical" title="Mirror Vertically">↕️</button>
+            <button class="mirror-btn" data-mirror="both" title="Mirror Both Ways">✢</button>
           </div>
           
           <div class="coordinates">
@@ -377,11 +854,31 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             </div>
             <input type="number" id="customTileId" min="1" max="115" placeholder="Custom ID">
             <button id="addCustomTile">Add Custom</button>
+            
+            <h3>Minimap</h3>
+            <div id="minimapContainer">
+              <canvas id="minimap"></canvas>
+              <div id="minimapViewport"></div>
+            </div>
+            
+            <h3>Tile Patterns</h3>
+            <div id="patternsSection">
+              <button id="savePatternBtn" title="Save current selection as pattern" disabled>💾 Save Pattern</button>
+              <div id="patternsList"></div>
+            </div>
+            
+            <h3>Layers</h3>
+            <div id="layersSection">
+              <button id="addLayerBtn" title="Add new layer">➕ New Layer</button>
+              <div id="layersList"></div>
+            </div>
           </div>
           
           <div id="mapContainer">
-            <canvas id="mapCanvas"></canvas>
-            <canvas id="overlayCanvas"></canvas>
+            <div id="mapViewport">
+              <canvas id="mapCanvas"></canvas>
+              <canvas id="overlayCanvas"></canvas>
+            </div>
           </div>
         </div>
       </div>
@@ -401,6 +898,9 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
         const rows = ${info.rowcount};
         const cols = ${info.colcount};
         const tileColors = ${JSON.stringify(tileColors)};
+        let savedPatterns = ${JSON.stringify(patterns)};
+        let mapLayers = ${JSON.stringify(layers)};
+        let currentLayerId = 'base';
       </script>
       <script src="${scriptUri}"></script>
     </body>
