@@ -22,6 +22,7 @@
 	"exclude": [
 		"node_modules",
 		"map-reference-implementations",
-		"src/levelGenerators/**"
+		"src/levelGenerators/**",
+		"docs"
 	]
 }

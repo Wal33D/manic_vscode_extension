@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manic Miners Documentation - Local Viewing Guide</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #e0e0e0;
+        }
+        h1 {
+            color: #61dafb;
+            border-bottom: 2px solid #444;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #ffd700;
+            margin-top: 30px;
+        }
+        .warning {
+            background: #ff6b6b;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        code {
+            background: #2a2a2a;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+        pre {
+            background: #2a2a2a;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        a {
+            color: #61dafb;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .option {
+            background: #2a2a2a;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #61dafb;
+        }
+    </style>
+</head>
+<body>
+    <h1>📚 Manic Miners VSCode Extension Documentation</h1>
+    
+    <div class="warning">
+        <strong>⚠️ Local File Access Issue</strong><br>
+        You're trying to view this documentation directly from the file system. 
+        Due to browser security restrictions, the documentation needs to be served through a web server.
+    </div>
+
+    <h2>🚀 Quick Start - Choose One Option:</h2>
+
+    <div class="option">
+        <h3>Option 1: VS Code Live Server (Easiest)</h3>
+        <ol>
+            <li>Install the "Live Server" extension in VS Code</li>
+            <li>Right-click on <code>index.html</code></li>
+            <li>Select "Open with Live Server"</li>
+        </ol>
+    </div>
+
+    <div class="option">
+        <h3>Option 2: Python (Pre-installed on Mac/Linux)</h3>
+        <pre>cd /path/to/docs/web-docs
+python -m http.server 8000</pre>
+        <p>Then open <a href="http://localhost:8000">http://localhost:8000</a></p>
+    </div>
+
+    <div class="option">
+        <h3>Option 3: Node.js</h3>
+        <pre>cd /path/to/docs/web-docs
+npx http-server -p 8000</pre>
+        <p>Then open <a href="http://localhost:8000">http://localhost:8000</a></p>
+    </div>
+
+    <h2>📖 Documentation Contents</h2>
+    <ul>
+        <li><strong>DAT File Format</strong> - Complete specification of all sections</li>
+        <li><strong>Scripting Reference</strong> - Variables, triggers, events, and more</li>
+        <li><strong>Tile Reference</strong> - All tile types with IDs and properties</li>
+        <li><strong>Classes Documentation</strong> - Buildings, vehicles, miners, creatures</li>
+        <li><strong>Examples</strong> - Sample scripts and common patterns</li>
+    </ul>
+
+    <h2>📁 Direct File Access</h2>
+    <p>If you can't run a web server, you can browse the markdown files directly:</p>
+    <ul>
+        <li><a href="_pages/DATFileFormat.md">DAT File Format</a></li>
+        <li><a href="_pages/ScriptingStructure.md">Scripting Structure</a></li>
+        <li><a href="_pages/DATTileReference.md">Tile Reference</a></li>
+        <li><a href="_sidebar.md">Navigation Structure</a></li>
+    </ul>
+
+    <h2>🔗 Useful Links</h2>
+    <ul>
+        <li><a href="https://github.com/Wal33D/vscode-manic-miners">VSCode Extension Repository</a></li>
+        <li><a href="https://marketplace.visualstudio.com/items?itemName=manic-miners.dat">VS Marketplace</a></li>
+        <li><a href="https://discord.gg/85k8JHz">Manic Miners Discord</a></li>
+    </ul>
+</body>
+</html>

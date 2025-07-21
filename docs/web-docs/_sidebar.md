@@ -1,18 +1,25 @@
 <!-- docs/_sidebar.md -->
 
 <details open>
-<summary><b>Getting Started</b></summary>
+<summary><b>🏠 Home</b></summary>
 
-- [Scripting](README)
-- [Scripting Structure](_pages/ScriptingStructure)
-- [DAT file format](_pages/DATFileFormat)
-- [DAT TileID reference](_pages/DATTileReference)
-- [Air](_pages/Air)
+- [Documentation Overview](README)
+- [How to View This Documentation](HOW_TO_VIEW)
 
 </details>
 
 <details open>
-<summary><b>DAT File Format</b></summary>
+<summary><b>🚀 Getting Started</b></summary>
+
+- [Scripting Basics](_pages/ScriptingStructure)
+- [DAT File Format](_pages/DATFileFormat)
+- [Tile Reference](_pages/DATTileReference)
+- [Air System](_pages/Air)
+
+</details>
+
+<details open>
+<summary><b>📄 DAT File Format</b></summary>
 
 - [DAT Format Overview](_pages/DATFileFormat)
 	- [comments](_pages/DATSectioncomments)
@@ -37,7 +44,7 @@
 
 
 <details open>
-<summary><b>General</b></summary>
+<summary><b>⚙️ Scripting Components</b></summary>
 
 - [Events](_pages/Events)
 - [Event Chains](_pages/EventChains)
@@ -53,7 +60,7 @@
 </details>
 
 <details open>
-<summary><b>Classes</b></summary>
+<summary><b>🏗️ Game Classes</b></summary>
 
 - [General Information](_pages/Classes)
 	- [Arrows](_pages/ClassesArrow)
@@ -67,8 +74,20 @@
 
 
 <details open>
-<summary><b>Other</b></summary>
+<summary><b>📚 Resources</b></summary>
 
 - [Scripting Examples](_pages/ScriptingExamples)
+- [VSCode Extension Features](../../README)
+- [Extension User Guide](../../docs/extension/USER_GUIDE)
+- [Common Patterns](../../map-reference-implementations/COMMON-PATTERNS)
+
+</details>
+
+<details open>
+<summary><b>🔧 Tools & References</b></summary>
+
+- [Map Generator](../../map-reference-implementations/map-generator/README)
+- [Map Parser](../../map-reference-implementations/map-parser/README)
+- [Map Visualizer](../../map-reference-implementations/map-visualizer/README)
 
 </details>
