@@ -127,27 +127,43 @@ Defines what players must accomplish. Multiple objectives are combined with comm
 ```
 objectives{
     resources: 50,25,0 / Collect 50 crystals and 25 ore
+    // Format: crystals,ore,studs / Description
 }
 ```
 
 **Building Construction:**
 ```
 objectives{
-    buildings: BuildingToolStore_C,2 / Build 2 Tool Stores
+    building: BuildingToolStore_C,2 / Build 2 Tool Stores
+    building: BuildingPowerStation_C / Build a Power Station
 }
 ```
 
-**Discovery:**
+**Discovery & Rescue:**
 ```
 objectives{
-    discovers: 15,8 / Find the hidden cavern
+    discovertile: 15,8 / Find the hidden cavern
+    findbuilding: 20,25 / Locate the lost building
+    findminer: 3 / Rescue miner with ID 3
+    units: 10 / Rescue 10 Rock Raiders
 }
 ```
 
 **Custom Variables:**
 ```
 objectives{
-    variables: bCreaturesCaged==true / Capture all creatures
+    variable: ObjectiveComplete==true / Complete the mission
+    variable: AllBuildingsConstructed==true / Build all structures
+    variable: CreatureCount==0 / Eliminate all creatures
+}
+```
+
+**Combined Objectives:**
+```
+objectives{
+    resources: 25,50,0 / Collect resources,
+    building: BuildingGeologicalCenter_C / Build Geological Center,
+    variable: HiddenCaveFound==true / Find the hidden cave
 }
 ```
 
@@ -169,24 +185,73 @@ buildings{
 ```
 
 ### script{} - Level Scripting
-Implements custom logic and events.
+Implements custom logic and events using a powerful event-driven system.
 
+#### Variable Declarations
 ```
 script{
-    string: MyVariable = "Hello"
-    int: Counter = 0
+    // Basic types
+    string MessageText="Welcome!"
+    bool ObjectiveComplete=false
+    int CrystalCount=0
+    float TimeElapsed=0.0
     
-    event: onLevelStart
-    {
-        msg: Welcome to the level!
-        SetObjectiveSwitch: true
-    }
+    // Special types
+    arrow GuideArrow=green     // Arrow indicators
+    timer SpawnTimer=10,5,3,SpawnEvent  // delay,min,max,event
+}
+```
+
+#### Event System
+```
+script{
+    // Basic event
+    ShowIntro::
+    msg:MessageText;
+    pan:15,20;      // Pan camera to coordinates
+    wait:3;         // Wait 3 seconds
+    highlightarrow:5,5,GuideArrow;
     
-    event: onBuildingComplete : BuildingToolStore_C
-    {
-        AddCrystals: 10
-        msg: Tool Store built! +10 crystals
-    }
+    // Conditional trigger
+    ((time>10))CheckProgress::
+    if(crystals>=25)[ShowSuccess];
+    else[ShowHint];
+    
+    // When trigger (continuous check)
+    when(crystals>=50)[WinLevel];
+    when(buildings.BuildingToolStore_C==0)[LoseLevel];
+}
+```
+
+#### Advanced Commands
+```
+script{
+    // Camera control
+    pan:row,col              // Move camera
+    shake:intensity,duration // Screen shake
+    
+    // Arrows and highlighting  
+    highlightarrow:row,col,arrowname
+    removearrow:arrowname
+    
+    // Dynamic spawning
+    spawncap:CreatureType,min,max
+    spawnwave:creature,count,interval
+    addrandomspawn:CreatureType,min,max
+    
+    // Resource manipulation
+    drill:row,col           // Force drill wall
+    place:row,col,tileID    // Change tile
+    reinforce:row,col       // Reinforce wall
+    
+    // Sound and messages
+    playsound:soundname
+    msg:stringvariable      // Display message
+    
+    // Flow control
+    wait:seconds
+    win:                    // Win level
+    lose:                   // Lose level
 }
 ```
 
@@ -222,12 +287,21 @@ Wall materials:
 - `42-45`: Crystal Seam (yields crystals)
 - `46-49`: Ore Seam (yields ore)
 
-#### Special Tiles (50-65)
-- `50-53`: Recharge Seam
+#### Special Tiles (50-165)
+- `50-53`: Recharge Seam (powers electric fences)
 - `54-62`: Various rubble types
+- `60-61`: Rubble (drillable)
+- `62`: Path rubble
 - `63`: Invisible barrier
 - `64`: Lava erosion source
 - `65`: Undiscovered cavern
+- `101`: Reinforced ground
+- `106`: Reinforced lava
+- `111`: Reinforced water
+- `112`: Reinforced slug hole
+- `114`: Shore/beach tile
+- `124`: Energy crystal formation
+- `163-165`: Landslide/dense/unstable rubble
 
 #### Reinforced Variants (76-115)
 Add 50 to base tile ID for reinforced version:
@@ -302,14 +376,67 @@ onCrystalCollected       // Crystal collected
 onOreCollected           // Ore collected
 ```
 
-### Common Commands
+### Script Command Reference
+
+#### Message & UI Commands
 ```
-msg: Display this text              // Show message
-SetObjectiveSwitch: true/false      // Control objectives
-AddCrystals: 10                     // Give resources
-RemoveCrystals: 5
-SpawnCreature: type, x, y           // Spawn enemy
-CreateLandslide: x, y               // Trigger landslide
+msg:stringvar                       // Display message
+wait:seconds                        // Pause script
+pan:row,col                        // Move camera to tile
+shake:intensity,duration           // Screen shake effect
+```
+
+#### Arrow & Highlighting
+```
+arrow ArrowName=color              // Declare arrow (red,green,blue,yellow)
+highlightarrow:row,col,arrowname  // Show arrow at location
+removearrow:arrowname              // Remove specific arrow
+```
+
+#### Resource Commands
+```
+crystals:amount                    // Add/remove crystals
+ore:amount                         // Add/remove ore
+studs:amount                       // Add/remove studs
+```
+
+#### Spawning Commands
+```
+spawn:type,row,col                 // Spawn single entity
+spawncap:type,min,max              // Set spawn limits
+spawnwave:type,count,interval      // Wave spawning
+addrandomspawn:type,min,max        // Random spawn points
+```
+
+#### Map Manipulation
+```
+drill:row,col                      // Force drill tile
+place:row,col,tileID               // Change tile type
+reinforce:row,col                  // Make wall reinforced
+teleport:unitID,row,col            // Move unit
+destroy:row,col                    // Destroy tile/entity
+```
+
+#### Game Flow
+```
+win:                               // Victory
+lose:                              // Defeat
+objective:text                     // Update objective display
+timer:name,start/stop              // Control timers
+```
+
+#### Conditionals
+```
+if(condition)[EventName]           // One-time check
+when(condition)[EventName]         // Continuous check
+
+// Condition examples:
+crystals>25                        // Resource check
+time>60                            // Time elapsed
+buildings.BuildingType>0           // Building count
+vehicles.VehicleType>0             // Vehicle count
+miners>5                           // Miner count
+ObjectiveComplete==true            // Variable check
 ```
 
 ## Best Practices
@@ -320,6 +447,23 @@ CreateLandslide: x, y               // Trigger landslide
 3. **Balance resources** - Ensure objectives are achievable
 4. **Test pathfinding** - Ensure all areas are accessible
 5. **Place spawn points carefully** - Away from starting area
+6. **Use height variation** - Creates visual interest and strategic depth
+7. **Plan power paths** - Buildings need connected power
+8. **Layer objectives** - Primary goals with optional challenges
+
+### Script Organization
+1. **Declare all variables first** - At the top of script section
+2. **Name events clearly** - ShowIntro, CheckProgress, WinCondition
+3. **Use arrow colors consistently** - Green=go, Red=danger, etc.
+4. **Chain events logically** - Intro→Tutorial→Gameplay→Victory
+5. **Test edge cases** - What if player does unexpected actions?
+
+### Resource Balance Guidelines
+- **Tutorial levels**: 50-100 surface crystals, minimal threats
+- **Easy levels**: 25-50 crystals per objective requirement
+- **Medium levels**: 15-25 crystals per requirement, hidden caches
+- **Hard levels**: 10-15 crystals, heavy reliance on seams
+- **Expert levels**: Scarce resources, time pressure, multiple threats
 
 ### Performance
 1. **Limit map size** - 50x50 maximum recommended
@@ -335,7 +479,75 @@ CreateLandslide: x, y               // Trigger landslide
 
 ### Common Pitfalls
 - Forgetting semicolons in info section
-- Using 1-indexed instead of 0-indexed coordinates
+- Using 1-indexed instead of 0-indexed coordinates  
 - Placing buildings on non-ground tiles
 - Creating isolated areas with no access
 - Setting impossible objectives
+- Missing Tool Store (essential for gameplay)
+- Incorrect tile IDs (especially 163-165)
+- Unbalanced spawn rates causing difficulty spikes
+- Script syntax errors (missing semicolons, brackets)
+- Circular script dependencies (infinite loops)
+- Forgetting to declare variables before use
+- Power path disconnections
+- Unreachable resources behind solid rock
+
+### Advanced Techniques
+
+#### Dynamic Difficulty
+```
+script{
+    int Difficulty=0
+    
+    when(time>300)[IncreaseDifficulty];
+    when(miners<3)[DecreaseDifficulty];
+    
+    IncreaseDifficulty::
+    Difficulty:Difficulty+1;
+    spawncap:CreatureRockMonster_C,Difficulty,Difficulty*2;
+    
+    DecreaseDifficulty::
+    Difficulty:Difficulty-1;
+    spawncap:CreatureRockMonster_C,0,Difficulty;
+}
+```
+
+#### Multi-Stage Objectives
+```
+script{
+    bool Stage1=false
+    bool Stage2=false
+    
+    when(crystals>=25 and Stage1==false)[CompleteStage1];
+    when(buildings.BuildingPowerStation_C>0 and Stage2==false)[CompleteStage2];
+    
+    CompleteStage1::
+    Stage1:true;
+    msg:Stage1Text;
+    objective:Build a Power Station;
+    
+    CompleteStage2::
+    Stage2:true;
+    msg:Stage2Text;
+    objective:Find the hidden cache;
+}
+```
+
+#### Environmental Storytelling
+```
+script{
+    // Breadcrumb trail of messages
+    when(discovertile[10,5])[FindClue1];
+    when(discovertile[15,8])[FindClue2];
+    when(discovertile[20,12])[FindFinalClue];
+    
+    FindClue1::
+    msg:Clue1Text;
+    highlightarrow:15,8,YellowArrow;
+    
+    FindClue2::
+    msg:Clue2Text;
+    removearrow:YellowArrow;
+    highlightarrow:20,12,RedArrow;
+}
+```
