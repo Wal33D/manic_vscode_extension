@@ -877,8 +877,12 @@ export class DatFileValidator {
     // Check for balanced parentheses
     let parenCount = 0;
     for (const char of condition) {
-      if (char === '(') parenCount++;
-      if (char === ')') parenCount--;
+      if (char === '(') {
+        parenCount++;
+      }
+      if (char === ')') {
+        parenCount--;
+      }
       if (parenCount < 0) {
         this.addError(
           'Objective condition has unmatched closing parenthesis',
