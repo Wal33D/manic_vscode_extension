@@ -8,6 +8,13 @@ import {
   getBaseTileId,
 } from './data/enhancedTileDefinitions';
 import { getExtendedTileInfo } from './data/extendedTileDefinitions';
+import { 
+  getAdvancedTileInfo, 
+  getHardnessName, 
+  getDrillTimeEstimate,
+  getTileResourceYield,
+  Hardness 
+} from './data/advancedTileDefinitions';
 import { BuildingType, VehicleType, CreatureType, BiomeType } from './types/datFileTypes';
 
 // Section descriptions
@@ -516,8 +523,9 @@ export class DatHoverProvider implements vscode.HoverProvider {
         const matchIndex = lineText.indexOf(match, currentPos);
         if (position.character >= matchIndex && position.character <= matchIndex + match.length) {
           const tileId = parseInt(match);
-          // Try enhanced tile info first, then basic, then extended
-          const tileInfo =
+          // Try advanced tile info first for the most comprehensive data
+          const advancedInfo = getAdvancedTileInfo(tileId);
+          const tileInfo = advancedInfo ||
             getEnhancedTileInfo(tileId) || getTileInfo(tileId) || getExtendedTileInfo(tileId);
           if (tileInfo) {
             const markdown = new vscode.MarkdownString();
@@ -534,6 +542,53 @@ export class DatHoverProvider implements vscode.HoverProvider {
             markdown.appendMarkdown(`**Tile ${tileId}: ${tileInfo.name}**\n\n`);
             markdown.appendMarkdown(`${tileInfo.description}\n\n`);
             markdown.appendMarkdown(`*Category:* ${tileInfo.category}\n\n`);
+            
+            // Add advanced metadata if available
+            if (advancedInfo) {
+              // Hardness information
+              markdown.appendMarkdown(`**⛏️ Hardness:** ${getHardnessName(advancedInfo.hardness)} (${getDrillTimeEstimate(advancedInfo.hardness)})\n\n`);
+              
+              // Physical properties
+              const properties = [];
+              if (advancedInfo.isWall) properties.push('Wall');
+              if (advancedInfo.isFloor) properties.push('Floor');
+              if (advancedInfo.isFluid) properties.push('Fluid');
+              if (properties.length > 0) {
+                markdown.appendMarkdown(`**🏗️ Type:** ${properties.join(', ')}\n\n`);
+              }
+              
+              // Resource yields
+              const yields = getTileResourceYield(tileId);
+              if (yields.crystals > 0 || yields.ore > 0 || yields.studs > 0) {
+                markdown.appendMarkdown(`**💎 Resource Yields:**\n`);
+                if (yields.crystals > 0) markdown.appendMarkdown(`- Crystals: ${yields.crystals}\n`);
+                if (yields.ore > 0) markdown.appendMarkdown(`- Ore: ${yields.ore}\n`);
+                if (yields.studs > 0) markdown.appendMarkdown(`- Studs: ${yields.studs}\n`);
+                markdown.appendMarkdown('\n');
+              }
+              
+              // Special triggers
+              if (advancedInfo.trigger) {
+                const triggerEmoji = {
+                  'flood': '💧',
+                  'waste': '☢️',
+                  'spawn': '👾',
+                  'landslide': '🏔️',
+                  'erosion': '🌋'
+                };
+                markdown.appendMarkdown(`**${triggerEmoji[advancedInfo.trigger] || '⚠️'} Trigger:** ${advancedInfo.trigger}\n\n`);
+              }
+              
+              // Slope constraints
+              if (advancedInfo.maxSlope !== undefined) {
+                markdown.appendMarkdown(`**📐 Max Slope:** ${advancedInfo.maxSlope}\n\n`);
+              }
+              
+              // Landslide warning
+              if (advancedInfo.canLandslide) {
+                markdown.appendMarkdown(`**⚠️ Warning:** This tile can cause landslides!\n\n`);
+              }
+            }
 
             // Add reinforced indicator
             if (isReinforcedTile(tileId)) {

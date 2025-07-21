@@ -7,6 +7,13 @@ import {
   getBaseTileId,
 } from '../data/enhancedTileDefinitions';
 import { getExtendedTileInfo } from '../data/extendedTileDefinitions';
+import { 
+  getAdvancedTileInfo, 
+  isFluidTile, 
+  isWallTile,
+  isFloorTile,
+  Hardness 
+} from '../data/advancedTileDefinitions';
 
 export class DatFileValidator {
   private errors: ValidationError[] = [];
@@ -246,8 +253,82 @@ export class DatFileValidator {
     tileId: number,
     tileInfo: ReturnType<typeof getEnhancedTileInfo>
   ): void {
-    // Check water tile placement
-    if (tileId === 11 || tileId === 111) {
+    // Use advanced tile info for comprehensive validation
+    const advancedInfo = getAdvancedTileInfo(tileId);
+    
+    if (advancedInfo) {
+      // Validate fluid placement
+      if (advancedInfo.isFluid) {
+        const adjacentTiles = this.getAdjacentTiles(tiles, row, col);
+        let hasShore = false;
+        let allFluid = true;
+
+        for (const adjacent of adjacentTiles) {
+          const adjAdvanced = getAdvancedTileInfo(adjacent);
+          if (adjAdvanced) {
+            if (adjAdvanced.isFloor || (adjAdvanced.isWall && adjAdvanced.hardness < Hardness.SOLID)) {
+              hasShore = true;
+            }
+            if (!adjAdvanced.isFluid) {
+              allFluid = false;
+            }
+          }
+        }
+
+        if (!hasShore && !allFluid) {
+          this.addWarning(`${advancedInfo.name} should be adjacent to shore/ground tiles or fully surrounded by fluid`, row, col, 'tiles');
+        }
+      }
+      
+      // Validate landslide-prone tiles
+      if (advancedInfo.canLandslide) {
+        const above = row > 0 ? tiles[row - 1][col] : -1;
+        const aboveInfo = above !== -1 ? getAdvancedTileInfo(above) : null;
+        
+        if (aboveInfo && aboveInfo.hardness >= Hardness.HARD) {
+          this.addWarning(`Landslide-prone ${advancedInfo.name} is below hard rock - high cave-in risk`, row, col, 'tiles');
+        }
+      }
+      
+      // Validate resource placement
+      if (advancedInfo.crystalYield > 0 || advancedInfo.oreYield > 0) {
+        const adjacentResources = this.getAdjacentTiles(tiles, row, col).filter(adj => {
+          const adjInfo = getAdvancedTileInfo(adj);
+          return adjInfo && (adjInfo.crystalYield > 0 || adjInfo.oreYield > 0);
+        });
+        
+        if (adjacentResources.length === 0) {
+          this.addWarning('Isolated resource seam - consider grouping resources for easier mining', row, col, 'tiles');
+        }
+      }
+      
+      // Validate special trigger tiles
+      if (advancedInfo.trigger === 'spawn') {
+        const surroundedByWalls = this.getAdjacentTiles(tiles, row, col).every(adj => {
+          const adjInfo = getAdvancedTileInfo(adj);
+          return adjInfo && adjInfo.isWall;
+        });
+        
+        if (!surroundedByWalls) {
+          this.addWarning('Spawn trigger tile should be surrounded by walls for proper emergence', row, col, 'tiles');
+        }
+      }
+      
+      // Validate erosion tiles
+      if (advancedInfo.trigger === 'erosion') {
+        const nearLava = this.getAdjacentTiles(tiles, row, col).some(adj => {
+          const adjInfo = getAdvancedTileInfo(adj);
+          return adjInfo && adjInfo.isFluid && adj !== 11 && adj !== 111; // Not water
+        });
+        
+        if (!nearLava) {
+          this.addWarning('Erosion trigger tile is not near lava source', row, col, 'tiles');
+        }
+      }
+    }
+    
+    // Keep original water tile check as fallback
+    if (!advancedInfo && (tileId === 11 || tileId === 111)) {
       const adjacentTiles = this.getAdjacentTiles(tiles, row, col);
       let hasShore = false;
 
