@@ -4,6 +4,7 @@ import { EditHistory, MapEdit, EditChange } from '../undoRedo/editHistory';
 import { getTileColor } from '../mapPreview/colorMap';
 import { getTileName } from '../data/tileDefinitions';
 import { AutoTiler, supportsAutoTiling } from './autoTiling';
+import { MapEditorValidator } from './mapEditorValidator';
 
 export interface PaintTool {
   type: 'paint' | 'fill' | 'line' | 'rectangle' | 'picker' | 'select' | 'stamp';
@@ -175,6 +176,12 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             tileId: message.tileId,
             supported: supportsAutoTiling(message.tileId),
           });
+          break;
+        case 'validateMap':
+          await this.handleValidateMap(webviewPanel.webview, document);
+          break;
+        case 'fixValidationIssue':
+          await this.handleFixValidationIssue(document, message.issue, message.fix);
           break;
       }
     });
@@ -750,6 +757,85 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
     }
   }
 
+  private async handleValidateMap(
+    webview: vscode.Webview,
+    document: vscode.TextDocument
+  ): Promise<void> {
+    try {
+      const validator = new MapEditorValidator(document);
+      const result = await validator.validateForEditor();
+
+      webview.postMessage({
+        type: 'validationResult',
+        result: result,
+      });
+
+      // Show summary in VS Code
+      const errorCount = result.issues.filter(i => i.type === 'error').length;
+      const warningCount = result.issues.filter(i => i.type === 'warning').length;
+
+      if (errorCount === 0 && warningCount === 0) {
+        vscode.window.showInformationMessage('Map validation passed! No issues found.');
+      } else {
+        const message = `Map validation found ${errorCount} error(s) and ${warningCount} warning(s)`;
+        if (errorCount > 0) {
+          vscode.window.showErrorMessage(message);
+        } else {
+          vscode.window.showWarningMessage(message);
+        }
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error validating map: ${errorMessage}`);
+    }
+  }
+
+  private async handleFixValidationIssue(
+    document: vscode.TextDocument,
+    _issue: any,
+    fix: string
+  ): Promise<void> {
+    try {
+      // Handle different types of fixes
+      switch (fix) {
+        case 'addSpawnPoint': {
+          // Find a suitable location for spawn point
+          const parser = new DatFileParser(document.getText());
+          const tilesSection = parser.getSection('tiles');
+          if (!tilesSection) {
+            return;
+          }
+
+          // Find center of largest open area
+          // For now, just place at center of map
+          const info = parser.parse().info;
+          const centerRow = Math.floor(info.rowcount / 2);
+          const centerCol = Math.floor(info.colcount / 2);
+
+          await this.handlePaint(
+            document,
+            [{ row: centerRow, col: centerCol, tileId: 101 }],
+            'Add Tool Store (spawn point)'
+          );
+          break;
+        }
+
+        case 'connectArea':
+          // This would require more complex pathfinding
+          vscode.window.showInformationMessage(
+            'Automatic area connection not yet implemented. Please manually connect the isolated areas.'
+          );
+          break;
+
+        default:
+          vscode.window.showWarningMessage(`Unknown fix type: ${fix}`);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error applying fix: ${errorMessage}`);
+    }
+  }
+
   private updateWebview(webview: vscode.Webview, document: vscode.TextDocument): void {
     try {
       const parser = new DatFileParser(document.getText());
@@ -894,6 +980,10 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
           
           <div class="tool-group">
             <button id="autoTileBtn" title="Toggle Auto-Tiling (A)">🔧 Auto-Tile</button>
+          </div>
+          
+          <div class="tool-group">
+            <button id="validateBtn" title="Validate Map (V)">✓ Validate</button>
           </div>
           
           <div class="coordinates">
