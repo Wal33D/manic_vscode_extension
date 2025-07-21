@@ -1,0 +1,190 @@
+.contextInput {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  height: 100%;
+
+  scrollbar-color: var(--palette-fg) transparent;
+  scrollbar-width: thin;
+
+  & > * {
+    padding: 0 8px;
+
+    &:first-child {
+      margin-top: 48px;
+    }
+
+    &:last-child {
+      margin-bottom: 200px;
+    }
+  }
+
+  .section {
+    .subsection {
+      &::after {
+        content: " ";
+        display: block;
+        width: 100%;
+        height: 1px;
+        margin-bottom: 8px;
+        background: var(--palette-fg);
+      }
+    }
+  }
+
+  h2 {
+    position: sticky;
+    top: 0;
+    margin: 0;
+    margin-bottom: -8px;
+    height: 36px;
+    line-height: 28px;
+    z-index: 2;
+    background: linear-gradient(
+      0deg,
+      transparent,
+      var(--palette-settings-bg) 8px,
+      var(--palette-settings-bg)
+    );
+  }
+
+  h3 {
+    position: sticky;
+    top: 28px;
+    margin: 0;
+    height: 24px;
+    padding-bottom: 8px;
+    z-index: 1;
+    background: linear-gradient(
+      0deg,
+      transparent,
+      var(--palette-settings-bg) 8px,
+      var(--palette-settings-bg)
+    );
+    &::before {
+      font-family: "Material Symbols Outlined";
+      content: "subdirectory_arrow_right";
+    }
+  }
+
+  p {
+    margin: 0;
+  }
+
+  .inputRow {
+    display: flex;
+    gap: 8px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+
+    > *:not([type="range"]) {
+      height: 36px;
+      width: 100%;
+      line-height: 34px;
+      box-sizing: border-box;
+      border: 1px solid var(--palette-lines);
+      padding: 0;
+      margin: 0;
+
+      color: var(--palette-fg);
+      background: none;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      text-align: center;
+    }
+
+    .icon {
+      font-family: "Material Symbols Outlined";
+      font-size: 24px;
+      flex-shrink: 0;
+      width: 36px;
+    }
+
+    .inactive {
+      color: var(--palette-lines);
+      border-style: dashed;
+    }
+
+    .invisible {
+      opacity: 0;
+    }
+
+    .override {
+      color: black;
+      background: yellow;
+    }
+
+    .seed {
+      font-size: 24px;
+    }
+
+    .architectCount {
+      border: none;
+      flex-shrink: 0;
+      width: 36px;
+    }
+
+    .showAdvanced {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      height: 24px;
+
+      font-size: 18px;
+      line-height: 22px;
+    }
+
+    .curve {
+      display: flex;
+      height: fit-content;
+      flex-direction: column;
+      border: none;
+      padding: 6px 0;
+      gap: 6px;
+    }
+
+    button {
+      cursor: pointer;
+
+      &:active {
+        background: var(--palette-fg);
+        color: black;
+      }
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      cursor: pointer;
+      outline: none;
+      border-radius: 2px;
+      height: 6px;
+      background: linear-gradient(
+        to right,
+        var(--palette-accent) 4px,
+        var(--palette-accent) var(--completion),
+        var(--palette-fg) var(--completion),
+        var(--palette-fg) 100%
+      );
+
+      &::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        height: 14px;
+        width: 8px;
+        background-color: var(--palette-accent);
+        border-radius: 2px;
+        border: none;
+      }
+
+      &::-moz-range-thumb {
+        height: 14px;
+        width: 8px;
+        background-color: var(--palette-accent);
+        border-radius: 2px;
+        border: none;
+      }
+    }
+  }
+}

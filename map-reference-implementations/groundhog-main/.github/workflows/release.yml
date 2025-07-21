@@ -1,0 +1,24 @@
+name: release
+on: 
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    name: Build and upload to GitHub Pages
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: yarn install
+      - run: yarn test
+      - run: yarn build
+      - run: git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: npx gh-pages -d dist -u "github-actions-bot <support+actions@github.com>"
