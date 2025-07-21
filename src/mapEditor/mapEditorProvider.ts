@@ -10,6 +10,11 @@ export interface PaintTool {
   tileId: number;
 }
 
+// Maximum map dimensions to prevent performance issues
+const MAX_MAP_DIMENSION = 500;
+const MAX_TILE_ID = 115;
+const MIN_TILE_ID = 1;
+
 export class MapEditorProvider implements vscode.CustomTextEditorProvider {
   private static readonly viewType = 'manicMiners.mapEditor';
   private editHistory = new EditHistory(100);
@@ -71,6 +76,9 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             tileName: getTileName(message.tileId),
           });
           break;
+        case 'error':
+          vscode.window.showErrorMessage(message.message || 'An error occurred in the map editor');
+          break;
       }
     });
 
@@ -84,71 +92,99 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
     tiles: { row: number; col: number; tileId: number }[],
     description: string
   ): Promise<void> {
-    const parser = new DatFileParser(document.getText());
-    const tilesSection = parser.getSection('tiles');
-    if (!tilesSection) {
-      return;
-    }
-
-    const lines = document.getText().split('\n');
-    const tilesStartLine = lines.findIndex(line => line.trim() === 'tiles{');
-    const tilesEndLine = lines.findIndex(
-      (line, index) => index > tilesStartLine && line.trim() === '}'
-    );
-
-    if (tilesStartLine === -1 || tilesEndLine === -1) {
-      return;
-    }
-
-    const edit = new vscode.WorkspaceEdit();
-    const changes: EditChange[] = [];
-
-    // Parse current tiles
-    const tileLines = lines.slice(tilesStartLine + 1, tilesEndLine);
-    const tileGrid: number[][] = tileLines
-      .filter(line => line.trim().length > 0)
-      .map(line => line.split(',').map(t => parseInt(t.trim(), 10)));
-
-    // Group tiles by row for efficient editing
-    const tilesByRow = new Map<number, { col: number; tileId: number }[]>();
-    for (const tile of tiles) {
-      if (!tilesByRow.has(tile.row)) {
-        tilesByRow.set(tile.row, []);
+    try {
+      // Validate tiles input
+      if (!Array.isArray(tiles) || tiles.length === 0) {
+        vscode.window.showErrorMessage('Invalid tiles data received');
+        return;
       }
-      tilesByRow.get(tile.row)!.push({ col: tile.col, tileId: tile.tileId });
-    }
 
-    // Apply changes
-    for (const [row, rowTiles] of tilesByRow) {
-      if (row >= 0 && row < tileGrid.length) {
+      // Validate each tile
+      for (const tile of tiles) {
+        if (
+          typeof tile.row !== 'number' ||
+          typeof tile.col !== 'number' ||
+          typeof tile.tileId !== 'number'
+        ) {
+          vscode.window.showErrorMessage('Invalid tile data format');
+          return;
+        }
+        if (tile.tileId < MIN_TILE_ID || tile.tileId > MAX_TILE_ID) {
+          vscode.window.showErrorMessage(
+            `Invalid tile ID: ${tile.tileId}. Must be between ${MIN_TILE_ID} and ${MAX_TILE_ID}`
+          );
+          return;
+        }
+      }
+      const parser = new DatFileParser(document.getText());
+      const tilesSection = parser.getSection('tiles');
+      if (!tilesSection) {
+        vscode.window.showErrorMessage('No tiles section found in document');
+        return;
+      }
+
+      const lines = document.getText().split('\n');
+      const tilesStartLine = lines.findIndex(line => line.trim() === 'tiles{');
+      const tilesEndLine = lines.findIndex(
+        (line, index) => index > tilesStartLine && line.trim() === '}'
+      );
+
+      if (tilesStartLine === -1 || tilesEndLine === -1) {
+        return;
+      }
+
+      const edit = new vscode.WorkspaceEdit();
+      const changes: EditChange[] = [];
+
+      // Parse current tiles
+      const tileLines = lines.slice(tilesStartLine + 1, tilesEndLine);
+      const tileGrid: number[][] = tileLines
+        .filter(line => line.trim().length > 0)
+        .map(line => line.split(',').map(t => parseInt(t.trim(), 10)));
+
+      // Group tiles by row for efficient editing
+      const tilesByRow = new Map<number, { col: number; tileId: number }[]>();
+      for (const tile of tiles) {
+        if (!tilesByRow.has(tile.row)) {
+          tilesByRow.set(tile.row, []);
+        }
+        tilesByRow.get(tile.row)!.push({ col: tile.col, tileId: tile.tileId });
+      }
+
+      // Apply changes with bounds checking
+      for (const [row, rowTiles] of tilesByRow) {
+        if (row < 0 || row >= tileGrid.length) {
+          continue; // Skip invalid rows
+        }
         const lineIndex = tilesStartLine + 1 + row;
         const oldLine = lines[lineIndex];
         const tiles = [...tileGrid[row]];
 
         // Track old values for undo
         for (const { col, tileId } of rowTiles) {
-          if (col >= 0 && col < tiles.length) {
-            const oldTileId = tiles[col];
-            tiles[col] = tileId;
-
-            // Find character position in line
-            const tileStrings = oldLine.split(',');
-            let charPos = 0;
-            for (let i = 0; i < col; i++) {
-              charPos += tileStrings[i].length + 1; // +1 for comma
-            }
-
-            changes.push({
-              range: new vscode.Range(
-                lineIndex,
-                charPos,
-                lineIndex,
-                charPos + tileStrings[col].trim().length
-              ),
-              oldText: String(oldTileId),
-              newText: String(tileId),
-            });
+          if (col < 0 || col >= tiles.length) {
+            continue; // Skip invalid columns
           }
+          const oldTileId = tiles[col];
+          tiles[col] = tileId;
+
+          // Find character position in line
+          const tileStrings = oldLine.split(',');
+          let charPos = 0;
+          for (let i = 0; i < col; i++) {
+            charPos += tileStrings[i].length + 1; // +1 for comma
+          }
+
+          changes.push({
+            range: new vscode.Range(
+              lineIndex,
+              charPos,
+              lineIndex,
+              charPos + tileStrings[col].trim().length
+            ),
+            oldText: String(oldTileId),
+            newText: String(tileId),
+          });
         }
 
         const newLine = tiles.join(',');
@@ -158,47 +194,72 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
           newLine
         );
       }
+
+      // Record edit for undo history
+      const mapEdit: MapEdit = {
+        id: Date.now().toString(),
+        timestamp: new Date(),
+        description,
+        documentUri: document.uri,
+        changes,
+      };
+
+      const success = await vscode.workspace.applyEdit(edit);
+      if (success) {
+        this.editHistory.addEdit(mapEdit);
+      } else {
+        vscode.window.showErrorMessage('Failed to apply changes to the document');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error painting tiles: ${errorMessage}`);
     }
-
-    // Record edit for undo history
-    const mapEdit: MapEdit = {
-      id: Date.now().toString(),
-      timestamp: new Date(),
-      description,
-      documentUri: document.uri,
-      changes,
-    };
-
-    await vscode.workspace.applyEdit(edit);
-    this.editHistory.addEdit(mapEdit);
   }
 
   private async handleUndo(document: vscode.TextDocument): Promise<void> {
-    const edit = this.editHistory.undo();
-    if (!edit) {
-      return;
-    }
+    try {
+      const edit = this.editHistory.undo();
+      if (!edit) {
+        return;
+      }
 
-    const workspaceEdit = new vscode.WorkspaceEdit();
-    for (const change of edit.changes) {
-      workspaceEdit.replace(document.uri, change.range, change.oldText);
-    }
+      const workspaceEdit = new vscode.WorkspaceEdit();
+      for (const change of edit.changes) {
+        workspaceEdit.replace(document.uri, change.range, change.oldText);
+      }
 
-    await vscode.workspace.applyEdit(workspaceEdit);
+      const success = await vscode.workspace.applyEdit(workspaceEdit);
+      if (!success) {
+        vscode.window.showErrorMessage('Failed to undo changes');
+        // Re-add the edit to history since undo failed
+        this.editHistory.addEdit(edit);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error during undo: ${errorMessage}`);
+    }
   }
 
   private async handleRedo(document: vscode.TextDocument): Promise<void> {
-    const edit = this.editHistory.redo();
-    if (!edit) {
-      return;
-    }
+    try {
+      const edit = this.editHistory.redo();
+      if (!edit) {
+        return;
+      }
 
-    const workspaceEdit = new vscode.WorkspaceEdit();
-    for (const change of edit.changes) {
-      workspaceEdit.replace(document.uri, change.range, change.newText);
-    }
+      const workspaceEdit = new vscode.WorkspaceEdit();
+      for (const change of edit.changes) {
+        workspaceEdit.replace(document.uri, change.range, change.newText);
+      }
 
-    await vscode.workspace.applyEdit(workspaceEdit);
+      const success = await vscode.workspace.applyEdit(workspaceEdit);
+      if (!success) {
+        vscode.window.showErrorMessage('Failed to redo changes');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error during redo: ${errorMessage}`);
+    }
   }
 
   private updateWebview(webview: vscode.Webview, document: vscode.TextDocument): void {
@@ -207,7 +268,23 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
       const datFile = parser.parse();
 
       if (!datFile || !datFile.tiles) {
-        webview.html = this.getErrorHtml('Unable to parse map file');
+        webview.html = this.getErrorHtml('Unable to parse map file: Missing tiles section');
+        return;
+      }
+
+      // Validate map dimensions
+      if (datFile.info.rowcount > MAX_MAP_DIMENSION || datFile.info.colcount > MAX_MAP_DIMENSION) {
+        webview.html = this.getErrorHtml(
+          `Map too large: ${datFile.info.rowcount}x${datFile.info.colcount}. Maximum supported size is ${MAX_MAP_DIMENSION}x${MAX_MAP_DIMENSION}`
+        );
+        return;
+      }
+
+      // Validate tile data
+      if (datFile.tiles.length !== datFile.info.rowcount) {
+        webview.html = this.getErrorHtml(
+          `Map data mismatch: Expected ${datFile.info.rowcount} rows but found ${datFile.tiles.length}`
+        );
         return;
       }
 
@@ -308,6 +385,15 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
           </div>
         </div>
       </div>
+      
+      <div class="progress-overlay" id="progressOverlay">
+        <div class="progress-content">
+          <div class="progress-spinner"></div>
+          <div id="progressText">Processing...</div>
+        </div>
+      </div>
+      
+      <div class="status-message" id="statusMessage"></div>
       
       <script>
         const vscode = acquireVsCodeApi();

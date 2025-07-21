@@ -34,6 +34,7 @@ import { WelcomePageProvider } from './welcomePage';
 // Import package metadata for welcome/version tracking
 import { registerScriptPatternCommands } from './commands/scriptPatternCommands';
 import { registerMapEditorCommands } from './mapEditor/mapEditorCommands';
+import { MapEditorProvider } from './mapEditor/mapEditorProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -252,10 +253,9 @@ script{
 
   // Register Map Editor
   registerMapEditorCommands(context);
-  
+
   // Register Map Editor Provider
-  const mapEditorProvider = await import('./mapEditor/mapEditorProvider.js');
-  context.subscriptions.push(mapEditorProvider.MapEditorProvider.register(context));
+  context.subscriptions.push(MapEditorProvider.register(context));
 
   // Register Objective Builder Provider
   const objectiveBuilderProvider = new ObjectiveBuilderProvider(context.extensionUri);
