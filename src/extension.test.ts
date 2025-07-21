@@ -60,7 +60,7 @@ describe('Extension', () => {
     it('should add all disposables to subscriptions', () => {
       activate(mockContext);
 
-      // Should have 42 subscriptions: hello world command, show map preview command, map preview provider,
+      // Should have 66 subscriptions: hello world command, show map preview command, map preview provider,
       // onDidChangeActiveTextEditor, onDidChangeTextDocument, completion provider, hover provider,
       // definition provider, reference provider, code actions provider (original), code actions provider (autoFix),
       // code actions provider (smart suggestions),
@@ -72,8 +72,10 @@ describe('Extension', () => {
       // enhanced quick actions (3 commands + 4 undo/redo commands + 1 clear history command),
       // smart suggestions (2 commands: showSmartSuggestions, analyzeTilePatterns),
       // heat map provider (1 provider + 1 command + 2 event listeners)
-      // Actual count: 61 based on new additions
-      expect(mockContext.subscriptions).toHaveLength(61);
+      // 3D terrain provider (1 provider + 1 command + 2 event listeners)
+      // level generator (1 command)
+      // Actual count: 66 based on new additions
+      expect(mockContext.subscriptions).toHaveLength(66);
     });
 
     it('should activate without errors', () => {
