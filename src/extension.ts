@@ -252,6 +252,10 @@ script{
 
   // Register Map Editor
   registerMapEditorCommands(context);
+  
+  // Register Map Editor Provider
+  const mapEditorProvider = await import('./mapEditor/mapEditorProvider.js');
+  context.subscriptions.push(mapEditorProvider.MapEditorProvider.register(context));
 
   // Register Objective Builder Provider
   const objectiveBuilderProvider = new ObjectiveBuilderProvider(context.extensionUri);
