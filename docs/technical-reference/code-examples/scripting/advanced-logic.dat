@@ -1,0 +1,412 @@
+info{
+rowcount:60
+colcount:60
+biome:lava  
+creator:Example Scripts
+version:1.0
+name:Advanced Logic Example
+}
+
+script{
+// Advanced Logic Example
+// Demonstrates complex scripting patterns, state machines, and AI behaviors
+
+// ======================
+// Core State Machine
+// ======================
+int GameState=0  // 0=Init, 1=Explore, 2=Build, 3=Defend, 4=Assault, 5=Victory
+int ThreatLevel=0
+int EconomyScore=0
+int MilitaryScore=0
+int ResearchLevel=0
+bool CrisisMode=false
+
+// ======================
+// Resource Management
+// ======================
+int CrystalIncome=0
+int OreIncome=0
+int CrystalReserve=0
+int OreReserve=0
+float EconomyMultiplier=1.0
+
+// ======================
+// AI Director Variables  
+// ======================
+int DifficultyLevel=1
+int PlayerSkillEstimate=50
+int ChallengePoints=0
+bool AdaptiveDifficulty=true
+
+// ======================
+// Mission Objectives
+// ======================
+int PrimaryObjective=0
+int SecondaryObjective=0
+int OptionalObjective=0
+bool[] ObjectiveComplete=false,false,false
+
+// ======================
+// Complex Initialization
+// ======================
+init::
+InitializeGameState;
+SetupAIDirector;
+GenerateMissionObjectives;
+StartGameLoop;
+
+InitializeGameState::
+GameState:1;
+msg:=== LAVA DEPTHS EXPEDITION ===;
+msg:Volatile environment detected;
+msg:Establishing initial parameters...;
+CalculateStartingResources;
+SetupEconomyTracking;
+
+CalculateStartingResources::
+// Dynamic starting resources based on map analysis
+int MapSize=rowcount*colcount;
+int StartCrystals=MapSize/100;
+int StartOre=MapSize/150;
+crystals:StartCrystals;
+ore:StartOre;
+msg:Initial resources allocated;
+
+// ======================
+// State Machine Logic
+// ======================
+UpdateGameState::
+((GameState == 1))[ProcessExploreState];
+((GameState == 2))[ProcessBuildState];
+((GameState == 3))[ProcessDefendState];
+((GameState == 4))[ProcessAssaultState];
+((GameState == 5))[ProcessVictoryState];
+
+ProcessExploreState::
+// Exploration phase logic
+((discovered > 30))[
+    GameState:2;
+    msg:Sufficient area explored. Entering BUILD phase.;
+    TriggerBuildPhase;
+];
+((ThreatLevel > 3))[
+    GameState:3;
+    msg:High threat detected! Entering DEFEND phase.;
+];
+
+ProcessBuildState::
+// Building phase logic
+UpdateEconomyScore;
+((EconomyScore > 50))[
+    ResearchLevel:ResearchLevel+1;
+    msg:Research level increased to <ResearchLevel>;
+];
+((buildings.total > 10 and MilitaryScore > 30))[
+    GameState:4;
+    msg:Ready for ASSAULT phase!;
+];
+
+ProcessDefendState::
+// Defense phase logic
+((ThreatLevel < 2 and CrisisMode == false))[
+    GameState:2;
+    msg:Threat neutralized. Resuming construction.;
+];
+((creatures == 0))[
+    ThreatLevel:0;
+    msg:All threats eliminated!;
+];
+
+// ======================
+// AI Director System
+// ======================
+SetupAIDirector::
+timer AIDirectorTick=10.0,30.0,30.0,UpdateAIDirector
+timer DifficultyAdjust=60.0,120.0,120.0,AdjustDifficulty
+
+UpdateAIDirector::
+AnalyzePlayerPerformance;
+CalculateChallengePoints;
+((ChallengePoints > 100))[SpawnChallenge];
+
+AnalyzePlayerPerformance::
+// Estimate player skill based on actions
+int TimeEfficiency=CrystalIncome*60/time;
+int BuildEfficiency=buildings.total*100/ore.used;
+int CombatEfficiency=creatures.killed*100/(damagetaken+1);
+PlayerSkillEstimate:(TimeEfficiency+BuildEfficiency+CombatEfficiency)/3;
+
+CalculateChallengePoints::
+// Accumulate points for spawning challenges
+ChallengePoints:ChallengePoints+DifficultyLevel*10;
+((PlayerSkillEstimate > 75))[ChallengePoints:ChallengePoints+20];
+((GameState == 1))[ChallengePoints:ChallengePoints/2]; // Less during exploration
+
+SpawnChallenge::
+int ChallengeType=random:100;
+((ChallengeType < 40))[SpawnMonsterChallenge];
+((ChallengeType < 70))[CreateEnvironmentChallenge];
+((ChallengeType < 90))[TriggerResourceChallenge];
+((ChallengeType >= 90))[SpecialEventChallenge];
+ChallengePoints:0;
+
+AdjustDifficulty::
+((AdaptiveDifficulty == true))[
+    ((PlayerSkillEstimate > 80 and DifficultyLevel < 5))[
+        DifficultyLevel:DifficultyLevel+1;
+        msg:Difficulty increased to level <DifficultyLevel>;
+    ];
+    ((PlayerSkillEstimate < 40 and DifficultyLevel > 1))[
+        DifficultyLevel:DifficultyLevel-1;
+        msg:Difficulty decreased to level <DifficultyLevel>;
+    ];
+];
+
+// ======================
+// Economy System
+// ======================
+SetupEconomyTracking::
+timer EconomyUpdate=5.0,10.0,10.0,UpdateEconomy
+timer IncomeCollection=15.0,30.0,30.0,CollectIncome
+
+UpdateEconomy::
+// Calculate income rates
+CrystalIncome:0;
+OreIncome:0;
+((buildings.BuildingPowerStation_C > 0))[CrystalIncome:buildings.BuildingPowerStation_C*2];
+((buildings.BuildingOreRefinery_C > 0))[OreIncome:buildings.BuildingOreRefinery_C*3];
+// Apply economy multiplier
+CrystalIncome:floor(CrystalIncome*EconomyMultiplier);
+OreIncome:floor(OreIncome*EconomyMultiplier);
+
+UpdateEconomyScore::
+EconomyScore:(CrystalIncome*10+OreIncome*15+buildings.total*5)/3;
+
+CollectIncome::
+CrystalReserve:CrystalReserve+CrystalIncome;
+OreReserve:OreReserve+OreIncome;
+((CrystalReserve > 10))[
+    crystals:CrystalReserve;
+    CrystalReserve:0;
+];
+((OreReserve > 10))[
+    ore:OreReserve;
+    OreReserve:0;
+];
+
+// ======================
+// Combat AI System
+// ======================
+when(creatures > 0)[EngageCombatAI];
+
+EngageCombatAI::
+AnalyzeThreat;
+SelectCombatStrategy;
+ExecuteCombatPlan;
+
+AnalyzeThreat::
+ThreatLevel:creatures;
+((creatures.LavaMonster > 0))[ThreatLevel:ThreatLevel+creatures.LavaMonster*2];
+((creatures.LavaBoss > 0))[ThreatLevel:ThreatLevel+creatures.LavaBoss*5];
+
+SelectCombatStrategy::
+((ThreatLevel <= 3))[StandardDefense];
+((ThreatLevel > 3 and ThreatLevel <= 8))[TacticalDefense];
+((ThreatLevel > 8))[EmergencyDefense];
+
+StandardDefense::
+msg:Engaging standard defense protocol;
+((buildings.BuildingGunStation_C > 0))[ActivateGunTurrets];
+
+TacticalDefense::
+msg:Tactical defense mode activated;
+((MilitaryScore > 20))[DeployAdvancedWeapons];
+((miners > 10))[FormDefensiveSquads];
+
+EmergencyDefense::
+CrisisMode:true;
+msg:EMERGENCY! All units to defensive positions!;
+EnableAllDefenses;
+((ResearchLevel >= 3))[ActivateExperimentalWeapons];
+
+// ======================
+// Mission Objective System
+// ======================
+GenerateMissionObjectives::
+// Dynamically generate objectives based on map
+PrimaryObjective:random:3+1;
+SecondaryObjective:random:3+4;
+OptionalObjective:random:3+7;
+DisplayObjectives;
+
+DisplayObjectives::
+msg:=== MISSION OBJECTIVES ===;
+msg:PRIMARY: <GetObjectiveName:PrimaryObjective>;
+msg:SECONDARY: <GetObjectiveName:SecondaryObjective>;
+msg:OPTIONAL: <GetObjectiveName:OptionalObjective>;
+
+GetObjectiveName:int:ObjID:string::
+((ObjID == 1))["Establish Mining Operations"];
+((ObjID == 2))["Defend Against Lava Creatures"];
+((ObjID == 3))["Research Advanced Technology"];
+((ObjID == 4))["Locate Hidden Artifacts"];
+((ObjID == 5))["Build Defensive Perimeter"];
+((ObjID == 6))["Achieve Economic Dominance"];
+((ObjID == 7))["Complete Without Casualties"];
+((ObjID == 8))["Discover All Map Secrets"];
+((ObjID == 9))["Speedrun Challenge"];
+
+CheckObjectiveComplete:int:ObjID::
+((ObjID == 1 and buildings.BuildingOreRefinery_C >= 3))[CompleteObjective:0];
+((ObjID == 2 and creatures.killed >= 20))[CompleteObjective:0];
+((ObjID == 3 and ResearchLevel >= 5))[CompleteObjective:0];
+// ... additional objective checks
+
+CompleteObjective:int:ObjIndex::
+ObjectiveComplete[ObjIndex]:true;
+msg:OBJECTIVE COMPLETE!;
+crystals:50;
+ore:25;
+CheckVictoryConditions;
+
+// ======================
+// Advanced Event Responses
+// ======================
+
+// Dynamic monster spawning based on player actions
+when(ore.collected % 50 == 0 and ore.collected > 0)[OreCollectionResponse];
+
+OreCollectionResponse::
+int SpawnCount=DifficultyLevel;
+msg:Your mining has disturbed the depths...;
+wait:2;
+SmartMonsterSpawn:SpawnCount;
+
+SmartMonsterSpawn:int:Count::
+// Spawn monsters away from defenses
+int SpawnX=random:colcount;
+int SpawnY=random:rowcount;
+((GetDistanceToNearestDefense:SpawnX,SpawnY < 10))[
+    SmartMonsterSpawn:Count; // Retry
+];
+((GetDistanceToNearestDefense:SpawnX,SpawnY >= 10))[
+    emerge:SpawnX,SpawnY,random:4,LavaMonster,2;
+    ((Count > 1))[SmartMonsterSpawn:Count-1];
+];
+
+// Research progression system
+when(buildings.BuildingResearchCenter_C > 0 and ResearchLevel < 10)[ConductResearch];
+
+ConductResearch::
+timer ResearchProgress=30.0,60.0,60.0,ResearchComplete
+
+ResearchComplete::
+ResearchLevel:ResearchLevel+1;
+msg:Research complete! Level <ResearchLevel> achieved;
+UnlockTechnology:ResearchLevel;
+
+UnlockTechnology:int:Level::
+((Level == 2))[EconomyMultiplier:1.2];
+((Level == 3))[EnableAdvancedRadar];
+((Level == 5))[EnableTeleportation];
+((Level == 7))[EnableEnergyShields];
+((Level == 10))[EnableSuperweapon];
+
+// ======================
+// Victory Condition Logic
+// ======================
+CheckVictoryConditions::
+int CompletedCount=0;
+((ObjectiveComplete[0] == true))[CompletedCount:CompletedCount+1];
+((ObjectiveComplete[1] == true))[CompletedCount:CompletedCount+1];
+((ObjectiveComplete[2] == true))[CompletedCount:CompletedCount+1];
+
+((CompletedCount >= 2 and ObjectiveComplete[0] == true))[
+    GameState:5;
+    msg:Victory conditions met!;
+];
+
+ProcessVictoryState::
+msg:=== MISSION ACCOMPLISHED ===;
+DisplayFinalStats;
+wait:5;
+win;
+
+DisplayFinalStats::
+msg:Final Statistics:;
+msg:Economy Score: <EconomyScore>;
+msg:Military Score: <MilitaryScore>;
+msg:Research Level: <ResearchLevel>;
+msg:Difficulty Reached: <DifficultyLevel>;
+msg:Skill Estimate: <PlayerSkillEstimate>;
+
+// ======================
+// Main Game Loop
+// ======================
+StartGameLoop::
+timer MainLoop=1.0,5.0,5.0,GameLoopTick
+
+GameLoopTick::
+UpdateGameState;
+((GameState != 5))[CheckObjectiveComplete:PrimaryObjective];
+((GameState != 5))[CheckObjectiveComplete:SecondaryObjective];
+((GameState != 5))[CheckObjectiveComplete:OptionalObjective];
+
+}
+
+objectives{
+// Primary: Varies based on generated objective
+crystals,100
+// Secondary: Build advanced base
+buildings,any,15
+// Optional: Complete quickly
+time,900
+}
+
+comments{
+Advanced Logic Patterns Demonstrated:
+
+1. State Machine Architecture
+   - Multiple game states with transitions
+   - Each state has its own processing logic
+   - Clean state management
+
+2. AI Director System
+   - Monitors player performance
+   - Adjusts difficulty dynamically
+   - Spawns challenges based on skill
+
+3. Complex Economy
+   - Income generation and collection
+   - Resource reserves and multipliers
+   - Economic scoring system
+
+4. Combat AI
+   - Threat analysis
+   - Strategy selection
+   - Coordinated defense responses
+
+5. Dynamic Objectives
+   - Randomly generated missions
+   - Progress tracking with arrays
+   - Completion rewards
+
+6. Research System
+   - Progressive unlocks
+   - Technology benefits
+   - Timed research cycles
+
+7. Smart Spawning
+   - Avoids player defenses
+   - Scales with difficulty
+   - Responds to player actions
+
+Key Techniques:
+- Modular function design
+- Parameter passing to events
+- Complex conditional logic
+- State tracking with variables
+- Dynamic difficulty adjustment
+- Performance analysis
+- Recursive functions with termination
+}

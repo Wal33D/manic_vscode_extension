@@ -346,7 +346,7 @@ export class DatHoverProvider implements vscode.HoverProvider {
         vscode.Uri.joinPath(
           vscode.Uri.file(this.extensionPath),
           'images',
-          'tiles',
+          'resources',
           'crystal_energy.png'
         ).fsPath
       );
@@ -356,7 +356,7 @@ export class DatHoverProvider implements vscode.HoverProvider {
         vscode.Uri.joinPath(
           vscode.Uri.file(this.extensionPath),
           'images',
-          'tiles',
+          'resources',
           'ore_resource.png'
         ).fsPath
       );
@@ -366,7 +366,7 @@ export class DatHoverProvider implements vscode.HoverProvider {
         vscode.Uri.joinPath(
           vscode.Uri.file(this.extensionPath),
           'images',
-          'tiles',
+          'resources',
           'crystal_energy.png'
         ).fsPath
       );

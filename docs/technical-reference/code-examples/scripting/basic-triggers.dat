@@ -1,0 +1,210 @@
+info{
+rowcount:40
+colcount:40
+biome:rock
+creator:Example Scripts
+version:1.0
+name:Basic Triggers Example
+}
+
+script{
+// Basic Triggers Example
+// This demonstrates common trigger patterns in Manic Miners scripting
+
+// ======================
+// Variable Declarations
+// ======================
+int CrystalsCollected=0
+int BuildingsConstructed=0
+bool FirstCrystalFound=false
+bool BaseEstablished=false
+string CurrentObjective="Find your first Energy Crystal"
+
+// ======================
+// Initialization
+// ======================
+init::
+msg:Welcome to the Basic Triggers tutorial!;
+msg:Your objective: <CurrentObjective>;
+
+// ======================
+// Resource Collection Triggers
+// ======================
+
+// Crystal collection
+when(crystalCollected)[HandleCrystalCollection];
+
+HandleCrystalCollection::
+CrystalsCollected:CrystalsCollected+1;
+((FirstCrystalFound==false))[
+    FirstCrystalFound:true;
+    msg:Great! You found your first crystal!;
+    CurrentObjective:"Build a Tool Store";
+    msg:New objective: <CurrentObjective>;
+];
+((CrystalsCollected==5))[msg:You have collected 5 crystals!];
+((CrystalsCollected==10))[msg:Excellent! 10 crystals collected!];
+
+// ======================
+// Building Triggers
+// ======================
+
+// Tool Store construction
+when(buildings.BuildingToolStore_C > 0 and BaseEstablished==false)[EstablishBase];
+
+EstablishBase::
+BaseEstablished:true;
+msg:Base established! Your Tool Store is operational.;
+CurrentObjective:"Collect 25 Energy Crystals";
+msg:New objective: <CurrentObjective>;
+
+// Any building constructed
+when(buildingConstructed)[BuildingComplete];
+
+BuildingComplete::
+BuildingsConstructed:BuildingsConstructed+1;
+msg:Building constructed! Total buildings: <BuildingsConstructed>;
+
+// ======================
+// Location-Based Triggers
+// ======================
+
+// Discover hidden cave at specific location
+when(enter:20,20:miners)[DiscoverCave];
+
+DiscoverCave::
+msg:You've discovered a hidden crystal cave!;
+place:21,20,crystal;
+place:22,20,crystal;
+place:21,21,crystal;
+
+// Warning zone
+when(enter:30,30:any)[DangerWarning];
+
+DangerWarning::
+msg:WARNING: Dangerous area ahead!;
+msg:Lava detected nearby - proceed with caution!;
+
+// ======================
+// Time-Based Triggers
+// ======================
+
+// Periodic resource bonus
+timer ResourceBonus=60.0,120.0,120.0,GiveBonus
+
+GiveBonus::
+crystals:5;
+msg:Time bonus: 5 crystals awarded!;
+
+// Timed challenge
+timer ChallengeTimer=180.0,0.0,0.0,TimeUp
+
+TimeUp::
+((CrystalsCollected < 15))[
+    msg:Time's up! Challenge failed.;
+    lose;
+];
+
+// ======================
+// Victory Conditions
+// ======================
+
+// Primary objective
+when(CrystalsCollected >= 25 and BaseEstablished==true)[CheckVictory];
+
+CheckVictory::
+msg:Congratulations! All objectives completed!;
+wait:3;
+win;
+
+// ======================
+// Failure Conditions
+// ======================
+
+// All miners lost
+when(miners==0)[GameOver];
+
+GameOver::
+msg:All Rock Raiders have been lost!;
+wait:2;
+lose;
+
+// ======================
+// Special Events
+// ======================
+
+// Rockfall event
+when(random:100 < 5)[TriggerRockfall];
+
+TriggerRockfall::
+msg:ROCKFALL! Watch out!;
+rockfall:15,15;
+wait:0.5;
+rockfall:16,15;
+wait:0.5;
+rockfall:17,15;
+
+// Monster emergence
+when(CrystalsCollected >= 10 and random:100 < 10)[SpawnMonster];
+
+SpawnMonster::
+msg:A Rock Monster has emerged!;
+emerge:25,25,E,RockMonster,3;
+
+// ======================
+// Achievement System
+// ======================
+
+// Speed achievement
+when(CrystalsCollected >= 10 and time < 120)[SpeedAchievement];
+
+SpeedAchievement::
+msg:ACHIEVEMENT UNLOCKED: Speed Collector!;
+msg:10 crystals in under 2 minutes!;
+
+// No damage achievement
+when(CrystalsCollected >= 25 and damagetaken == 0)[NoDamageAchievement];
+
+NoDamageAchievement::
+msg:ACHIEVEMENT UNLOCKED: Flawless Victory!;
+msg:Completed without taking damage!;
+
+// ======================
+// Helper Functions
+// ======================
+
+// Debug information (triggered by pressing D key if supported)
+ShowDebug::
+msg:=== Debug Info ===;
+msg:Crystals: <CrystalsCollected>;
+msg:Buildings: <BuildingsConstructed>;
+msg:Time: <time>;
+msg:Miners: <miners>;
+
+}
+
+objectives{
+// Collect 25 crystals with an established base
+collect,crystal,25
+// Survive for 5 minutes
+survive,300
+}
+
+// Comments section for level notes
+comments{
+This level demonstrates basic trigger patterns including:
+- Resource collection tracking
+- Building construction events  
+- Location-based triggers
+- Timer-based events
+- Victory and failure conditions
+- Random events
+- Achievement system
+
+Key learning points:
+1. Use variables to track game state
+2. Chain triggers with event handlers
+3. Combine conditions for complex logic
+4. Provide player feedback with messages
+5. Create engaging gameplay with varied triggers
+}
