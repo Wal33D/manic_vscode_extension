@@ -52,7 +52,7 @@ describe('ScriptBuilder', () => {
 
       const script = builder.build();
 
-      expect(script).toContain('when(crystals>=25)[testVictory0]');
+      expect(script).toContain('when(crystals>=25)[Victory]');
       expect(script).toContain('msg:You win!;');
       expect(script).toContain('win;');
     });

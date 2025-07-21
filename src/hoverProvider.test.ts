@@ -149,8 +149,8 @@ describe('DatHoverProvider', () => {
 
       expect(hover).toBeInstanceOf(vscode.Hover);
       const content = (hover as any)?.contents;
-      expect(content.value).toContain('**Tile 38: Solid Rock Regular**');
-      expect(content.value).toContain('Impenetrable solid rock - cannot be drilled');
+      expect(content.value).toContain('**Tile 38: Solid Rock**');
+      expect(content.value).toContain('Impenetrable solid rock wall - cannot be drilled');
     });
 
     it('should provide hover for section names', () => {
