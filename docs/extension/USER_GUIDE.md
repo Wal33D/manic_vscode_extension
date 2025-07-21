@@ -309,6 +309,6 @@ AI-powered suggestions based on context.
 - Check documentation for updates
 
 ## Additional Resources
-- [DAT File Format Guide](./DAT_FORMAT.md)
-- [Tile Reference](./reference/TILE_REFERENCE.md)
+- [DAT File Format Guide](../DAT_FORMAT.md)
+- [Tile Reference](../game-reference/format/tile-reference.md)
 - [Developer Guide](./DEVELOPER_GUIDE.md)

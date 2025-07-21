@@ -396,4 +396,4 @@ async function generateTerrainAsync(params: Parameters) {
 - [Cave Generation](cave-generation.md) - Detailed cellular automata
 - [Resource Placement](resource-placement.md) - Resource distribution
 - [Common Patterns](../common-patterns.md) - Implementation tips
-- [Map Generator Source](https://github.com/example/map-generator) - Full implementation
+- [Code Examples](../code-examples/generation/) - Generation examples

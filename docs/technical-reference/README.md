@@ -23,48 +23,42 @@ These reference implementations are maintained as examples for:
 
 **Note:** These are reference implementations only - they are not integrated into the VSCode extension directly.
 
-## 📚 Components
+## 📚 Key Concepts
 
-### 1. Map Generator (`map-generator/`)
-A TypeScript/React application that procedurally generates Manic Miners maps.
+### 1. Map Generation
+Procedural generation techniques for creating Manic Miners maps.
 
 **Key Features:**
 - Procedural terrain generation with caves, ore deposits, and crystals
 - Support for different biomes (ice, rock, lava)
-- Web UI for parameter configuration
-- CLI tools for batch generation
-- Exports directly to `.dat` format
+- Cellular automata algorithms
+- Resource distribution strategies
+- Export to `.dat` format
 
-**Technologies:** TypeScript, React, MobX, Canvas API
+**See:** [Generation Algorithms](algorithms/) | [Code Examples](code-examples/generation/)
 
-[Full Documentation →](./map-generator/README.md)
-
-### 2. Map Parser (`map-parser/`)
-A robust parser library for reading and manipulating Manic Miners map files.
+### 2. Map Parsing
+Robust parsing techniques for reading and manipulating map files.
 
 **Key Features:**
 - Complete parsing of all map sections
-- Object-oriented data model
-- Serialization/deserialization
-- Built with Chevrotain parser generator
+- Regex-based section splitting
+- Grid data handling
+- Validation and error handling
 
-**Technologies:** TypeScript, Chevrotain, Lodash
+**See:** [Parsing Patterns](parsing-patterns.md) | [Code Examples](code-examples/parsing/)
 
-[Full Documentation →](./map-parser/README.md)
-
-### 3. Map Visualizer (`map-visualizer/`)
-Tools for visualizing and analyzing existing map files.
+### 3. Map Visualization
+Tools and techniques for visualizing and analyzing map files.
 
 **Key Features:**
-- Generate PNG previews of maps
-- Create thumbnail images
-- Calculate map statistics
-- Analyze resource distribution
-- Map integrity checking
+- PNG preview generation
+- Thumbnail creation
+- Statistical analysis
+- Heat map visualization
+- Performance optimization
 
-**Technologies:** TypeScript, Sharp, Canvas
-
-[Full Documentation →](./map-visualizer/README.md)
+**See:** [Visualization Techniques](visualization-techniques.md) | [Code Examples](code-examples/visualization/)
 
 ## 🗺️ Map File Format
 
