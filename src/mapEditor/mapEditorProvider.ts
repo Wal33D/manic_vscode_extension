@@ -5,6 +5,7 @@ import { getTileColor } from '../mapPreview/colorMap';
 import { getTileName } from '../data/tileDefinitions';
 import { AutoTiler, supportsAutoTiling } from './autoTiling';
 import { MapEditorValidator } from './mapEditorValidator';
+import { MapTemplateManager, MapTemplate } from './mapTemplates';
 
 export interface PaintTool {
   type: 'paint' | 'fill' | 'line' | 'rectangle' | 'picker' | 'select' | 'stamp';
@@ -182,6 +183,21 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
           break;
         case 'fixValidationIssue':
           await this.handleFixValidationIssue(document, message.issue, message.fix);
+          break;
+        case 'getTemplates':
+          await this.handleGetTemplates(webviewPanel.webview);
+          break;
+        case 'useTemplate':
+          await this.handleUseTemplate(document, webviewPanel.webview, message.template);
+          break;
+        case 'saveAsTemplate':
+          await this.handleSaveAsTemplate(
+            webviewPanel.webview,
+            message.name,
+            message.description,
+            message.objectives,
+            message.tiles
+          );
           break;
       }
     });
@@ -986,6 +1002,10 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             <button id="validateBtn" title="Validate Map (V)">✓ Validate</button>
           </div>
           
+          <div class="tool-group">
+            <button id="templateBtn" title="Map Templates (T)">📋 Templates</button>
+          </div>
+          
           <div class="coordinates">
             <span id="coords">Row: -, Col: -</span>
           </div>
@@ -1058,9 +1078,278 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
         let mapLayers = ${JSON.stringify(layers)};
         let currentLayerId = 'base';
       </script>
+      
+      <!-- Template Gallery -->
+      <div class="template-gallery" id="templateGallery">
+        <div class="template-gallery-content">
+          <div class="template-header">
+            <h2>Map Templates</h2>
+            <button class="template-close" id="templateClose">&times;</button>
+          </div>
+          <div class="template-body">
+            <div class="template-categories" id="templateCategories">
+              <div class="template-category active" data-category="all">
+                <span class="template-category-icon">📋</span>
+                <span>All Templates</span>
+              </div>
+              <div class="template-category" data-category="tutorial">
+                <span class="template-category-icon">🎓</span>
+                <span>Tutorial</span>
+              </div>
+              <div class="template-category" data-category="combat">
+                <span class="template-category-icon">⚔️</span>
+                <span>Combat</span>
+              </div>
+              <div class="template-category" data-category="puzzle">
+                <span class="template-category-icon">🧩</span>
+                <span>Puzzle</span>
+              </div>
+              <div class="template-category" data-category="exploration">
+                <span class="template-category-icon">🗺️</span>
+                <span>Exploration</span>
+              </div>
+              <div class="template-category" data-category="resource">
+                <span class="template-category-icon">💎</span>
+                <span>Resource</span>
+              </div>
+              <div class="template-category" data-category="custom">
+                <span class="template-category-icon">⭐</span>
+                <span>Custom</span>
+              </div>
+            </div>
+            <div class="template-grid" id="templateGrid">
+              <!-- Templates will be inserted here -->
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Template Details Panel -->
+      <div class="template-details" id="templateDetails">
+        <div class="template-details-header">
+          <h3 id="templateDetailsTitle">Template Details</h3>
+          <button class="template-details-close" id="templateDetailsClose">&times;</button>
+        </div>
+        <div class="template-details-content">
+          <div class="template-preview-large" id="templatePreviewLarge">
+            <canvas id="templatePreviewCanvas"></canvas>
+          </div>
+          <div class="template-section">
+            <h4>Description</h4>
+            <p id="templateDetailsDescription"></p>
+          </div>
+          <div class="template-section">
+            <h4>Objectives</h4>
+            <ul class="template-objectives-list" id="templateDetailsObjectives"></ul>
+          </div>
+          <div class="template-section">
+            <h4>Map Properties</h4>
+            <div id="templateDetailsProperties"></div>
+          </div>
+        </div>
+        <div class="template-actions">
+          <button class="template-use-btn" id="templateUseBtn">Use Template</button>
+          <button class="template-customize-btn" id="templateCustomizeBtn">Customize</button>
+        </div>
+      </div>
+      
+      <!-- Save as Template Dialog -->
+      <div class="save-template-dialog" id="saveTemplateDialog" style="display: none;">
+        <div class="save-template-content">
+          <h3>Save as Template</h3>
+          <div class="save-template-field">
+            <label for="templateName">Template Name</label>
+            <input type="text" id="templateName" placeholder="My Custom Template">
+          </div>
+          <div class="save-template-field">
+            <label for="templateDescription">Description</label>
+            <textarea id="templateDescription" placeholder="Describe your template..."></textarea>
+          </div>
+          <div class="save-template-field">
+            <label for="templateObjectives">Objectives (one per line)</label>
+            <textarea id="templateObjectives" placeholder="Collect 10 crystals&#10;Build a base&#10;Defeat all enemies"></textarea>
+          </div>
+          <div class="save-template-buttons">
+            <button class="save-template-save" id="saveTemplateConfirm">Save Template</button>
+            <button class="save-template-cancel" id="saveTemplateCancel">Cancel</button>
+          </div>
+        </div>
+      </div>
+      
       <script src="${scriptUri}"></script>
     </body>
     </html>`;
+  }
+
+  private async handleGetTemplates(webview: vscode.Webview): Promise<void> {
+    try {
+      const templates = MapTemplateManager.getAllTemplates();
+      webview.postMessage({
+        type: 'templates',
+        templates: templates.map(t => ({
+          id: t.id,
+          name: t.name,
+          description: t.description,
+          category: t.category,
+          difficulty: t.difficulty,
+          size: t.size,
+          tiles: t.tiles,
+          objectives: t.objectives,
+          info: t.info,
+        })),
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error loading templates: ${errorMessage}`);
+    }
+  }
+
+  private async handleUseTemplate(
+    document: vscode.TextDocument,
+    webview: vscode.Webview,
+    template: MapTemplate
+  ): Promise<void> {
+    try {
+      const parser = new DatFileParser(document.getText());
+      const datFile = parser.parse();
+
+      // Update map dimensions
+      datFile.info.rowcount = template.size.rows;
+      datFile.info.colcount = template.size.cols;
+
+      // Update tiles
+      datFile.tiles = template.tiles;
+
+      // Note: Template objectives are simple strings, not parsed Objective types
+      // They would need to be parsed properly to convert to Objective[] type
+
+      // Update info section if template has additional info
+      if (template.info) {
+        Object.assign(datFile.info, template.info);
+      }
+
+      // Convert back to .dat format
+      const newContent = this.serializeDatFile(datFile);
+
+      // Apply the edit
+      const edit = new vscode.WorkspaceEdit();
+      edit.replace(document.uri, new vscode.Range(0, 0, document.lineCount, 0), newContent);
+
+      await vscode.workspace.applyEdit(edit);
+
+      // Notify webview
+      webview.postMessage({
+        type: 'templateLoaded',
+        tiles: template.tiles,
+      });
+
+      vscode.window.showInformationMessage(`Template "${template.name}" loaded successfully`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error using template: ${errorMessage}`);
+    }
+  }
+
+  private async handleSaveAsTemplate(
+    webview: vscode.Webview,
+    name: string,
+    description: string,
+    objectives: string[],
+    tiles: number[][]
+  ): Promise<void> {
+    try {
+      const template = MapTemplateManager.createCustomTemplate(
+        name,
+        description,
+        tiles,
+        objectives
+      );
+
+      // Save to workspace state
+      const context = (this as any).context;
+      if (context) {
+        const savedTemplates = context.workspaceState.get('customTemplates', []) as MapTemplate[];
+        savedTemplates.push(template);
+        await context.workspaceState.update('customTemplates', savedTemplates);
+
+        // Add to template manager
+        MapTemplateManager.addTemplate(template);
+      }
+
+      webview.postMessage({
+        type: 'templateSaved',
+      });
+
+      vscode.window.showInformationMessage(`Template "${name}" saved successfully`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error saving template: ${errorMessage}`);
+    }
+  }
+
+  private serializeDatFile(datFile: any): string {
+    let content = '';
+
+    // Info section
+    content += '[info]\n';
+    content += `rowcount:${datFile.info.rowcount}\n`;
+    content += `colcount:${datFile.info.colcount}\n`;
+    if (datFile.info.camerapos) {
+      content += `camerapos:${datFile.info.camerapos}\n`;
+    }
+    if (datFile.info.biome) {
+      content += `biome:${datFile.info.biome}\n`;
+    }
+    if (datFile.info.creator) {
+      content += `creator:${datFile.info.creator}\n`;
+    }
+    content += '\n';
+
+    // Tiles section
+    content += '[tiles]\n';
+    for (const row of datFile.tiles) {
+      content += row.join(',') + '\n';
+    }
+    content += '\n';
+
+    // Height section (if exists)
+    if (datFile.height && datFile.height.length > 0) {
+      content += '[height]\n';
+      for (const row of datFile.height) {
+        content += row.join(',') + '\n';
+      }
+      content += '\n';
+    }
+
+    // Objectives section (handle both parsed Objective[] and string[])
+    if (datFile.objectives && datFile.objectives.length > 0) {
+      content += '[objectives]\n';
+      // Check if objectives are already strings or need to be serialized
+      const objectiveStrings = datFile.objectives.map((obj: any) => {
+        if (typeof obj === 'string') {
+          return obj;
+        }
+        // Handle parsed objective objects - simplified serialization
+        return JSON.stringify(obj);
+      });
+      content += objectiveStrings.join('\n') + '\n';
+      content += '\n';
+    }
+
+    // Buildings section (if exists)
+    if (datFile.buildings && datFile.buildings.length > 0) {
+      content += '[buildings]\n';
+      content += datFile.buildings.join('\n') + '\n';
+      content += '\n';
+    }
+
+    // Script section (if exists)
+    if (datFile.script) {
+      content += '[script]\n';
+      content += datFile.script + '\n';
+    }
+
+    return content;
   }
 
   private getErrorHtml(message: string): string {
