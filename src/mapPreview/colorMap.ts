@@ -1,3 +1,9 @@
+/**
+ * Color definitions for Manic Miners tiles
+ * Based on reference implementations from map-generator and map-visualizer
+ * Colors should match the game's radar/map view for consistency
+ */
+
 interface Color {
   r: number;
   g: number;
@@ -7,6 +13,10 @@ interface Color {
 
 interface ColorMap {
   [key: number]: Color;
+}
+
+interface BiomeColorMap {
+  [key: string]: Color;
 }
 
 export function getColorMap(): ColorMap {
@@ -133,4 +143,17 @@ export function getTileColor(tileId: number): Color {
 export function getRgbaString(color: Color): string {
   const alpha = color.a !== undefined ? color.a : 1;
   return `rgba(${color.r}, ${color.g}, ${color.b}, ${alpha})`;
+}
+
+export function getBiomeColors(): BiomeColorMap {
+  return {
+    rock: { r: 120, g: 115, b: 110, a: 0.2 }, // Rocky, natural grey with transparency
+    lava: { r: 255, g: 50, b: 0, a: 0.2 }, // Lava, orange with transparency
+    ice: { r: 150, g: 200, b: 240, a: 0.2 }, // Bluish for ice biome
+  };
+}
+
+export function getBiomeColor(biome: string): Color {
+  const biomeColors = getBiomeColors();
+  return biomeColors[biome.toLowerCase()] || biomeColors.rock;
 }
