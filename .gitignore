@@ -58,6 +58,6 @@ additional_context_manic_miner_dat_files
 !/samples/**/*.md
 
 # Game installation directory
-/game-install/**
-!/game-install/.gitkeep
-!/game-install/*.md
+/samples/install/**
+!/samples/install/**/.gitkeep
+!/samples/install/**/*.md
