@@ -270,6 +270,12 @@
         "title": "Show Heat Map Analysis",
         "category": "Manic Miners",
         "icon": "$(graph-line)"
+      },
+      {
+        "command": "manicMiners.show3DTerrain",
+        "title": "Show 3D Terrain Preview",
+        "category": "Manic Miners",
+        "icon": "$(map-filled)"
       }
     ],
     "hoverProviders": [
@@ -306,6 +312,13 @@
           "name": "Heat Map",
           "icon": "$(graph-line)",
           "contextualTitle": "Manic Miners Heat Map Analysis"
+        },
+        {
+          "type": "webview",
+          "id": "manicMiners.terrain3D",
+          "name": "3D Terrain",
+          "icon": "$(map-filled)",
+          "contextualTitle": "Manic Miners 3D Terrain Preview"
         }
       ]
     },

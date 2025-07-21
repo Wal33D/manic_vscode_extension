@@ -28,6 +28,7 @@ import { AccessibilityManager } from './accessibility/accessibilityManager';
 import { AccessibleMapPreviewProvider } from './accessibility/accessibleMapPreview';
 import { registerAccessibilityCommands } from './accessibility/accessibilityCommands';
 import { HeatMapProvider } from './heatmap/heatMapProvider';
+import { Terrain3DProvider } from './terrain3d/terrain3DProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -236,6 +237,44 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.executeCommand('manicMiners.heatMap.focus');
   });
   context.subscriptions.push(showHeatMapCommand);
+
+  // Register 3D Terrain Provider
+  const terrain3DProvider = new Terrain3DProvider(context.extensionUri);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(Terrain3DProvider.viewType, terrain3DProvider)
+  );
+
+  // Update 3D terrain when active editor changes
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(editor => {
+      if (editor && editor.document.languageId === 'manicminers') {
+        terrain3DProvider.updateDocument(editor.document);
+      }
+    })
+  );
+
+  // Update 3D terrain when document changes
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(e => {
+      if (
+        e.document.languageId === 'manicminers' &&
+        e.document === vscode.window.activeTextEditor?.document
+      ) {
+        terrain3DProvider.updateDocument(e.document);
+      }
+    })
+  );
+
+  // Initialize 3D terrain with current document
+  if (vscode.window.activeTextEditor?.document.languageId === 'manicminers') {
+    terrain3DProvider.updateDocument(vscode.window.activeTextEditor.document);
+  }
+
+  // Register 3D terrain command
+  const show3DTerrainCommand = vscode.commands.registerCommand('manicMiners.show3DTerrain', () => {
+    vscode.commands.executeCommand('manicMiners.terrain3D.focus');
+  });
+  context.subscriptions.push(show3DTerrainCommand);
 }
 
 export function deactivate() {}
