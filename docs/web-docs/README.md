@@ -94,4 +94,4 @@ The terms `non-deterministic` and `undefined` are used interchangeably in this d
 ### Documentation
  - [Extension User Guide](../../docs/extension/USER_GUIDE.md)
  - [Extension Developer Guide](../../docs/extension/DEVELOPER_GUIDE.md)
- - [Map Reference Implementations](../../map-reference-implementations/README.md)
+ - [Technical Reference](../../docs/technical-reference/README.md)

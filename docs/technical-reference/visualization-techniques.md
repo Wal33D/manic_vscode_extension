@@ -861,4 +861,4 @@ function getOptimalScale(mapSize: number): number {
 - [Color Mapping Reference](../game-reference/format/tile-reference.md)
 - [Canvas API Documentation](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API)
 - [Sharp Image Processing](https://sharp.pixelplumbing.com/)
-- [Map Visualizer Source](https://github.com/your-repo/map-visualizer)
+- [Performance Guide](performance.md)

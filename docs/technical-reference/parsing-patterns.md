@@ -714,4 +714,4 @@ for (const testCase of edgeCases) {
 - [DAT Format Specification](../game-reference/format/overview.md)
 - [Grid Data Structures](algorithms/cave-generation.md#grid-systems)
 - [Validation Rules](performance.md#validation)
-- [Map Parser Source](https://github.com/your-repo/map-parser)
+- [Code Examples](code-examples/parsing/)

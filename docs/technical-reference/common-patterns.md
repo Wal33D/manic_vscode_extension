@@ -398,7 +398,7 @@ const playable = checkPlayability(map); // Custom logic needed
 
 ## See Also
 
-- [Map Generator README](./map-generator/README.md) - Generation algorithms
-- [Map Parser README](./map-parser/README.md) - Parsing details
-- [Map Visualizer README](./map-visualizer/README.md) - Rendering patterns
-- [Main README](./README.md) - Format overview
+- [Generation Algorithms](algorithms/terrain-generation.md) - Terrain generation details
+- [Parsing Patterns](parsing-patterns.md) - Advanced parsing techniques
+- [Visualization Techniques](visualization-techniques.md) - Rendering patterns
+- [Format Overview](../game-reference/format/overview.md) - Complete DAT format
