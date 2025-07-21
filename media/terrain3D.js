@@ -60,8 +60,9 @@
         camera.lookAt(this.target);
       },
       reset: function() {
-        camera.position.set(50, 50, 50);
-        this.target.set(0, 0, 0);
+        const maxDim = Math.max(cols || 50, rows || 50);
+        camera.position.set(maxDim, maxDim * 0.8, maxDim * 1.5);
+        this.target.set((cols || 50) / 2, 0, (rows || 50) / 2);
         this.update();
       }
     };
@@ -231,7 +232,8 @@
       colorMapSize: Object.keys(colorMap).length
     });
 
-    // Create geometry
+    // Create geometry - Note: PlaneGeometry takes (width, height) = (cols, rows)
+    // The segments are one less than the number of vertices
     const geometry = new THREE.PlaneGeometry(cols, rows, cols - 1, rows - 1);
     geometry.rotateX(-Math.PI / 2);
 
@@ -283,8 +285,9 @@
     scene.add(wireframe);
 
     // Center camera on terrain
+    const maxDim = Math.max(cols, rows);
     controls.target.set(cols / 2, 0, rows / 2);
-    camera.position.set(cols, cols * 0.8, rows * 1.5);
+    camera.position.set(maxDim, maxDim * 0.8, maxDim * 1.5);
     controls.update();
   }
 
@@ -342,17 +345,18 @@
   }
 
   function setView(viewType) {
+    const maxDim = Math.max(cols, rows);
     switch (viewType) {
       case 'top':
-        camera.position.set(cols / 2, cols * 1.5, rows / 2);
+        camera.position.set(cols / 2, maxDim * 1.5, rows / 2);
         camera.lookAt(cols / 2, 0, rows / 2);
         break;
       case 'iso':
-        camera.position.set(cols, cols * 0.8, rows * 1.5);
+        camera.position.set(maxDim, maxDim * 0.8, maxDim * 1.5);
         camera.lookAt(cols / 2, 0, rows / 2);
         break;
       case 'side':
-        camera.position.set(cols * 1.5, cols * 0.5, rows / 2);
+        camera.position.set(cols * 1.5, maxDim * 0.5, rows / 2);
         camera.lookAt(cols / 2, 0, rows / 2);
         break;
       case 'reset':
