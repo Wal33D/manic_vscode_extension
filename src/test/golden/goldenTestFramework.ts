@@ -30,7 +30,7 @@ export class GoldenTestFramework {
   private testMapsDir: string;
   private outputDir: string;
   private options: GoldenTestOptions;
-  
+
   constructor(
     goldenDir: string,
     testMapsDir: string,
@@ -41,23 +41,23 @@ export class GoldenTestFramework {
     this.testMapsDir = testMapsDir;
     this.outputDir = outputDir;
     this.options = options;
-    
+
     // Ensure directories exist
     this.ensureDirectoryExists(goldenDir);
     this.ensureDirectoryExists(outputDir);
   }
-  
+
   /**
    * Run all golden tests
    */
   public async runAllTests(): Promise<GoldenTestResult[]> {
     const results: GoldenTestResult[] = [];
     const testFiles = this.getTestFiles();
-    
+
     for (const testFile of testFiles) {
       const result = await this.runTest(testFile);
       results.push(result);
-      
+
       if (this.options.verbose) {
         console.log(`${result.passed ? '✓' : '✗'} ${result.testName}`);
         if (!result.passed && result.differences) {
@@ -65,66 +65,67 @@ export class GoldenTestFramework {
         }
       }
     }
-    
+
     return results;
   }
-  
+
   /**
    * Run a single golden test
    */
   public async runTest(testFileName: string): Promise<GoldenTestResult> {
     const testName = path.basename(testFileName, '.dat');
-    
+
     try {
       // Read test file
       const testFilePath = path.join(this.testMapsDir, testFileName);
       const content = fs.readFileSync(testFilePath, 'utf-8');
-      
+
       // Parse the file
       const parser = new DatFileParser(content);
       const datFile = parser.parse();
-      
+
       // Validate the file
       const validator = new DatFileValidator();
       const validationErrors = validator.validate(datFile);
-      
+
       // Enhanced script validation if script exists
       let scriptValidationErrors: any[] = [];
       if (datFile.script) {
         const scriptValidator = new EnhancedScriptValidator();
         scriptValidationErrors = scriptValidator.validate(datFile.script);
       }
-      
+
       // Generate output
       const output = this.generateTestOutput(datFile, validationErrors, scriptValidationErrors);
-      
+
       // Compare with golden
       const goldenPath = path.join(this.goldenDir, `${testName}.golden`);
       const outputPath = path.join(this.outputDir, `${testName}.output`);
-      
+
       // Write output for debugging
       fs.writeFileSync(outputPath, output);
-      
+
       if (this.options.updateGoldens || !fs.existsSync(goldenPath)) {
         // Update golden file
         fs.writeFileSync(goldenPath, output);
         return {
           passed: true,
           testName,
-          differences: this.options.updateGoldens ? ['Golden file updated'] : ['Golden file created'],
+          differences: this.options.updateGoldens
+            ? ['Golden file updated']
+            : ['Golden file created'],
         };
       }
-      
+
       // Compare with existing golden
       const golden = fs.readFileSync(goldenPath, 'utf-8');
       const differences = this.compareOutputs(output, golden);
-      
+
       return {
         passed: differences.length === 0,
         testName,
         differences: differences.length > 0 ? differences : undefined,
       };
-      
     } catch (error) {
       return {
         passed: false,
@@ -133,7 +134,7 @@ export class GoldenTestFramework {
       };
     }
   }
-  
+
   /**
    * Generate test output for comparison
    */
@@ -143,11 +144,11 @@ export class GoldenTestFramework {
     scriptValidationErrors: any[]
   ): string {
     const output: string[] = [];
-    
+
     // Header
     output.push('=== PARSED DAT FILE ===');
     output.push('');
-    
+
     // Info section
     if (datFile.info) {
       output.push('[INFO]');
@@ -158,27 +159,32 @@ export class GoldenTestFramework {
       output.push(`levelname: ${datFile.info.levelname || 'not specified'}`);
       output.push('');
     }
-    
+
     // Tiles summary
     if (datFile.tiles) {
       output.push('[TILES]');
       output.push(`dimensions: ${datFile.tiles.length}x${datFile.tiles[0]?.length || 0}`);
       const uniqueTiles = new Set(datFile.tiles.flat());
       output.push(`unique tiles: ${uniqueTiles.size}`);
-      output.push(`tile IDs: ${Array.from(uniqueTiles).sort((a, b) => a - b).join(', ')}`);
+      output.push(
+        `tile IDs: ${Array.from(uniqueTiles)
+          .sort((a, b) => Number(a) - Number(b))
+          .join(', ')}`
+      );
       output.push('');
     }
-    
+
     // Resources
     if (datFile.resources) {
       output.push('[RESOURCES]');
-      const crystalCount = datFile.resources.crystals?.flat().filter((x: number) => x > 0).length || 0;
+      const crystalCount =
+        datFile.resources.crystals?.flat().filter((x: number) => x > 0).length || 0;
       const oreCount = datFile.resources.ore?.flat().filter((x: number) => x > 0).length || 0;
       output.push(`crystals: ${crystalCount} tiles`);
       output.push(`ore: ${oreCount} tiles`);
       output.push('');
     }
-    
+
     // Objectives
     if (datFile.objectives && datFile.objectives.length > 0) {
       output.push('[OBJECTIVES]');
@@ -187,7 +193,7 @@ export class GoldenTestFramework {
       });
       output.push('');
     }
-    
+
     // Entities
     const entitySections = ['buildings', 'vehicles', 'creatures', 'miners'];
     entitySections.forEach(section => {
@@ -203,13 +209,13 @@ export class GoldenTestFramework {
         output.push('');
       }
     });
-    
+
     // Script
     if (datFile.script) {
       output.push('[SCRIPT]');
       output.push(`variables: ${datFile.script.variables.size}`);
       output.push(`events: ${datFile.script.events.length}`);
-      
+
       // Count command types
       const commandCounts = new Map<string, number>();
       datFile.script.events.forEach((event: any) => {
@@ -218,7 +224,7 @@ export class GoldenTestFramework {
           commandCounts.set(cmd.command, count + 1);
         });
       });
-      
+
       output.push('commands:');
       Array.from(commandCounts.entries())
         .sort((a, b) => b[1] - a[1])
@@ -227,22 +233,26 @@ export class GoldenTestFramework {
         });
       output.push('');
     }
-    
+
     // Validation results
     output.push('[VALIDATION]');
     output.push(`errors: ${validationErrors.filter(e => e.severity === 'error').length}`);
     output.push(`warnings: ${validationErrors.filter(e => e.severity === 'warning').length}`);
-    
+
     if (scriptValidationErrors.length > 0) {
-      output.push(`script errors: ${scriptValidationErrors.filter(e => e.severity === 'error').length}`);
-      output.push(`script warnings: ${scriptValidationErrors.filter(e => e.severity === 'warning').length}`);
+      output.push(
+        `script errors: ${scriptValidationErrors.filter(e => e.severity === 'error').length}`
+      );
+      output.push(
+        `script warnings: ${scriptValidationErrors.filter(e => e.severity === 'warning').length}`
+      );
     }
-    
+
     // List first few errors/warnings
     const allErrors = [...validationErrors, ...scriptValidationErrors]
       .filter(e => e.severity === 'error')
       .slice(0, 5);
-    
+
     if (allErrors.length > 0) {
       output.push('');
       output.push('First errors:');
@@ -250,10 +260,10 @@ export class GoldenTestFramework {
         output.push(`  [${err.section}] ${err.message}`);
       });
     }
-    
+
     return output.join('\n');
   }
-  
+
   /**
    * Compare two outputs and return differences
    */
@@ -261,23 +271,23 @@ export class GoldenTestFramework {
     const actualLines = actual.split('\n');
     const expectedLines = expected.split('\n');
     const differences: string[] = [];
-    
+
     const maxLines = Math.max(actualLines.length, expectedLines.length);
-    
+
     for (let i = 0; i < maxLines; i++) {
       const actualLine = actualLines[i] || '';
       const expectedLine = expectedLines[i] || '';
-      
+
       if (actualLine !== expectedLine) {
         differences.push(`Line ${i + 1}:`);
         differences.push(`  Expected: ${expectedLine}`);
         differences.push(`  Actual:   ${actualLine}`);
       }
     }
-    
+
     return differences;
   }
-  
+
   /**
    * Get all test files
    */
@@ -285,12 +295,13 @@ export class GoldenTestFramework {
     if (!fs.existsSync(this.testMapsDir)) {
       return [];
     }
-    
-    return fs.readdirSync(this.testMapsDir)
+
+    return fs
+      .readdirSync(this.testMapsDir)
       .filter(file => file.endsWith('.dat'))
       .sort();
   }
-  
+
   /**
    * Ensure directory exists
    */
@@ -299,7 +310,7 @@ export class GoldenTestFramework {
       fs.mkdirSync(dir, { recursive: true });
     }
   }
-  
+
   /**
    * Generate summary report
    */
@@ -307,14 +318,14 @@ export class GoldenTestFramework {
     const passed = results.filter(r => r.passed).length;
     const failed = results.filter(r => !r.passed).length;
     const total = results.length;
-    
+
     const summary: string[] = [];
     summary.push('=== GOLDEN TEST SUMMARY ===');
     summary.push(`Total tests: ${total}`);
     summary.push(`Passed: ${passed}`);
     summary.push(`Failed: ${failed}`);
     summary.push('');
-    
+
     if (failed > 0) {
       summary.push('Failed tests:');
       results
@@ -328,7 +339,7 @@ export class GoldenTestFramework {
           }
         });
     }
-    
+
     return summary.join('\n');
   }
 }

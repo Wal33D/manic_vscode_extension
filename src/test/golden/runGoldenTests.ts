@@ -19,15 +19,10 @@ const testMapsDir = path.join(projectRoot, 'src', 'test', 'golden', 'test-maps')
 const outputDir = path.join(projectRoot, 'src', 'test', 'golden', 'output');
 
 // Create test framework
-const framework = new GoldenTestFramework(
-  goldenDir,
-  testMapsDir,
-  outputDir,
-  {
-    updateGoldens,
-    verbose,
-  }
-);
+const framework = new GoldenTestFramework(goldenDir, testMapsDir, outputDir, {
+  updateGoldens,
+  verbose,
+});
 
 // Run tests
 async function runTests() {
@@ -36,9 +31,9 @@ async function runTests() {
   console.log(`Test maps directory: ${testMapsDir}`);
   console.log(`Update goldens: ${updateGoldens}`);
   console.log('');
-  
+
   let results;
-  
+
   if (specificTest) {
     // Run single test
     console.log(`Running single test: ${specificTest}`);
@@ -48,12 +43,12 @@ async function runTests() {
     // Run all tests
     results = await framework.runAllTests();
   }
-  
+
   // Generate summary
   const summary = framework.generateSummary(results);
   console.log('');
   console.log(summary);
-  
+
   // Exit with appropriate code
   const failed = results.filter(r => !r.passed).length;
   process.exit(failed > 0 ? 1 : 0);
