@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Manic Miners VSCode Extension - Documentation</title>
+    <meta name="description" content="Documentation for Manic Miners VSCode Extension - DAT file format, scripting reference, and tools">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <link rel="icon" href="_media/favicon.ico">
+    <!-- Theme: Simple Dark -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">
+    <link rel="stylesheet" href="StyleTweaks.css">
+    <style>
+      /* Additional styles for better local viewing */
+      .local-notice {
+        background: #ff6b6b;
+        color: white;
+        padding: 20px;
+        margin: 20px;
+        border-radius: 5px;
+        font-size: 16px;
+        display: none;
+      }
+      .local-notice h3 {
+        margin-top: 0;
+      }
+      .local-notice code {
+        background: rgba(255,255,255,0.2);
+        padding: 2px 6px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="local-notice" id="localNotice">
+        <h3>📋 Local File Access Notice</h3>
+        <p>You're viewing this documentation locally. For the best experience, please serve it through a web server.</p>
+        <p><strong>Quick solutions:</strong></p>
+        <ul>
+          <li>Use VS Code's Live Server extension</li>
+          <li>Run <code>python -m http.server 8000</code> in this directory</li>
+          <li>Run <code>npx http-server</code> in this directory</li>
+          <li>Use any other local web server</li>
+        </ul>
+        <p>Then navigate to <code>http://localhost:8000</code> (or your server's port)</p>
+      </div>
+    </div>
+    
+    <script>
+      // Check if running locally and show notice
+      if (window.location.protocol === 'file:') {
+        document.getElementById('localNotice').style.display = 'block';
+      }
+      
+      window.$docsify = {
+        repo: 'https://github.com/Wal33D/vscode-manic-miners',
+        name: 'Manic Miners VSCode Extension',
+        auto2top: true,
+        loadSidebar: true,
+        coverpage: true,
+        maxLevel: 4,
+        subMaxLevel: 3,
+        homepage: 'README.md',
+        fallbackLanguages: ['en'],
+        notFoundPage: true,
+        search: {
+          noData: {
+            '/': 'No results found!'
+          },
+          paths: 'auto',
+          placeholder: {
+            '/': 'Search documentation...'
+          },
+          depth: 3
+        },
+        // Handle local file access better
+        requestHeaders: {
+          'cache-control': 'no-cache'
+        },
+        // Custom 404 page
+        notFoundPage: {
+          '/': '404 - Page not found. Please check the URL or use the sidebar navigation.'
+        }
+      }
+    </script>
+    
+    <!-- Required -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/docsify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+
+    <!-- Recommended plugins -->
+    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2/dist/docsify-copy-code.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-typescript.min.js"></script>
+  </body>
+</html>

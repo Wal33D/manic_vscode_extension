@@ -1,8 +1,17 @@
-# Scripting
+# Manic Miners VSCode Extension Documentation
 
-NOTE: If you are reading this on the main github repro - click to navigate to this documentation:  https://manicminers.github.io/docs/#/README
+Welcome to the comprehensive documentation for the Manic Miners VSCode Extension. This documentation covers the DAT file format, scripting language, and all the tools available in the extension.
 
-Manic Miner maps are text files ending in .DAT extension.
+## Quick Links
+
+- [VSCode Extension Features](../../README.md)
+- [DAT File Format](_pages/DATFileFormat)
+- [Scripting Guide](_pages/ScriptingStructure)
+- [Tile Reference](_pages/DATTileReference)
+
+## Overview
+
+Manic Miners maps are text files ending in .DAT extension.
 
 The map file is organized into sections. A complete description of each section is documented here: [DAT file format](_pages/DatFileFormat)
 
@@ -39,6 +48,18 @@ Reserved words are here: [Reserved Words](_pages/ReservedWords)
 
 >The game provides a handy log that tells you exactly what has occurred and if any errors happen. Be aware that these are limited in number of events so fast timers or large scripts may exceed these limits making the debugging portion of your map more difficult. That said, scripts of tens of thousands of lines and thousands of event chains and variables do work as expected - so far no real limits have been discovered on size of script, number of event chains or variables.
 
+## VSCode Extension Features
+
+The VSCode extension provides powerful tools to help with map development:
+
+- **Syntax Highlighting**: Full syntax highlighting for DAT files
+- **IntelliSense**: Auto-completion for tiles, buildings, vehicles, and script commands
+- **Validation**: Real-time error checking and validation
+- **Hover Information**: Detailed information about tiles and commands on hover
+- **Map Preview**: Visual preview of your map layout
+- **Quick Actions**: Common map editing operations
+- **Snippets**: Code snippets for common patterns
+
 ![ShowLogs_Screenshot](_media/EditorScriptingOptions.png "Script Button")
 
 ![ShowLog_Screenshot](_media/EditorShowLogs.png "Show Logs")
@@ -59,6 +80,18 @@ The [Events](_pages/Events) page has misc information related to events includin
 The terms `non-deterministic` and `undefined` are used interchangeably in this documentation. They are both referring to either behavior or syntax that cannot be depended upon by the map developer. Basically - don't do that.
 
 ## Links
+
+### VSCode Extension
+ - [Extension on VS Marketplace](https://marketplace.visualstudio.com/items?itemName=manic-miners.dat)
+ - [Extension GitHub Repository](https://github.com/Wal33D/vscode-manic-miners)
+ - [Report Issues](https://github.com/Wal33D/vscode-manic-miners/issues)
+
+### Manic Miners Community
  - [Manic Miners Discord](https://discord.gg/85k8JHz)
  - [Manic Miners Homepage](https://manicminers.baraklava.com/)
  - [Manic Miners Wiki](https://manicminers.fandom.com/)
+
+### Documentation
+ - [Extension User Guide](../../docs/extension/USER_GUIDE.md)
+ - [Extension Developer Guide](../../docs/extension/DEVELOPER_GUIDE.md)
+ - [Map Reference Implementations](../../map-reference-implementations/README.md)
