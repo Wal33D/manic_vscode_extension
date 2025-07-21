@@ -312,6 +312,18 @@
         "title": "Generate New Level",
         "category": "Manic Miners",
         "icon": "$(add)"
+      },
+      {
+        "command": "manicMiners.openMapEditor",
+        "title": "Open Map Editor",
+        "category": "Manic Miners",
+        "icon": "$(edit)"
+      },
+      {
+        "command": "manicMiners.switchToTextEditor",
+        "title": "Switch to Text Editor",
+        "category": "Manic Miners",
+        "icon": "$(code)"
       }
     ],
     "hoverProviders": [
@@ -368,6 +380,18 @@
         "contents": "Open a .dat file to build objectives.\n[Open File](command:workbench.action.files.openFile)"
       }
     ],
+    "customEditors": [
+      {
+        "viewType": "manicMiners.mapEditor",
+        "displayName": "Map Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.dat"
+          }
+        ],
+        "priority": "option"
+      }
+    ],
     "menus": {
       "editor/title": [
         {
@@ -388,6 +412,11 @@
         {
           "when": "resourceExtname == .dat",
           "command": "manicMiners.openObjectiveBuilder",
+          "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .dat",
+          "command": "manicMiners.openMapEditor",
           "group": "navigation"
         },
         {
@@ -458,6 +487,18 @@
         "label": "Manic Miners Dark",
         "uiTheme": "vs-dark",
         "path": "./themes/manic-miners-dark.json"
+      }
+    ],
+    "customEditors": [
+      {
+        "viewType": "manicMiners.mapEditor",
+        "displayName": "Map Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.dat"
+          }
+        ],
+        "priority": "option"
       }
     ]
   },

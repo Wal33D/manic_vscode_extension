@@ -120,6 +120,7 @@ export const window = {
       html: '',
       asWebviewUri: jest.fn(uri => uri),
       onDidReceiveMessage: jest.fn(),
+      postMessage: jest.fn(),
     },
     dispose: jest.fn(),
     onDidDispose: jest.fn(),

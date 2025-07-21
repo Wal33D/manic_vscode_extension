@@ -33,6 +33,7 @@ import { registerLevelGeneratorCommands } from './levelGenerators/levelGenerator
 import { WelcomePageProvider } from './welcomePage';
 // Import package metadata for welcome/version tracking
 import { registerScriptPatternCommands } from './commands/scriptPatternCommands';
+import { registerMapEditorCommands } from './mapEditor/mapEditorCommands';
 
 export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -248,6 +249,9 @@ script{
 
   // Register Script Pattern Commands
   registerScriptPatternCommands(context);
+
+  // Register Map Editor
+  registerMapEditorCommands(context);
 
   // Register Objective Builder Provider
   const objectiveBuilderProvider = new ObjectiveBuilderProvider(context.extensionUri);
