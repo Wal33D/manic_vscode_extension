@@ -1,39 +1,42 @@
 # Common Scripting Patterns
 
-This guide provides production-ready script patterns for common gameplay scenarios in Manic Miners. These patterns have been tested in community and campaign levels.
+This guide provides production-ready patterns for common gameplay scenarios in Manic Miners scripting.
 
-## Tutorial Flow Pattern
+## Table of Contents
+- [Tutorial Flow](#tutorial-flow)
+- [Wave Defense](#wave-defense)
+- [Exploration Rewards](#exploration-rewards)
+- [Dynamic Objective System](#dynamic-objective-system)
+- [Progressive Difficulty](#progressive-difficulty)
 
-A complete tutorial system that guides players through multiple steps with visual indicators and progress tracking.
+## Tutorial Flow
+
+A step-by-step tutorial system that guides players through game mechanics.
 
 ```
 script{
     bool Step1Done=false
     bool Step2Done=false
-    bool Step3Done=false
     arrow TutorialArrow=green
-    string CurrentInstruction="Build a Tool Store on solid ground"
     
-    # Initialize tutorial
-    Init::
-    msg:CurrentInstruction;
+    # Step 1: Build Tool Store
+    Start::
+    msg:Step1Text;
     highlightarrow:10,10,TutorialArrow;
     objective:Build a Tool Store;
     
-    # Step 1: Build Tool Store
     when(buildings.BuildingToolStore_C>0 and Step1Done==false)[CompleteStep1];
     
     CompleteStep1::
     Step1Done:true;
     removearrow:TutorialArrow;
-    msg:"Well done! You've built your first Tool Store.";
-    wait:3;
-    StartStep2;
+    msg:Step1Complete;
+    wait:2;
+    StartStep2::;
     
     # Step 2: Collect resources
     StartStep2::
-    CurrentInstruction:"Collect 10 Energy Crystals to power your base";
-    msg:CurrentInstruction;
+    msg:Step2Text;
     highlightarrow:15,15,TutorialArrow;
     objective:Collect 10 Energy Crystals;
     
@@ -42,375 +45,203 @@ script{
     CompleteStep2::
     Step2Done:true;
     removearrow:TutorialArrow;
-    msg:"Excellent! You have enough crystals.";
-    wait:2;
-    StartStep3;
-    
-    # Step 3: Train miners
-    StartStep3::
-    CurrentInstruction:"Teleport 3 Rock Raiders to help with mining";
-    msg:CurrentInstruction;
-    objective:Teleport 3 Rock Raiders;
-    
-    when(miners>=3 and Step3Done==false)[CompleteStep3];
-    
-    CompleteStep3::
-    Step3Done:true;
-    msg:"Tutorial complete! You're ready for your mission.";
+    msg:TutorialComplete;
     objective:Complete the mission;
-    # Continue to main gameplay...
 }
 ```
 
 ### Key Features:
-- Progress tracking with boolean flags
+- Uses flags to prevent re-triggering completed steps
 - Visual guidance with arrows
-- Clear instructions at each step
-- Prevents re-triggering completed steps
+- Clear objective updates
 - Smooth transitions between steps
 
-## Wave Defense Pattern
+## Wave Defense
 
-Implements a wave-based enemy spawning system with increasing difficulty and rewards.
+Create escalating enemy waves with rewards between rounds.
 
 ```
 script{
     int WaveNumber=0
     int EnemiesInWave=3
-    int EnemiesKilled=0
     bool WaveActive=false
-    timer WaveTimer=30,20,40,StartWave
-    
-    # Initialize wave system
-    Init::
-    msg:"Prepare your defenses! First wave in 30 seconds.";
-    starttimer:WaveTimer;
     
     StartWave::
     WaveNumber:WaveNumber+1;
     WaveActive:true;
-    EnemiesKilled:0;
-    msg:"Wave " + WaveNumber + " incoming!";
-    
-    # Spawn enemies based on wave number
-    if(WaveNumber==1)[SpawnEasyWave];
-    if(WaveNumber==2)[SpawnMediumWave];
-    if(WaveNumber>=3)[SpawnHardWave];
-    
-    SpawnEasyWave::
-    spawnwave:CreatureSmallSpider_C,EnemiesInWave,2;
-    
-    SpawnMediumWave::
-    EnemiesInWave:5;
-    spawnwave:CreatureRockMonster_C,EnemiesInWave,3;
-    
-    SpawnHardWave::
+    msg:WaveStartText;
+    spawnwave:CreatureRockMonster_C,EnemiesInWave,2;
     EnemiesInWave:EnemiesInWave+2;
-    spawnwave:CreatureLavaMonster_C,EnemiesInWave/2,2;
-    spawnwave:CreatureRockMonster_C,EnemiesInWave/2,2;
     
-    # Track wave completion
     when(creatures==0 and WaveActive==true)[WaveComplete];
     
     WaveComplete::
     WaveActive:false;
-    msg:"Wave " + WaveNumber + " defeated!";
-    
-    # Give rewards based on wave
+    msg:WaveCompleteText;
     crystals:WaveNumber*10;
-    ore:WaveNumber*5;
-    
-    # Check for victory
-    if(WaveNumber>=5)[Victory];
+    wait:10;
+    if(WaveNumber<5)[StartWave];
+    else[Victory];
     
     Victory::
-    msg:"All waves defeated! You are victorious!";
-    stoptimer:WaveTimer;
+    msg:AllWavesComplete;
     win:;
 }
 ```
 
 ### Key Features:
-- Progressive difficulty scaling
-- Dynamic enemy composition
-- Wave-based rewards
-- Automatic wave management
-- Victory condition after set number of waves
+- Progressive difficulty (more enemies each wave)
+- Scaling rewards based on wave number
+- Clean state management with WaveActive flag
+- Automatic progression to next wave
 
-## Exploration Rewards Pattern
+## Exploration Rewards
 
-Rewards players for discovering hidden areas of the map with bonuses and achievements.
+Reward players for discovering hidden areas or secrets.
 
 ```
 script{
-    # Hidden cave locations
     bool Cave1Found=false
     bool Cave2Found=false
     bool Cave3Found=false
     int CavesFound=0
-    int TotalSecrets=3
     
-    # Secret areas
     when(discovertile[20,20] and Cave1Found==false)[FoundCave1];
-    when(discovertile[35,45] and Cave2Found==false)[FoundCave2];
-    when(discovertile[50,50] and Cave3Found==false)[FoundCave3];
+    when(discovertile[30,30] and Cave2Found==false)[FoundCave2];
+    when(discovertile[40,40] and Cave3Found==false)[FoundCave3];
     
     FoundCave1::
     Cave1Found:true;
     CavesFound:CavesFound+1;
-    msg:"Hidden Crystal Cave discovered!";
+    msg:Cave1Text;
     crystals:25;
-    UpdateExplorationProgress;
+    CheckAllCaves::;
     
     FoundCave2::
     Cave2Found:true;
     CavesFound:CavesFound+1;
-    msg:"Ancient Ore Deposit found!";
-    ore:40;
-    UpdateExplorationProgress;
+    msg:Cave2Text;
+    ore:25;
+    CheckAllCaves::;
     
     FoundCave3::
     Cave3Found:true;
     CavesFound:CavesFound+1;
-    msg:"Secret Recharge Seam located!";
-    air:100;
-    UpdateExplorationProgress;
-    
-    UpdateExplorationProgress::
-    objective:"Hidden areas found: " + CavesFound + "/" + TotalSecrets;
-    
-    # Bonus for finding all secrets
-    if(CavesFound==TotalSecrets)[AllSecretsBonus];
-    
-    AllSecretsBonus::
-    msg:"Master Explorer! All hidden areas discovered!";
-    
-    # Major reward
-    crystals:100;
-    ore:50;
+    msg:Cave3Text;
     studs:25;
+    CheckAllCaves::;
     
-    # Spawn reward vehicle
-    place:BuildingSmallTeleportPad_C,25,25;
-    teleportobjectin:VehicleLoaderDozer_C;
+    CheckAllCaves::
+    if(CavesFound==3)[AllCavesBonus];
+    
+    AllCavesBonus::
+    msg:AllCavesFoundText;
+    ore:50;
+    objective:All hidden caves discovered!;
 }
 ```
 
 ### Key Features:
-- Tracks multiple discovery locations
-- Individual rewards for each discovery
-- Progress tracking with objectives
-- Completion bonus for finding all secrets
-- Combines resource and equipment rewards
+- Tracks individual discoveries
+- Provides immediate rewards
+- Bonus for finding all secrets
+- Prevents duplicate rewards with flags
 
 ## Dynamic Objective System
 
-Creates a flexible objective system that updates based on player progress.
+Create objectives that update based on player progress.
 
 ```
 script{
     int ObjectivesComplete=0
-    int TotalObjectives=4
-    bool Obj1_ToolStore=false
-    bool Obj2_PowerStation=false
-    bool Obj3_Crystals=false
-    bool Obj4_Defense=false
+    bool Obj1=false
+    bool Obj2=false
+    bool Obj3=false
     string CurrentObjective="Build a Tool Store"
     
-    # Initialize objectives
-    Init::
-    UpdateObjectiveDisplay;
+    # Update objective display dynamically
+    UpdateObjective::
+    objective:CurrentObjective;
     
-    UpdateObjectiveDisplay::
-    objective:CurrentObjective + " (" + ObjectivesComplete + "/" + TotalObjectives + " complete)";
-    
-    # Objective 1: Build Tool Store
-    when(buildings.BuildingToolStore_C>0 and Obj1_ToolStore==false)[CompleteObj1];
+    when(buildings.BuildingToolStore_C>0 and Obj1==false)[CompleteObj1];
+    when(crystals>=50 and Obj2==false)[CompleteObj2];
+    when(creatures==0 and Obj3==false)[CompleteObj3];
     
     CompleteObj1::
-    Obj1_ToolStore:true;
+    Obj1:true;
     ObjectivesComplete:ObjectivesComplete+1;
-    msg:"Tool Store complete!";
-    CurrentObjective:"Build a Power Station";
-    UpdateObjectiveDisplay;
-    
-    # Objective 2: Build Power Station
-    when(buildings.BuildingPowerStation_C>0 and Obj2_PowerStation==false)[CompleteObj2];
+    CurrentObjective:"Collect 50 Energy Crystals";
+    UpdateObjective::;
     
     CompleteObj2::
-    Obj2_PowerStation:true;
+    Obj2:true;
     ObjectivesComplete:ObjectivesComplete+1;
-    msg:"Power Station online!";
-    CurrentObjective:"Collect 50 Energy Crystals";
-    UpdateObjectiveDisplay;
-    
-    # Objective 3: Collect Crystals
-    when(crystals>=50 and Obj3_Crystals==false)[CompleteObj3];
+    CurrentObjective:"Eliminate all creatures";
+    UpdateObjective::;
     
     CompleteObj3::
-    Obj3_Crystals:true;
+    Obj3:true;
     ObjectivesComplete:ObjectivesComplete+1;
-    msg:"Crystal quota reached!";
-    CurrentObjective:"Defeat all creatures";
-    UpdateObjectiveDisplay;
+    CurrentObjective:"Mission Complete!";
+    UpdateObjective::;
     
-    # Objective 4: Clear Threats
-    when(creatures==0 and Obj4_Defense==false)[CompleteObj4];
+    when(ObjectivesComplete==3)[AllComplete];
     
-    CompleteObj4::
-    Obj4_Defense:true;
-    ObjectivesComplete:ObjectivesComplete+1;
-    msg:"All threats eliminated!";
-    UpdateObjectiveDisplay;
-    
-    # Check for mission complete
-    when(ObjectivesComplete==TotalObjectives)[MissionComplete];
-    
-    MissionComplete::
-    msg:"All objectives complete! Outstanding work!";
-    wait:3;
+    AllComplete::
+    msg:VictoryText;
     win:;
 }
 ```
 
 ### Key Features:
 - Dynamic objective text updates
-- Progress counter in objective display
+- Progress tracking
+- Clear completion states
 - Flexible objective ordering
-- Clear completion feedback
-- Automatic victory detection
 
-## Multi-Zone Control Pattern
+## Progressive Difficulty
 
-Implements area control mechanics where players must capture and hold multiple zones.
+Automatically increase challenge over time.
 
 ```
 script{
-    # Zone states
-    bool Zone1Captured=false
-    bool Zone2Captured=false
-    bool Zone3Captured=false
-    int ZonesCaptured=0
+    int DifficultyLevel=1
+    int EnemiesDefeated=0
     
-    # Zone timers
-    int Zone1Timer=0
-    int Zone2Timer=0
-    int Zone3Timer=0
-    int CaptureTime=10  # Seconds to capture
+    # Increase difficulty over time
+    when(time>300 and DifficultyLevel==1)[IncreaseDifficulty];
+    when(time>600 and DifficultyLevel==2)[IncreaseDifficulty];
     
-    # Zone 1 (10,10 - 15,15)
-    when(enter:12,12:miners)[Zone1Entry];
+    IncreaseDifficulty::
+    DifficultyLevel:DifficultyLevel+1;
+    spawncap:CreatureRockMonster_C,DifficultyLevel,DifficultyLevel*3;
+    msg:DifficultyIncreased;
     
-    Zone1Entry::
-    if(Zone1Captured==false)[StartZone1Capture];
+    # Alternatively, base on player performance
+    when(EnemiesDefeated>10 and DifficultyLevel==1)[PerformanceIncrease];
     
-    StartZone1Capture::
-    msg:"Capturing Zone 1...";
-    Zone1Timer:0;
-    when(time>Zone1Timer+CaptureTime and Zone1Captured==false)[CaptureZone1];
-    
-    CaptureZone1::
-    Zone1Captured:true;
-    ZonesCaptured:ZonesCaptured+1;
-    msg:"Zone 1 captured!";
-    highlightarrow:12,12,green;
-    CheckVictory;
-    
-    # Similar patterns for Zone 2 and Zone 3...
-    
-    CheckVictory::
-    if(ZonesCaptured==3)[AllZonesCaptured];
-    
-    AllZonesCaptured::
-    msg:"All zones under control! Victory!";
-    win:;
+    PerformanceIncrease::
+    DifficultyLevel:2;
+    spawncap:CreatureRockMonster_C,2,6;
+    msg:DifficultyAdjusted;
 }
 ```
 
-## Resource Management Alert System
+### Key Features:
+- Time-based or performance-based scaling
+- Adjusts spawn caps dynamically
+- Clear player feedback
+- Prevents difficulty jumps with level checks
 
-Monitors resources and provides warnings when supplies run low.
+## Best Practices
 
-```
-script{
-    # Alert thresholds
-    int CrystalWarningLevel=20
-    int OreWarningLevel=15
-    int AirCriticalLevel=50
-    
-    # Alert states
-    bool CrystalWarningShown=false
-    bool OreWarningShown=false
-    bool AirWarningShown=false
-    
-    # Monitor crystal levels
-    when(crystals<CrystalWarningLevel and CrystalWarningShown==false)[CrystalWarning];
-    when(crystals>=CrystalWarningLevel and CrystalWarningShown==true)[CrystalWarningClear];
-    
-    CrystalWarning::
-    CrystalWarningShown:true;
-    msg:"Warning: Energy Crystal reserves low!";
-    sound:warning;
-    
-    CrystalWarningClear::
-    CrystalWarningShown:false;
-    msg:"Crystal levels restored.";
-    
-    # Monitor ore levels
-    when(ore<OreWarningLevel and OreWarningShown==false)[OreWarning];
-    
-    OreWarning::
-    OreWarningShown:true;
-    msg:"Warning: Ore supplies running low!";
-    
-    # Critical air warning
-    when(air<AirCriticalLevel and AirWarningShown==false)[AirCritical];
-    
-    AirCritical::
-    AirWarningShown:true;
-    msg:"CRITICAL: Oxygen levels dangerously low!";
-    sound:alarm;
-    shake:1.0,0.5;
-}
-```
-
-## Best Practices for These Patterns
-
-1. **State Management**: Always use boolean flags to track completed events
-2. **Clear Feedback**: Provide messages for all major events
-3. **Progressive Difficulty**: Scale challenges based on player progress
-4. **Prevent Re-triggering**: Check state before executing repeatable events
-5. **Modular Design**: Break complex systems into smaller event chains
-6. **Resource Balance**: Test reward amounts for game balance
-7. **Performance**: Limit active `when` triggers by using state checks
-
-## Combining Patterns
-
-These patterns can be combined for complex gameplay:
-
-```
-script{
-    # Combine tutorial + wave defense
-    bool TutorialComplete=false
-    int WaveNumber=0
-    
-    # Run tutorial first
-    Init::
-    StartTutorial;
-    
-    # After tutorial, start waves
-    TutorialFinished::
-    TutorialComplete:true;
-    msg:"Tutorial complete! Prepare for enemy waves!";
-    wait:5;
-    StartWaveDefense;
-}
-```
+1. **Use Flags**: Always track completed events to prevent re-execution
+2. **Clear States**: Maintain clear game state with boolean flags
+3. **Provide Feedback**: Use messages to inform players of progress
+4. **Test Edge Cases**: Consider what happens if players do things out of order
+5. **Performance**: Limit continuous `when()` checks to essential conditions
 
 ## See Also
-
-- [Events](../syntax/events.md) - Complete event reference
-- [Triggers](../syntax/triggers.md) - Trigger types and usage
-- [Event Chains](../syntax/event-chains.md) - Event chain mechanics
-- [Debugging](../debugging.md) - Debugging scripts
-- [Performance](../../../technical-reference/performance.md#script-performance) - Optimization tips
+- [Event Chains](../event-chains.md) - Understanding event sequencing
+- [Triggers](../triggers.md) - Available trigger types
+- [Debugging](../debugging.md) - Troubleshooting scripts
