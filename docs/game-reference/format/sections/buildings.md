@@ -2,6 +2,8 @@
 
 The `buildings{}` section defines pre-placed buildings on the map. These can be in discovered or undiscovered areas.
 
+> **Note**: Buildings do not have an ID!
+
 ## Format
 
 Each building is defined on a single line with comma-separated values:

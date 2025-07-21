@@ -14,6 +14,7 @@ info{
 - Keys are lowercase ASCII (a-z)
 - No space between key and colon
 - Values start immediately after colon
+- Every character after the colon is considered part of the value until the end of the line
 - Each entry ends with semicolon (except multiline values)
 - Order doesn't matter
 
@@ -43,12 +44,16 @@ info{
 - **Type**: String
 - **Description**: Map display name
 - **Note**: All characters after `:` until end of line
+- **Important**: Do not enclose the name in double quotes
+- **Unicode**: Non-ANSI characters including UTF-8/16 sequences work (causes map editor to save as UTF-16LE BOM)
 - **Example**: `levelname: Crystal Challenge;`
 
 ### creator
 - **Type**: String
 - **Description**: Map author name
-- **Note**: Set only on initial creation
+- **Note**: Set only on initial creation, does not change when saving the map
+- **Important**: Do not enclose the name in double quotes
+- **Unicode**: Non-ANSI characters including UTF-8/16 sequences work (causes map editor to save as UTF-16LE BOM)
 - **Example**: `creator: MapMaker;`
 
 ### version
@@ -75,8 +80,9 @@ info{
 - **Type**: Integer pair
 - **Format**: `initial/maximum`
 - **Default**: Unlimited (if omitted)
-- **Description**: Air supply settings
+- **Description**: Air supply settings in miner-seconds
 - **Example**: `oxygen: 1000/1000;`
+- **See Also**: [Air/Oxygen System](../air-oxygen-system.md)
 
 ## Camera Settings
 
@@ -85,6 +91,7 @@ info{
 - **Format**: `Translation: X=n Y=n Z=n Rotation: P=n Y=n R=n Scale X=n Y=n Z=n`
 - **Units**: 300 world units per tile
 - **Description**: Camera position, rotation, and scale
+- **Default**: Center of map with P=45 (45-degree angle looking down), Y=-90 (so tile 0,0 is upper left)
 - **Example**: 
 ```
 camerapos: Translation: X=1200.0 Y=1200.0 Z=0.0 Rotation: P=45.0 Y=-90.0 R=0.0 Scale X=1.0 Y=1.0 Z=1.0;
@@ -142,6 +149,7 @@ camerapos: Translation: X=1200.0 Y=1200.0 Z=0.0 Rotation: P=45.0 Y=-90.0 R=0.0 S
 - **Default**: 1.0
 - **Description**: Global erosion time multiplier
 - **Note**: 0.0 disables erosion, 2.0 doubles erosion time
+- **Script**: This value is the initial value for the script erosionscale macro
 - **Example**: `erosionscale: 1.5;`
 
 ## Cave Discovery
@@ -150,7 +158,8 @@ camerapos: Translation: X=1200.0 Y=1200.0 Z=0.0 Rotation: P=45.0 Y=-90.0 R=0.0 S
 - **Type**: Coordinate list
 - **Format**: `row,col/row,col/...`
 - **Description**: Initially discovered cave areas
-- **Note**: Engine discovers connected regions from these points
+- **Behavior**: The engine looks at every tile starting at each location and identifies a closed region that surrounds that tile - that closed region will be visible when the map starts. If there is no closed region, the entire map is visible.
+- **Legacy Maps**: Many legacy maps lack this value. The engine attempts automatic detection of the initial open location, which usually works but can be incorrect. Fix by opening in map editor and resaving.
 - **Example**: `opencaves: 3,4/10,10/15,20/;`
 
 ## Coordinate System Notes
@@ -160,8 +169,18 @@ camerapos: Translation: X=1200.0 Y=1200.0 Z=0.0 Rotation: P=45.0 Y=-90.0 R=0.0 S
 - Center of tile [0,0] is at world (150, 150)
 - Formula: `world = (grid * 300) + 150`
 
-## Example
+## Examples
 
+### Basic Map (8x8)
+```
+info{
+    rowcount: 8;
+    colcount: 8;
+    biome: rock;
+}
+```
+
+### Full Featured Map
 ```
 info{
     rowcount: 25;

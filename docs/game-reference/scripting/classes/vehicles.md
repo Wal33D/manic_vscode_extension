@@ -9,8 +9,10 @@ vehicle name=id
 ```
 
 - References vehicle with specific ID
-- ID must match vehicle placed in map or teleported
+- ID must match vehicle placed in map editor or teleported
 - Vehicle must exist when script loads
+- Cannot dynamically assign at runtime using ID
+- Undiscovered vehicles are inactive until discovered
 
 ### Examples
 ```
@@ -23,39 +25,42 @@ vehicle TrackedVehicle    # Unassigned
 ## Vehicle Types
 
 ### Ground Vehicles
-- `VehicleHoverScout_C` - Fast reconnaissance
-- `VehicleSmallDigger_C` - Basic drilling
-- `VehicleSmallTransportTruck_C` - Carry resources
-- `VehicleLargeDigger_C` - Heavy drilling
-- `VehicleLoaderDozer_C` - Clear rubble
-- `VehicleWalkerDigger_C` - All-terrain drilling
+- `VehicleSmallDigger_C` / `SmallDigger_C` / `smalldigger` - Basic drilling
+- `VehicleLoaderDozer_C` / `LoaderDozer_C` / `loaderdozer` - Clear rubble
+- `VehicleSmallTransportTruck_C` / `SmallTransportTruck_C` / `smalltransporttruck` - Carry resources
+- `VehicleSMLC_C` / `SMLC_C` / `SMLC` - Small Mobile Laser Cutter
+- `VehicleLMLC_C` / `LMLC_C` / `LMLC` - Large Mobile Laser Cutter
+- `VehicleChromeCrusher_C` / `ChromeCrusher_C` / `chromecrusher` - Chrome Crusher
+- `VehicleGraniteGrinder_C` / `GraniteGrinder_C` / `granitegrinder` - Granite Grinder
 
-### Support Vehicles
-- `VehicleLargeMobileLabC` - Mobile command
-- `VehicleLargeTransportTruck_C` - Heavy transport
-- `VehicleFireTruck_C` - Lava protection (unimplemented)
+### Fast Vehicles
+- `VehicleHoverScout_C` / `HoverScout_C` / `hoverscout` - Fast reconnaissance
+- `VehicleRapidRider_C` / `RapidRider_C` / `rapidrider` - Fast water vehicle
 
 ### Water Vehicles
-- `VehicleCargoCarrier_C` - Water transport
-- `VehicleSmallMobileLabC` - Water lab
-- `VehicleRapidRider_C` - Fast water vehicle
+- `VehicleCargoCarrier_C` / `CargoCarrier_C` / `cargocarrier` - Water transport
 
 ### Air Vehicles
-- `VehicleTunnelScout_C` - Flying scout
-- `VehicleTunnelTransport_C` - Air transport
+- `VehicleTunnelScout_C` / `TunnelScout_C` / `tunnelscout` - Flying scout
+- `VehicleTunnelTransport_C` / `TunnelTransport_C` / `tunneltransport` - Air transport
+
+**Note**: Multiple names exist for legacy compatibility. Use the full `Vehicle*_C` names for clarity.
 
 ## Vehicle Events
 
-### lastvehicle
+### lastvehicle / savevehicle
 Capture reference to triggering vehicle.
 ```
 lastvehicle:VehicleVariable
+savevehicle:VehicleVariable  # Alternative syntax
 
 # Example
 when(drive:10,10)[SaveVehicle];
 
 SaveVehicle::
 lastvehicle:ActiveVehicle;
+# or
+savevehicle:ActiveVehicle;
 ```
 
 ### heal
@@ -91,34 +96,82 @@ when(Scout.drive:10,10)[ScoutAtLocation];
 # Action detection
 when(Scout.laser)[ScoutFiring];
 when(Scout.drill)[ScoutDrilling];
+
+# Click detection
+when(click:Scout)[ScoutClicked];
+
+# Upgrade detection
+when(Scout.upgrade)[ScoutUpgraded];
+
+# New vehicle detection (collection only)
+when(vehicle.new)[NewVehicleCreated];
 ```
 
 ## Vehicle Properties
 
-### Health Points (.hp)
+### Health Points (.hp/.health)
 ```
 vehicle Digger=0
 
-# Check health
+# Check health (both are aliases)
 ((Digger.hp < 50))[DiggerDamaged];
-((Digger.hp == 100))[DiggerRepaired];
+((Digger.health == 100))[DiggerRepaired];
 ```
 
-### Position (.row/.col)
+### Position Properties
 ```
-# Track vehicle location
-int VehicleRow=0
-int VehicleCol=0
+# Basic position
+int VehicleRow=Scout.row
+int VehicleCol=Scout.col      # or .column (alias)
 
-GetVehiclePosition::
-VehicleRow:Scout.row;
-VehicleCol:Scout.col;
+# Fine-grained position (300 units per tile)
+int PreciseX=Scout.X
+int PreciseY=Scout.Y
+int PreciseZ=Scout.Z
+
+# Tile under vehicle
+int TileAtVehicle=Scout.tile  # or .tileid (alias)
 ```
 
-### Upgrades (.upgrades)
+### Driver Properties
 ```
-# Check upgrade level (if supported)
-((Digger.upgrades > 0))[DiggerUpgraded];
+# Get driver miner ID
+int DriverID=Scout.driver    # or .driverid (alias)
+
+# Check if occupied
+((Scout.driver >= 0))[VehicleOccupied];
+((Scout.driver < 0))[VehicleEmpty];
+```
+
+### Other Properties
+```
+# Vehicle ID
+int VehicleID=Scout.id
+
+# Note: There's no .level property to query upgrade status
+# Use .upgrades or .upgrade trigger instead
+```
+
+## Vehicle Macros
+
+### Count Macros
+```
+# Total vehicle count
+int TotalVehicles=vehicles
+
+# Specific type counts (multiple aliases)
+int ScoutCount=hoverscout           # or HoverScout_C
+int DiggerCount=smalldigger         # or SmallDigger_C
+int TruckCount=smalltransporttruck  # or SmallTransportTruck_C
+int DozerCount=loaderdozer          # or LoaderDozer_C
+int CarrierCount=cargocarrier       # or CargoCarrier_C
+int RiderCount=rapidrider           # or RapidRider_C
+int ChromeCount=chromecrusher       # or ChromeCrusher_C
+int GraniteCount=granitegrinder     # or GraniteGrinder_C
+int LMLCCount=LMLC                  # or LMLC_C
+int SMLCCount=SMLC                  # or SMLC_C
+int TunnelScoutCount=tunnelscout    # or TunnelScout_C
+int TunnelTransCount=tunneltransport # or TunnelTransport_C
 ```
 
 ## Vehicle Management
@@ -130,8 +183,8 @@ VehicleCol:Scout.col;
 ((vehicles == 0))[NoVehicles];
 
 # Specific types
-((vehicles.VehicleHoverScout_C > 0))[HasScout];
-((vehicles.VehicleLoaderDozer_C >= 2))[EnoughDozers];
+((hoverscout > 0))[HasScout];
+((loaderdozer >= 2))[EnoughDozers];
 ```
 
 ### Movement Triggers
@@ -354,6 +407,45 @@ when(new:VehicleLoaderDozer_C)[DozerDeployed];
 # Track critical vehicles only
 # Use collection triggers when possible
 ```
+
+## Special Notes
+
+### Collection Behavior
+
+The `vehicle` keyword can be used as a special collection in triggers:
+```
+# Detect ANY new vehicle
+when(vehicle.new)[AnyNewVehicle];
+
+# Specific trigger overrides general
+vehicle Sofia=0
+when(Sofia.dead)[SofiaDestroyed];    # This fires
+when(vehicle.dead)[SomeVehicleDied]; # This doesn't fire for Sofia
+```
+
+### Assignment Rules
+
+```
+# Valid assignments
+vehicle V1=0       # Static ID assignment
+vehicle V2         # Unassigned
+
+# Dynamic assignment
+lastvehicle:V2     # After trigger
+savevehicle:V2     # Alternative syntax
+
+# Vehicles can be assigned to each other
+V1:V2              # Valid
+
+# Cannot dynamically assign by ID at runtime
+# V1=5              # NOT POSSIBLE after declaration
+```
+
+### Undiscovered Vehicles
+
+- Vehicles in undiscovered areas are inactive
+- They don't receive triggers until discovered
+- Plan accordingly for pre-placed vehicles
 
 ## Common Issues
 

@@ -12,10 +12,24 @@ event2:parameters;
 event3:parameters;
 ```
 
+Empty chain:
+```
+EmptyChain::;
+# or
+EmptyChain::
+```
+
 - Name followed by double colon `::`
 - Events listed sequentially
 - Each event ends with semicolon
-- Chain ends when next chain starts or script ends
+- Chain ends when: next chain starts, variable declaration, trigger line, or script ends
+- **No spaces after semicolons!** (Most common error)
+- **Blank lines recommended** between chains for readability
+
+**Naming Rules**:
+- Use alphanumeric characters and underscores
+- Avoid reserved words (see reserved-words-reference.md)
+- Technically can start with numbers (e.g., `123abc::`) but discouraged
 
 ### Calling Event Chains
 ```
@@ -53,7 +67,7 @@ tick::
 UpdateCounter;
 ```
 
-**Warning**: Can severely impact performance!
+**Warning**: Can severely impact performance! Engine processes up to 350 frames per second.
 
 ## Basic Event Chains
 
@@ -104,6 +118,12 @@ msg:CollectMoreCrystals;
 highlightarrow:10,10,CrystalArrow;
 ```
 
+**Single Event Syntax** (no brackets needed):
+```
+QuickCheck::
+((crystals >= 50))msg:EnoughCrystals;
+```
+
 ### Multiple Conditions
 ```
 EvaluateStatus::
@@ -147,6 +167,16 @@ ValidateAndProcess::
 DoProcess;
 ```
 
+### Return Event
+Exit chain early:
+```
+MyChain::
+((i<5))return;
+((i>10))return;
+# Only executes if 5 <= i <= 10
+msg:InRange;
+```
+
 ### Loops (via triggers)
 ```
 bool LoopActive=true
@@ -168,6 +198,8 @@ wait:1.0;
 StopLoop::
 LoopActive:false;
 ```
+
+**Note**: No traditional for/while/until loops or goto statements. Use triggers or recursive calls (with caution).
 
 ## Event Chain Patterns
 
@@ -271,7 +303,22 @@ pan:10,10;
 
 **Warning**: Script continues during wait!
 
+### Reentrancy Issues
+Multiple triggers can call the same chain:
+```
+# Problem: Chain can be entered multiple times
+when(enter:10,10:miners)[ShowMessage];
+when(enter:10,11:miners)[ShowMessage];
+
+ShowMessage::
+msg:Entered;
+wait:5.0;
+msg:Done;  # May show multiple times!
+```
+
 ### Preventing Re-entry
+
+**Allow Once Pattern**:
 ```
 bool CutscenePlaying=false
 
@@ -281,6 +328,17 @@ CutscenePlaying:true;
 # Cutscene events...
 wait:5.0;
 CutscenePlaying:false;
+```
+
+**Semaphore Pattern** (Single execution):
+```
+bool Semaphore=false
+
+SingleExecution::
+((Semaphore==true))return;
+Semaphore:true;
+# Critical section
+Semaphore:false;
 ```
 
 ## Special Modifiers
@@ -361,6 +419,8 @@ GoodChain::
 ((LoopCount < 10))[LoopCount+=1; GoodChain];
 ```
 
+**Recursion Limit**: ~890 recursive calls before game crash!
+
 ### Missing Semicolons
 ```
 # WRONG
@@ -382,6 +442,17 @@ StartProcess:true;
 wait:5.0;
 StartProcess:false;  # Might run before wait ends!
 ```
+
+### Wait and Reentrancy
+```
+# Multiple calls during wait create separate instances
+TimedEvent::
+msg:Start;
+wait:10.0;
+msg:End;  # May show multiple times!
+```
+
+**Technical Detail**: Engine internally renames event chains to handle multiple invocations during wait. Global variables remain shared, causing potential conflicts.
 
 ## Advanced Techniques
 
@@ -488,11 +559,17 @@ ExecuteComplexLogic;
 
 ## Performance Considerations
 
-- Avoid deep recursion
-- Minimize chains called from `tick`
+- Avoid deep recursion (limit ~890 calls)
+- Minimize chains called from `tick` (runs up to 350 FPS)
 - Use state flags to prevent repeated execution
 - Keep chains focused and small
 - Batch related operations together
+
+### Engine Tick Overhead
+- Engine evaluates all triggers every frame
+- Complex conditions (e.g., `when(air<100)`) checked constantly
+- Use timers instead of tick for periodic checks
+- Consider performance impact of many active triggers
 
 ## See Also
 - [Events](events.md) - Available events for chains

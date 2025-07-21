@@ -20,9 +20,10 @@ ore:
 ## Structure
 
 - Contains two subsections: `crystals:` and `ore:`
-- Each subsection starts with its name on a separate line
+- Each subsection starts with resource type on a line by itself
 - Followed by a grid matching map dimensions
 - Same format as tiles section (rows and columns)
+- Order doesn't matter, but the editor always writes crystals section first
 
 ## Resource Types
 
@@ -69,6 +70,7 @@ ore:
 - 100+ resources per tile can freeze the game
 - Recommended maximum: 20-30 per tile
 - Spread large quantities across multiple tiles
+- While upper limit per tile is unknown, practical limits based on physics engine mean thousands of resources will cause massive lag even on fast machines - potentially making the map unplayable
 
 ### Border Tiles
 - Typically have 0 resources

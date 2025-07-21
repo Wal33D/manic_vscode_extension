@@ -9,8 +9,10 @@ creature name=id
 ```
 
 - References creature with specific ID
-- ID must match creature placed in map
+- ID must match creature placed in map editor
 - Can reference sleeping or active creatures
+- Cannot dynamically assign at runtime using ID
+- Undiscovered creatures are inactive until discovered
 
 ### Examples
 ```
@@ -23,19 +25,16 @@ creature TrackedMonster    # Unassigned
 ## Creature Types
 
 ### Rock Monsters
-- `CreatureRockMonster_C` - Basic rock creature
-- `CreatureLavaMonster_C` - Fire-breathing variant
-- `CreatureIceMonster_C` - Freezing variant
+- `CreatureRockMonster_C` / `RockMonster_C` / `RockMonster` - Basic rock creature
+- `CreatureLavaMonster_C` / `LavaMonster_C` / `LavaMonster` - Fire-breathing variant
+- `CreatureIceMonster_C` / `IceMonster_C` / `IceMonster` - Freezing variant
 
 ### Smaller Creatures
-- `CreatureSmallSpider_C` - Fast, weak spider
-- `CreatureBat_C` - Flying annoyance
-- `CreatureSmallWormC` - Burrowing creature
+- `CreatureSmallSpider_C` / `SmallSpider_C` / `SmallSpider` - Fast, weak spider
+- `CreatureBat_C` / `Bat_C` / `Bat` / `bat` - Flying annoyance
+- `CreatureSlimySlug_C` / `SlimySlug_C` / `SlimySlug` / `slugs` - Crystal-draining slug
 
-### Special Creatures
-- `CreatureSlug_C` - Crystal-draining slug
-- `CreatureBigSpider_C` - Large spider variant
-- `CreatureWorm_C` - Large worm
+**Note**: Multiple names exist for legacy compatibility. Use the full `Creature*_C` names for clarity.
 
 ## Creature Events
 
@@ -48,6 +47,13 @@ emerge:row,col,direction,CreatureType,radius
 # Example
 emerge:10,10,A,CreatureRockMonster_C,2;
 ```
+
+**Spawning Requirements**:
+- Must be a flat (non-corner) wall
+- Must be non-reinforced
+- Must be dirt, loose rock, hard rock, or solid rock
+- Cannot spawn in undiscovered areas
+- Spawned creatures cannot have custom health/scale
 
 ### lastcreature  
 Capture spawned creature reference.
@@ -70,6 +76,12 @@ creature Monster=0
 flee:Monster,5,5;
 ```
 
+**Flee Requirements**:
+- Location must be valid for creature type
+- Slugs must flee to slug holes
+- Monsters must flee next to spawnable walls
+- Creature expects to leave map from flee location
+
 ### Creature Triggers
 ```
 creature Boss=0
@@ -80,6 +92,12 @@ when(Boss.dead)[BossDefeated];
 
 # Click detection
 when(click:Boss)[BossClicked];
+
+# Wake detection
+when(Boss.wake)[BossAwake];
+
+# Creation detection (collections only)
+when(new:CreatureRockMonster_C)[NewMonster];
 ```
 
 ## Creature Properties
@@ -93,21 +111,49 @@ creature Monster=0
 ((Monster.hp == 0))[MonsterDead];
 ```
 
-### Position (.row/.col)
+### Position Properties
 ```
-# Track creature location
-int MonsterRow=0
-int MonsterCol=0
+# Basic position
+int MonsterRow=Monster.row
+int MonsterCol=Monster.col
 
-GetMonsterPosition::
-MonsterRow:Monster.row;
-MonsterCol:Monster.col;
+# Fine-grained position (300 units per tile)
+int PreciseX=Monster.X
+int PreciseY=Monster.Y
+int PreciseZ=Monster.Z
+
+# Tile under creature
+int TileAtMonster=Monster.tile  # or .tileid
+```
+
+### Unique Properties
+```
+# Creature ID
+int CreatureID=Monster.id
+
+# Crystals eaten (slugs)
+int CrystalsEaten=Slug.eaten
 ```
 
 ### State (.sleep)
 ```
 # Check if sleeping (if supported)
 ((Monster.sleep == true))[MonsterSleeping];
+```
+
+## Creature Macros
+
+### Count Macros
+```
+# Total creature count
+int TotalCreatures=creatures
+
+# Hostile creature count (monsters and slugs)
+int HostileCount=hostiles
+
+# Specific type counts
+int BatCount=bat         # or Bat_C
+int SlugCount=slugs      # Count of slimy slugs
 ```
 
 ## Creature Management
@@ -374,6 +420,52 @@ creature Monster2=0  # ERROR!
 # Reference becomes invalid when defeated
 # Cannot reassign defeated creature ID
 ```
+
+## Special Notes
+
+### Spawning Limitations
+
+**Wall Requirements**:
+- Can only spawn from flat (non-corner) walls
+- Wall must be non-reinforced
+- Valid wall types: dirt, loose rock, hard rock, solid rock
+- Cannot spawn in undiscovered areas
+
+**Workaround for Other Walls**:
+```
+# Spawn from non-standard wall
+place:10,10,dirt;        # Change to spawnable
+emerge:10,10,A,CreatureRockMonster_C,1;
+place:10,10,lava;        # Change back
+```
+
+**Health and Scale**:
+- Script-spawned creatures use default health/scale
+- Only map editor placed creatures can have custom values
+
+### Assignment Rules
+
+```
+# Valid assignments
+creature C1
+creature C2=0
+
+# Dynamic assignment
+lastcreature:C1          # After emerge
+savecreature:C1          # Save reference
+
+# Creatures can be assigned to each other
+C2:C1                    # Valid
+
+# Cannot dynamically assign by ID at runtime
+# C1=lastminer.id        # NOT POSSIBLE
+```
+
+### Undiscovered Creatures
+
+- Creatures in undiscovered areas are inactive
+- They don't receive triggers until discovered
+- Cannot spawn into undiscovered areas
 
 ## Examples
 

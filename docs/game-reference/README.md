@@ -30,7 +30,7 @@ Comprehensive guide to the Manic Miners scripting language:
 - Visual scripting blocks
 - Macros and advanced features
 
-### Media Assets (`_media/`)
+### Media Assets (`../assets/`)
 Screenshots and images from the original documentation showing:
 - Editor interface
 - Scripting examples

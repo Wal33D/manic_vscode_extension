@@ -31,6 +31,8 @@ Each creature requires three lines:
 - `CreatureSmallSpider_C` - Fast, low health, spawns from drilling
 - `CreatureBat_C` - Visual effect only, no gameplay impact
 
+> **Note about Bats**: Bats have no mechanic in the game - they are for visual effect only and move around in a small swarm in a random manner. Historically Bats would scare miners but the mechanic was removed from Manic Miners since it could adversely affect game play. Bats have an ID and a creature script variable may be assigned to them and they exist for the duration of the game. Bats cannot have the HP or SLEEP properties.
+
 ## Properties
 
 ### Translation (Required)
@@ -75,7 +77,7 @@ HP=150
 | Lava Monster | 100 | Scale-dependent |
 | Slimy Slug | 100 | Scale-dependent |
 | Small Spider | 5 | Scale-dependent |
-| Bat | N/A | N/A |
+| Bat | NONE | NONE |
 
 ### Sleep (Optional)
 Creature starts sleeping:

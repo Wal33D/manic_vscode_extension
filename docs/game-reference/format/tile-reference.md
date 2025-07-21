@@ -7,6 +7,9 @@ This is a comprehensive reference of all tile types used in Manic Miners .dat fi
 - **Base tiles**: IDs 1-65 represent the fundamental tile types
 - **Reinforced tiles**: IDs 76-115 are reinforced variants (base ID + 50)
 - **Reinforced tiles** require significantly more drilling effort and are used to create more challenging obstacles
+- **Undiscovered caverns**: Floor tiles +100 (e.g., 101 = undiscovered ground)
+- **Extended tiles**: IDs 1-175 accessible via script `place` event
+- **Tile 0**: Invalid/empty - do not use intentionally (engine may generate warnings)
 
 ## Complete Tile Listing
 
@@ -124,12 +127,12 @@ These IDs are reserved but not used in standard gameplay.
 |----|------|-------------|------------|--------------|
 | 58 | Roof | Cave ceiling that blocks vision and movement | Blocks all | - |
 | 59 | UNUSED5 | Reserved for future use | - | - |
-| 60 | Fake Rubble 1 | Light decorative rubble | Can walk | 46, 23, 95, 0.1 |
-| 61 | Fake Rubble 2 | Medium decorative rubble | Can walk | 46, 23, 95, 0.5 |
-| 62 | Fake Rubble 3 | Standard decorative rubble | Can walk | 46, 23, 95, 0.3 |
-| 63 | Fake Rubble 4 | Heavy decorative rubble | Can walk | 46, 23, 95 |
-| 64 | Cliff Type 1 (Experimental) | Experimental cliff terrain | Cannot walk | 46, 23, 95, 0.7 |
-| 65 | Cliff Type 2 (Experimental) | Alternative cliff terrain | Cannot walk | 128, 0, 128 |
+| 60 | Fake Rubble 1 | Light decorative rubble (no ore when cleared) | Can walk | 46, 23, 95, 0.1 |
+| 61 | Fake Rubble 2 | Medium decorative rubble (no ore when cleared) | Can walk | 46, 23, 95, 0.5 |
+| 62 | Fake Rubble 3 | Standard decorative rubble (no ore when cleared) | Can walk | 46, 23, 95, 0.3 |
+| 63 | Fake Rubble 4 | Heavy decorative rubble (no ore when cleared) | Can walk | 46, 23, 95 |
+| 64 | Cliff Type 1 (Experimental) | Single-tile thick wall, prevents movement/falling | Blocks movement | 46, 23, 95, 0.7 |
+| 65 | Cliff Type 2 (Experimental) | Alternative cliff for height transitions | Blocks movement | 128, 0, 128 |
 
 ### Reinforced Tiles (76-115)
 
@@ -213,7 +216,13 @@ Some tiles may have different appearances based on the level's biome setting:
 
 ## Usage Notes
 
-1. **Wall Variants**: The Corner, Edge, and Intersect variants are used by the game engine for proper wall rendering at junctions and edges. Level designers typically only need to place the Regular variant, and the game will automatically use the correct variant.
+1. **Wall Variants**: The Corner, Edge, and Intersect variants are used by the game engine for proper wall rendering at junctions and edges. Level designers typically only need to place the Regular variant, and the game will automatically use the correct variant based on neighboring tiles:
+   - **Regular**: 3 neighbor tiles and 2 diagonal neighbors adjacent to each other
+   - **Corner**: 4 neighbors and 3 diagonal neighbors
+   - **Edge**: 2 neighbor tiles and 1 diagonal neighbor
+   - **Intersect**: 4 neighbors and 2 diagonal neighbors opposite to each other
+
+2. **Undiscovered Caverns**: Floor tiles in undiscovered areas have +100 added to their ID (e.g., 101 = undiscovered ground). The editor adds this automatically during save. When discovered, the +100 is removed. Wall tiles never have +100 values.
 
 2. **Reinforced Tiles**: Use reinforced tiles sparingly as they significantly increase difficulty. They're best used to protect important areas or create challenging paths.
 

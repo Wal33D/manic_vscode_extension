@@ -63,14 +63,14 @@ upgrades=UpDrill/UpEngine/UpScanner/
 | Chrome Crusher | `UpDrill/` `UpLaser/` `UpScanner/` `UpEngine/` |
 | Granite Grinder | `UpDrill/` `UpEngine/` |
 | Hover Scout | `UpEngine/` |
-| LMLC | `UpEngine/` `UpLaser/` `UpAddNav/` |
+| LMLC | `UpEngine/` `UpLaser/` `UpAddNav/`* |
 | Loader Dozer | `UpEngine/` |
 | Rapid Rider | `UpCargoHold/` `UpAddDrill/` |
 | Small Digger | `UpDrill/` `UpEngine/` |
 | Small Transport | `UpCargoHold/` `UpEngine/` |
 | SMLC | `UpEngine/` `UpLaser/` |
 | Tunnel Scout | `UpAddDrill/` |
-| Tunnel Transport | None |
+| Tunnel Transport | None** |
 
 #### Upgrade Effects
 - **UpDrill**: Faster drilling speed
@@ -79,16 +79,20 @@ upgrades=UpDrill/UpEngine/UpScanner/
 - **UpScanner**: Enhanced scanning range
 - **UpCargoHold**: Larger capacity
 - **UpAddDrill**: Adds drilling capability
-- **UpAddNav**: Lava navigation (LMLC hidden upgrade)
+- **UpAddNav**: Lava navigation
+
+> ***Note**: LMLC has a hidden upgrade `UpAddNav` which allows the vehicle to travel over lava. It can only be applied to vehicles defined in the map file. Currently there is no way for a user to add this upgrade in game.
+> 
+> ****Note**: VehicleTunnelTransport_C has no upgrades and cannot have the Upgrades= field.
 
 ### 4. Driver (Optional)
-References a miner ID:
+References a miner ID from the miners section:
 
 ```
 driver=2
 ```
 
-- Must match an ID in the miners section
+- Value is the Miner ID from the miners section
 - Miner starts inside vehicle
 - Both vehicle and miner must be defined
 

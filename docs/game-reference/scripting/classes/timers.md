@@ -32,6 +32,8 @@ timer RandomEvent=60.0,120.0,300.0,RandomEncounter
 - Calls specified event chain when triggered
 - Continues indefinitely until stopped
 - Each trigger calculates new random interval
+- Timers are suspended when game is paused
+- More efficient than using `tick` event chain for periodic tasks
 
 ## Timer Events
 
@@ -287,6 +289,53 @@ stoptimer:ResourceTimer;
 stoptimer:CheckTimer;
 ```
 
+## Special Notes
+
+### Timer Limitations
+
+Timers are not true variables:
+- Cannot be assigned to each other
+- Cannot be used in conditions or expressions
+- Only work with `starttimer` and `stoptimer` events
+
+```
+# WRONG - Cannot assign timers
+timer T1=10.0,20.0,30.0,Event1
+timer T2=T1  # ERROR!
+
+# WRONG - Cannot use in conditions
+((T1 == active))  # ERROR!
+```
+
+### Post-Game Behavior
+
+**Important**: Timers continue running after win/lose conditions!
+
+```
+# Timers persist after losing
+LoseCondition::
+lose:;
+# Timers STILL RUNNING - stop them manually!
+stoptimer:WaveTimer;
+stoptimer:ResourceTimer;
+
+# Players can continue after winning
+WinCondition::
+win:;
+# Consider stopping non-essential timers
+stoptimer:DifficultyTimer;
+# Or add win state check in timer events
+```
+
+```
+# Safe timer event with state check
+bool GameOver=false
+
+TimerEvent::
+((GameOver == true))[];  # Exit if game ended
+# Normal timer logic here
+```
+
 ## Common Issues
 
 ### Timer Not Firing
@@ -434,3 +483,4 @@ crystals:20;
 - [Events](../syntax/events.md#timer-control) - Timer control
 - [Event Chains](../syntax/event-chains.md) - Timer targets
 - [Performance](../../../technical-reference/performance.md) - Timer optimization
+- **Demo Scripts**: See `Levels\DEMO\Scripts\demotimers.dat` for examples

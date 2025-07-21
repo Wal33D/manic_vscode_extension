@@ -23,6 +23,7 @@
 		"node_modules",
 		"map-reference-implementations",
 		"src/levelGenerators/**",
-		"docs"
+		"docs",
+		"scripts"
 	]
 }

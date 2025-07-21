@@ -1,6 +1,6 @@
 # Tiles Section
 
-The `tiles{}` section is required and defines the tile layout of the map. It contains the TileID for every position in the map grid.
+The `tiles{}` section is required and defines the tile layout of the map. It contains the TileID for every position in the map grid. The map editor writes this section on every save.
 
 ## Format
 
@@ -23,9 +23,10 @@ tiles{
 
 ## Tile ID Ranges
 
-### Base Tiles (1-165)
+### Valid Range
+- **1-175**: Valid TileID range
 - **1-165**: Normal tiles
-- **166-175**: Reserved/invalid range
+- **166-175**: Reserved tiles (valid but not for general use)
 
 ### Tile Modifiers
 - **+50**: Reinforced walls (e.g., 88 = reinforced solid rock)
