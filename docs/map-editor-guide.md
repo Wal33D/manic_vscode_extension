@@ -49,6 +49,9 @@ There are two ways to open the map editor:
 - **L**: Switch to Line tool
 - **R**: Switch to Rectangle tool
 - **K**: Switch to Picker tool
+- **S**: Switch to Select tool
+- **T**: Switch to Stamp tool
+- **A**: Toggle Auto-Tiling
 - **[**: Decrease brush size
 - **]**: Increase brush size
 - **Ctrl+Z** (Cmd+Z on Mac): Undo
@@ -158,6 +161,16 @@ To switch back to the text editor:
 - **Save Pattern**: Select a region and click "Save Pattern"
 - **Use Pattern**: Click a saved pattern and use the Stamp tool (T)
 - Patterns are saved per workspace
+
+### 🔧 Auto-Tiling
+- **Enable/Disable**: Press `A` or click the Auto-Tile button
+- Automatically chooses correct tile variants based on neighbors
+- Supported tile types:
+  - Rock/Wall tiles (30-44): Creates proper edges and corners
+  - Water tiles (11-16): Creates shorelines
+  - Lava tiles (6-10): Creates lava flows
+  - Crystal/Ore seams (42-49): Creates connected veins
+- Works with all painting tools (Paint, Fill, Line, Rectangle)
 
 ### ↔️ Mirror Modes
 - **Horizontal**: Press `H` to mirror horizontally

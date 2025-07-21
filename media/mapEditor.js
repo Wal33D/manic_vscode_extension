@@ -35,6 +35,9 @@
   // Mirror state
   let mirrorMode = 'off';
   
+  // Auto-tile state
+  let autoTileEnabled = false;
+  
   // Layer state
   let currentLayer = mapLayers.find(l => l.id === currentLayerId) || mapLayers[0];
   
@@ -414,14 +417,15 @@
     }
     
     if (tilesToFill.length > 0) {
+      const messageType = autoTileEnabled && supportsAutoTiling(currentTileId) ? 'autoTile' : 'paint';
       vscode.postMessage({
-        type: 'paint',
+        type: messageType,
         tiles: tilesToFill,
-        description: `Fill region with tile ${currentTileId}`
+        description: `${autoTileEnabled ? 'Auto-tile fill' : 'Fill region'} with tile ${currentTileId}`
       });
       drawMap();
       hideProgress();
-      showStatus(`Filled ${tilesToFill.length} tiles`);
+      showStatus(`${autoTileEnabled ? 'Auto-filled' : 'Filled'} ${tilesToFill.length} tiles`);
     }
   }
   
@@ -458,10 +462,11 @@
     }
     
     if (tilesToPaint.length > 0) {
+      const messageType = autoTileEnabled && supportsAutoTiling(currentTileId) ? 'autoTile' : 'paint';
       vscode.postMessage({
-        type: 'paint',
+        type: messageType,
         tiles: tilesToPaint,
-        description: `Draw line with tile ${currentTileId}`
+        description: `${autoTileEnabled ? 'Auto-tile line' : 'Draw line'} with tile ${currentTileId}`
       });
       drawMap();
       showStatus(`Drew line with ${tilesToPaint.length} tiles`);
@@ -487,10 +492,11 @@
     }
     
     if (tilesToPaint.length > 0) {
+      const messageType = autoTileEnabled && supportsAutoTiling(currentTileId) ? 'autoTile' : 'paint';
       vscode.postMessage({
-        type: 'paint',
+        type: messageType,
         tiles: tilesToPaint,
-        description: `Draw rectangle with tile ${currentTileId}`
+        description: `${autoTileEnabled ? 'Auto-tile rectangle' : 'Draw rectangle'} with tile ${currentTileId}`
       });
       drawMap();
       showStatus(`Drew rectangle with ${tilesToPaint.length} tiles`);
@@ -776,12 +782,13 @@
     const pos = getTilePos(e.clientX, e.clientY);
     
     if (currentTool === 'paint' && tilePaintHistory.length > 0) {
+      const messageType = autoTileEnabled && supportsAutoTiling(currentTileId) ? 'autoTile' : 'paint';
       vscode.postMessage({
-        type: 'paint',
+        type: messageType,
         tiles: tilePaintHistory,
-        description: `Paint with tile ${currentTileId}`
+        description: `${autoTileEnabled ? 'Auto-tile' : 'Paint'} with tile ${currentTileId}`
       });
-      showStatus(`Painted ${tilePaintHistory.length} tiles`);
+      showStatus(`${autoTileEnabled ? 'Auto-tiled' : 'Painted'} ${tilePaintHistory.length} tiles`);
       tilePaintHistory = [];
     } else if (currentTool === 'line' && startPos) {
       drawLine(startPos.row, startPos.col, pos.row, pos.col);
@@ -895,6 +902,15 @@
     const color = tileColors[tileId] || getDefaultTileColor(tileId);
     document.getElementById('selectedTile').style.backgroundColor = color;
     document.getElementById('selectedTileId').textContent = `${tileId} - ${getTileName(tileId)}`;
+    
+    // Update auto-tile button state
+    const autoTileBtn = document.getElementById('autoTileBtn');
+    const isSupported = supportsAutoTiling(tileId);
+    autoTileBtn.disabled = !isSupported;
+    if (!isSupported && autoTileEnabled) {
+      autoTileEnabled = false;
+      autoTileBtn.classList.remove('active');
+    }
   }
   
   document.querySelectorAll('.palette-tile').forEach(tile => {
@@ -1100,6 +1116,19 @@
     btn.classList.toggle('active', showGrid);
     drawMap();
     showStatus(showGrid ? 'Grid enabled' : 'Grid disabled');
+  });
+  
+  // Auto-tile toggle
+  document.getElementById('autoTileBtn').addEventListener('click', () => {
+    if (!supportsAutoTiling(currentTileId)) {
+      showStatus('Current tile does not support auto-tiling', 'error');
+      return;
+    }
+    
+    autoTileEnabled = !autoTileEnabled;
+    const btn = document.getElementById('autoTileBtn');
+    btn.classList.toggle('active', autoTileEnabled);
+    showStatus(autoTileEnabled ? 'Auto-tiling enabled' : 'Auto-tiling disabled');
   });
   
   // Export functionality
@@ -1595,6 +1624,9 @@
         case 'e':
           document.getElementById('exportBtn').click();
           break;
+        case 'a':
+          document.getElementById('autoTileBtn').click();
+          break;
         case 'h':
           if (mirrorMode === 'horizontal') {
             mirrorMode = 'off';
@@ -1653,6 +1685,22 @@
     return tileNames[tileId] || `Tile ${tileId}`;
   }
   
+  // Check if a tile supports auto-tiling
+  function supportsAutoTiling(tileId) {
+    // Wall/Rock tiles
+    if (tileId >= 30 && tileId <= 44) return true;
+    // Water tiles
+    if (tileId >= 11 && tileId <= 16) return true;
+    // Lava tiles
+    if (tileId >= 6 && tileId <= 10) return true;
+    // Crystal tiles
+    if (tileId >= 42 && tileId <= 45) return true;
+    // Ore tiles
+    if (tileId >= 46 && tileId <= 49) return true;
+    
+    return false;
+  }
+  
   // Validate dimensions
   if (typeof rows !== 'number' || typeof cols !== 'number' || rows <= 0 || cols <= 0) {
     document.body.innerHTML = '<div style="color: red; padding: 20px;">Error: Invalid map dimensions</div>';
@@ -1694,6 +1742,9 @@
         currentLayer = mapLayers.find(l => l.id === currentLayerId) || mapLayers[0];
         updateLayersList();
         drawMap();
+        break;
+      case 'autoTileSupport':
+        // Handle auto-tile support check response if needed
         break;
     }
   });

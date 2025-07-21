@@ -3,12 +3,14 @@ import { DatFileParser } from '../parser/datFileParser';
 import { EditHistory, MapEdit, EditChange } from '../undoRedo/editHistory';
 import { getTileColor } from '../mapPreview/colorMap';
 import { getTileName } from '../data/tileDefinitions';
+import { AutoTiler, supportsAutoTiling } from './autoTiling';
 
 export interface PaintTool {
   type: 'paint' | 'fill' | 'line' | 'rectangle' | 'picker' | 'select' | 'stamp';
   size: number;
   tileId: number;
   mirrorMode?: 'horizontal' | 'vertical' | 'both' | 'off';
+  autoTile?: boolean;
 }
 
 export interface SelectionData {
@@ -163,6 +165,16 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
           break;
         case 'mergeLayersDown':
           await this.handleMergeLayersDown(webviewPanel.webview, document, message.layerId);
+          break;
+        case 'autoTile':
+          await this.handleAutoTile(document, message.tiles, message.description);
+          break;
+        case 'checkAutoTileSupport':
+          webviewPanel.webview.postMessage({
+            type: 'autoTileSupport',
+            tileId: message.tileId,
+            supported: supportsAutoTiling(message.tileId),
+          });
           break;
       }
     });
@@ -688,6 +700,56 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
     }
   }
 
+  private async handleAutoTile(
+    document: vscode.TextDocument,
+    tiles: { row: number; col: number; tileId: number }[],
+    description: string
+  ): Promise<void> {
+    try {
+      const parser = new DatFileParser(document.getText());
+      const tilesSection = parser.getSection('tiles');
+      if (!tilesSection) {
+        vscode.window.showErrorMessage('No tiles section found in document');
+        return;
+      }
+
+      const lines = document.getText().split('\n');
+      const tilesStartLine = lines.findIndex(line => line.trim() === 'tiles{');
+      const tilesEndLine = lines.findIndex(
+        (line, index) => index > tilesStartLine && line.trim() === '}'
+      );
+
+      if (tilesStartLine === -1 || tilesEndLine === -1) {
+        return;
+      }
+
+      // Parse current tiles
+      const tileLines = lines.slice(tilesStartLine + 1, tilesEndLine);
+      const tileGrid: number[][] = tileLines
+        .filter(line => line.trim().length > 0)
+        .map(line => line.split(',').map(t => parseInt(t.trim(), 10)));
+
+      // Create AutoTiler instance
+      const rows = tileGrid.length;
+      const cols = tileGrid[0]?.length || 0;
+      const autoTiler = new AutoTiler(tileGrid, rows, cols);
+
+      // Apply auto-tiling
+      const autoTiledChanges = autoTiler.updateAndAutoTile(tiles);
+
+      // Combine original tiles with auto-tiled changes
+      const allChanges = [...tiles, ...autoTiledChanges];
+
+      // Apply all changes
+      if (allChanges.length > 0) {
+        await this.handlePaint(document, allChanges, description);
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error applying auto-tiling: ${errorMessage}`);
+    }
+  }
+
   private updateWebview(webview: vscode.Webview, document: vscode.TextDocument): void {
     try {
       const parser = new DatFileParser(document.getText());
@@ -828,6 +890,10 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             <button class="mirror-btn" data-mirror="horizontal" title="Mirror Horizontally">↔️</button>
             <button class="mirror-btn" data-mirror="vertical" title="Mirror Vertically">↕️</button>
             <button class="mirror-btn" data-mirror="both" title="Mirror Both Ways">✢</button>
+          </div>
+          
+          <div class="tool-group">
+            <button id="autoTileBtn" title="Toggle Auto-Tiling (A)">🔧 Auto-Tile</button>
           </div>
           
           <div class="coordinates">
