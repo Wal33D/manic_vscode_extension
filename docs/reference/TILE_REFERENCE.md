@@ -179,17 +179,19 @@ Reinforced tiles are stronger variants that require approximately 2x the drillin
 
 ### Additional High-ID Tiles
 
-Some maps use tiles with IDs above 100 that duplicate functionality:
+Some maps use tiles with IDs above 100 that duplicate functionality or add special features:
 
 | ID | Name | Description | Color (RGB/RGBA) |
 |----|------|-------------|------------------|
-| 101 | Ground (Duplicate) | Same as tile 1 | 124, 92, 70 |
-| 106 | Lava (Cooling) | Partially cooled lava variant | 255, 70, 10, 0.9 |
-| 111 | Water (Deep) | Deep water variant | 30, 95, 220 |
-| 112 | Slimy Slug Hole (Alt) | Alternative spawn point | 180, 180, 20 |
-| 114 | Building Power Path | Alternative power path ID | 220, 220, 220 |
-| 124 | Floating Panels | Bridge or platform tiles | 70, 130, 180, 0.9 |
-| 160-165 | Various Rubble | Different rubble variants | Various |
+| 101 | Ground (Reinforced) | Explosion-resistant ground variant | 124, 92, 70 |
+| 106 | Lava (Reinforced) | Special lava variant used in advanced levels | 255, 70, 10, 0.9 |
+| 111 | Water (Deep) | Deeper water requiring advanced hover upgrades | 30, 95, 220 |
+| 112 | Slimy Slug Hole (Reinforced) | Spawns more aggressive slugs | 180, 180, 20 |
+| 114 | Shore/Beach | Transition between water and land tiles | 220, 200, 150 |
+| 124 | Energy Crystal Formation | Large crystal deposit (5-10 crystals) | 70, 255, 180, 0.9 |
+| 163 | Landslide Rubble | Result of landslide events, heavy debris | 110, 90, 70 |
+| 164 | Dense Rubble | Extremely compacted debris, slow to clear | 100, 80, 60 |
+| 165 | Unstable Rubble | May trigger additional landslides when disturbed | 120, 100, 80 |
 
 ## Biome-Specific Colors
 
@@ -220,3 +222,64 @@ Some tiles may have different appearances based on the level's biome setting:
 4. **Hazard Placement**: Lava and water tiles create natural barriers. Use erosion tiles to create areas that degrade over time.
 
 5. **Power Path Planning**: Always ensure buildings can connect to the power grid through power paths.
+
+## Advanced Usage Patterns
+
+### Common Tile Combinations
+
+#### Starting Areas
+- **Basic**: 5x5 area of tile 1 (Ground) surrounded by tile 26-29 (Dirt)
+- **Advanced**: Mix tile 1 with tile 101 (Reinforced Ground) for explosion resistance
+- **With Power**: Pre-place tiles 14-25 for power grid foundation
+
+#### Natural Barriers
+- **Water Bodies**: Tile 11 (Water) with tile 114 (Shore) edges
+- **Lava Lakes**: Tile 6 (Lava) with tiles 7-10 (Erosion) for expanding danger
+- **Cliffs**: Tiles 64-65 (Experimental cliffs) or tile 38 (Solid Rock)
+
+#### Resource Placement
+- **Early Game**: Tiles 42-45 (Crystal Seam) near start, 1-2 tiles deep
+- **Mid Game**: Tiles 46-49 (Ore Seam) behind tiles 30-33 (Loose Rock)
+- **Late Game**: Tiles 92-99 (Reinforced Seams) behind tiles 84-87 (Hard Rock)
+- **Bonus Caches**: Tile 124 (Crystal Formation) behind tile 65 (Undiscovered)
+
+#### Progressive Difficulty
+- **Layer 1**: Tile 26 (Dirt) - 1-2 tiles deep
+- **Layer 2**: Tile 30 (Loose Rock) - 2-3 tiles deep
+- **Layer 3**: Tile 34 (Hard Rock) - 3-4 tiles deep
+- **Core**: Tile 38 (Solid Rock) or reinforced variants
+
+### Special Techniques
+
+#### Hidden Passages
+```
+38,38,38,38,38  // Solid rock wall
+38,30,30,30,38  // Hidden passage with loose rock
+38,38,65,38,38  // Undiscovered cavern entrance
+```
+
+#### Timed Challenges
+```
+1,1,1,10,9,8,7,6  // Erosion cascade toward lava
+```
+
+#### Resource Puzzles
+```
+38,42,38  // Crystal seam blocked by solid rock
+50,12,50  // Recharge seams power fence around slug hole
+```
+
+### Performance Considerations
+
+1. **Tile Limits**: Maps larger than 64x64 may impact performance
+2. **Entity Spawners**: Limit tiles 12 (Slug Holes) to 5-10 per map
+3. **Water/Lava**: Large bodies (>100 tiles) can slow pathfinding
+4. **Reinforced Walls**: Excessive use (>30% of map) frustrates players
+
+### Validation Rules
+
+1. **Valid IDs**: 1-165 (despite some gaps)
+2. **Building Placement**: Only on tiles 1, 101
+3. **Vehicle Movement**: Requires tile 1 or cleared paths
+4. **Power Paths**: Work on tiles 1, 13-25
+5. **Special IDs**: 163-165 are valid (landslide rubble)

@@ -13,12 +13,13 @@ A comprehensive Visual Studio Code extension providing full language support, vi
 ### 🎨 Syntax Highlighting
 Full syntax highlighting for all DAT file sections including:
 - `info` - Level metadata and configuration
-- `tiles` - Tile layout data
+- `tiles` - Tile layout data (supports tiles 1-165)
 - `height` - Height map information
 - `resources` - Crystal and ore placement
-- `objectives` - Level goals
-- `buildings` - Pre-placed structures
-- `script` - Level scripting
+- `objectives` - Level goals with multiple types
+- `buildings`, `vehicles`, `creatures`, `miners` - Entity placement
+- `script` - Advanced event-driven scripting with syntax highlighting
+- `blocks` - Visual scripting support
 - And more!
 
 ### 💡 IntelliSense Support
@@ -164,6 +165,13 @@ This extension works out of the box with no configuration required. Future versi
 - 📄 [DAT Format Reference](docs/DAT_FORMAT.md) - Complete file format specification
 - 🎮 [Tile Reference](docs/reference/TILE_REFERENCE.md) - All tile IDs and properties
 
+## Documentation
+
+- [DAT File Format Guide](docs/DAT_FORMAT.md) - Complete format reference
+- [Advanced Scripting Guide](docs/ADVANCED_SCRIPTING.md) - In-depth scripting patterns
+- [User Guide](docs/USER_GUIDE.md) - How to use the extension
+- [Developer Guide](docs/DEVELOPER_GUIDE.md) - Contributing and development
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
@@ -228,7 +236,14 @@ Initial release featuring:
 - Smart tile suggestions
 - Undo/redo with preview
 
+### Completed Features ✨
+- 3D terrain preview with height visualization
+- Enhanced script syntax highlighting
+- Level generators for 5 game types
+- Support for all tile IDs (1-165)
+
 ### In Development 🚧
+- Resource overlay visualization
 - Tile statistics panel
 - Map diff tool improvements
 - Minimap navigation
