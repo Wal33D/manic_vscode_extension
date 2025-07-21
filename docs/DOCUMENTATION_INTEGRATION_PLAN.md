@@ -366,5 +366,8 @@ docs/
   - [x] tile-ids.md
 - [x] Add missing algorithms documentation
   - [x] pathfinding.md
-- [ ] Create comprehensive code examples
+- [x] Create comprehensive code examples
+  - [x] Parsing examples (basic-parser.ts, stream-parser.ts, validation.ts)
+  - [x] Generation examples (simple-cave.ts, biome-specific.ts, resource-placement.ts)
+  - [x] Visualization examples (png-renderer.ts, thumbnail.ts)
 - [ ] Remove map-reference-implementations after full integration
