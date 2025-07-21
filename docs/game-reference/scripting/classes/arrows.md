@@ -1,6 +1,14 @@
 # Arrow Class
 
-Arrows are visual markers used to guide players and highlight important locations. They provide directional indicators and can be shown, hidden, or moved during gameplay.
+Arrows are visual markers used to guide players and highlight important locations. They provide directional indicators and can be shown, hidden, or moved during gameplay. Arrows were primarily designed for tutorials but can be used in any map where you need to draw player attention.
+
+## Important Notes
+
+- **Arrow vs Highlight**: The arrow color does NOT change the arrow appearance - all arrows look identical. The color only affects the highlight patch that appears under the arrow.
+- **Display Components**: Arrows have two visual elements:
+  1. The bouncing arrow graphic (identical for all arrows)
+  2. The blinking highlight patch (uses the arrow's assigned color)
+- **Variable Limitations**: Arrow variables cannot be assigned to each other and cannot be used in expressions or conditionals - only with arrow-specific events.
 
 ## Declaration
 
@@ -28,7 +36,7 @@ arrow DefaultArrow        # Defaults to green
 ## Arrow Events
 
 ### showarrow
-Display arrow at specified location.
+Display arrow at specified location (arrow only, no highlight).
 ```
 showarrow:row,col,ArrowVariable
 
@@ -47,7 +55,7 @@ hidearrow:GuideArrow;
 ```
 
 ### highlight
-Highlight a tile without arrow.
+Highlight a tile without arrow (highlight only, no arrow).
 ```
 highlight:row,col,ArrowVariable
 
@@ -56,7 +64,7 @@ highlight:15,15,GuideArrow;
 ```
 
 ### highlightarrow
-Show both arrow and tile highlight.
+Show both arrow and tile highlight (both arrow and highlight at once).
 ```
 highlightarrow:row,col,ArrowVariable
 
@@ -398,3 +406,4 @@ CheckVictory;
 - [Variables](../syntax/variables.md) - Declaring arrows
 - [Events](../syntax/events.md) - Arrow-related events
 - [Coordinates](../../format/overview.md#coordinates) - Row/col system
+- **Demo Scripts**: Review arrow examples in `ManicMiners\Levels\DEMO\Scripts` for practical implementations

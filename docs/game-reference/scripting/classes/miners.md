@@ -9,8 +9,10 @@ miner name=id
 ```
 
 - References miner with specific ID
-- ID must match miner placed in map or teleported
+- ID must match miner placed in map editor or teleported
 - ID 0 is typically the Chief
+- Cannot dynamically assign at runtime using ID
+- Undiscovered miners are inactive until discovered
 
 ### Examples
 ```
@@ -49,16 +51,19 @@ miners:row,col,count
 miners:10,10,3;  # Teleport 3 miners
 ```
 
-### lastminer
+### lastminer / save
 Capture reference to triggering miner.
 ```
 lastminer:MinerVariable
+save:MinerVariable  # Alternative syntax
 
 # Example
 when(enter:10,10:miners)[SaveMiner];
 
 SaveMiner::
 lastminer:ActiveMiner;
+# or
+save:ActiveMiner;
 ```
 
 ### heal
@@ -95,28 +100,49 @@ when(Chief.drive:15,15)[ChiefDriving];
 # Action detection
 when(Chief.laser)[ChiefShooting];
 when(Chief.drill)[ChiefDrilling];
+
+# Click detection
+when(click:Chief)[ChiefClicked];
+
+# Upgrade detection
+when(Chief.levelup)[ChiefUpgraded];
+
+# New miner detection (collection only)
+when(miner.new)[NewMinerArrived];
 ```
 
 ## Miner Properties
 
-### Health Points (.hp)
+### Health Points (.hp/.health/.stamina)
 ```
 miner Chief=0
 
-# Check health
+# Check health (all three are aliases)
 ((Chief.hp < 50))[ChiefInjured];
-((Chief.hp == 100))[ChiefHealthy];
+((Chief.health == 100))[ChiefHealthy];
+((Chief.stamina > 75))[ChiefStrong];
 ```
 
-### Position (.row/.col)
+### Position Properties
 ```
-# Track miner location
-int ChiefRow=0
-int ChiefCol=0
+# Basic position
+int ChiefRow=Chief.row
+int ChiefCol=Chief.col      # or .column (alias)
 
-GetChiefPosition::
-ChiefRow:Chief.row;
-ChiefCol:Chief.col;
+# Fine-grained position (300 units per tile)
+int PreciseX=Chief.X
+int PreciseY=Chief.Y
+int PreciseZ=Chief.Z
+
+# Tile under miner
+int TileAtChief=Chief.tile  # or .tileid (alias)
+```
+
+### Upgrade Level (.level)
+```
+# Check miner upgrade level
+((Chief.level == 3))[ChiefFullyUpgraded];
+((Chief.level < 3))[CanUpgrade];
 ```
 
 ### State Properties
@@ -124,6 +150,8 @@ ChiefCol:Chief.col;
 # Check miner state (if supported)
 ((Chief.inVehicle == true))[ChiefDriving];
 ((Chief.carrying == true))[ChiefCarrying];
+
+# Note: There's no way to detect miner skills via script
 ```
 
 ## Miner Management
@@ -350,6 +378,56 @@ MinerBusy:false;
 # Avoid too many per-miner triggers
 # Use collection triggers when possible
 # Track critical miners only
+```
+
+## Special Notes
+
+### Collection Limitations
+
+The `miner` keyword is a special collection that:
+- Can be used in triggers (e.g., `when(walk:10,10:miner)`)
+- **Cannot** be used as a macro to return miner count
+- Use the `miners` macro instead for counting
+
+```
+# WRONG - miner is not a count macro
+int Count=miner  # ERROR!
+
+# CORRECT - use miners macro
+int Count=miners
+```
+
+### Assignment Rules
+
+```
+# Valid assignments
+miner M1=0       # Static ID assignment
+miner M2         # Unassigned
+
+# Dynamic assignment
+lastminer:M2     # After trigger
+save:M2          # Alternative syntax
+
+# Miners can be assigned to each other
+M1:M2            # Valid
+
+# Cannot dynamically assign by ID at runtime
+# M1=5            # NOT POSSIBLE after declaration
+```
+
+### Unassigned Variables
+
+- Unassigned miner variables cannot be used in triggers
+- Must assign via `lastminer` or `save` first
+- Common pattern: Use collection trigger then save reference
+
+```
+# Common pattern
+when(enter:10,10:miner)[SaveEnteredMiner];
+
+SaveEnteredMiner::
+lastminer:TrackedMiner;
+# Now TrackedMiner can be used
 ```
 
 ## Common Issues

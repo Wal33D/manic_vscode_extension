@@ -45,6 +45,8 @@ Common causes of mission failure:
 - Script `lose:` event
 - Time limit exceeded
 
+> **Note**: The briefingfailure text appears after any optional text the map displays about the specific failure reason (lack of air, lack of miners/buildings, or from the `lose` event).
+
 ## Examples
 
 ### Basic Failure

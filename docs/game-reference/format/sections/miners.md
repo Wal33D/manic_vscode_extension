@@ -34,9 +34,10 @@ Position, rotation, and scale:
 Translation: X=1650.0 Y=1350.0 Z=53.095 Rotation: P=0.0 Y=90.0 R=0.0 Scale X=1.0 Y=1.0 Z=1.0
 ```
 
-- **X, Y, Z**: World position (300 units per tile)
+- **X, Y, Z**: World position (300 units per tile) - same values returned by script .X data member
 - **P, Y, R**: Rotation in degrees
 - **Scale**: Size (usually 1.0 for miners)
+- **Warning**: Miners not correctly placed on the floor may be unusable
 
 ### 3. Options (Optional)
 Tools, jobs, and level upgrades:
@@ -46,6 +47,8 @@ Drill/Hammer/JobDriver/JobPilot/Level/Level/
 ```
 
 Format: Each option ends with `/`, no spaces
+- Options may be jobs known by the miner, objects carried by the miner, or level upgrades
+- While order doesn't matter during map load, the editor always writes options in order: objects/jobs/level
 
 ### 4. Essential (Optional)
 Mission-critical miner:

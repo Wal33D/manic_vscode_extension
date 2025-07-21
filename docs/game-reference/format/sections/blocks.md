@@ -137,6 +137,8 @@ Only if emerge fails:
 5~6
 ```
 If block 5 (emerge) fails, trigger block 6
+- Emerge is the only block that can fail
+- Backup wires only execute if the emerge block fails
 
 #### Random Wire (?)
 One random choice:
@@ -146,6 +148,10 @@ One random choice:
 1?4
 ```
 Block 1 randomly triggers ONE of blocks 2, 3, or 4
+- Only one random wire executes per trigger
+- Other non-random wires still execute normally
+
+> **Note**: The `?` and `~` wire modifiers are internally implemented as modifiers on events within an Event Chain.
 
 ## Complete Example
 

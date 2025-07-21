@@ -61,13 +61,13 @@ Landslides damage:
 ### Immune Units
 These are not damaged by landslides:
 - `VehicleLoaderDozer_C` - Built to handle rubble
-- `VehicleTunnelScout_C` - Flies above
-- `VehicleTunnelTransport_C` - Flies above
-- `VehicleCargoCarrier_C` - Water vehicle
-- `VehicleRapidRider_C` - Water vehicle
+- `VehicleTunnelScout_C` - Aerial vehicle, moves above landslides
+- `VehicleTunnelTransport_C` - Aerial vehicle, moves above landslides
+- `VehicleCargoCarrier_C` - Water vehicle (no landslides over water)
+- `VehicleRapidRider_C` - Water vehicle (no landslides over water)
 
 ### Special Cases
-- Power paths survive landslides
+- Landslides falling onto power paths do not destroy the power path
 - Reinforced walls (ID+50) don't landslide
 - Undiscovered tiles inactive until revealed
 

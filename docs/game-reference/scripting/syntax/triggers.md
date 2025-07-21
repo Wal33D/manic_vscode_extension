@@ -8,11 +8,23 @@ Triggers are the core mechanism for detecting game events and executing actions 
 OCCURRENCE(TRIGGER)((CONDITION))[TRUE_EVENT][FALSE_EVENT];
 ```
 
+All syntax forms:
+```
+if(TRIGGER)[TRUE_EVENT]
+if(TRIGGER)((CONDITION))[TRUE_EVENT]
+if(TRIGGER)((CONDITION))[TRUE_EVENT][FALSE_EVENT]
+when(TRIGGER)[TRUE_EVENT]
+when(TRIGGER)((CONDITION))[TRUE_EVENT]
+when(TRIGGER)((CONDITION))[TRUE_EVENT][FALSE_EVENT]
+```
+
 - **OCCURRENCE**: `if` or `when`
 - **TRIGGER**: The event to detect
 - **CONDITION**: Optional boolean test
 - **TRUE_EVENT**: Action when condition is true (or no condition)
 - **FALSE_EVENT**: Optional action when condition is false
+
+**Important**: All variables in triggers are converted to integers (decimals cut off, not rounded). For example, 2.2 and 2.9 both become 2.
 
 ## Occurrence Types
 
@@ -29,6 +41,8 @@ Fires every time conditions are met.
 when(enter:5,5)[PlayerEntered];
 when(crystals<10)[LowResources];
 ```
+
+**Warning**: Avoid `when` with time triggers - they evaluate every tick after the time is reached!
 
 ## Trigger Types
 
@@ -58,10 +72,18 @@ when(enter:8,8:VehicleHoverScout_C)[ScoutEntered];
 - miners, vehicles, buildings
 - Specific types: CreatureRockMonster_C, VehicleLoaderDozer_C, etc.
 
+**Note**: Basic form `enter:row,col` only triggers on miners and vehicles, not creatures. Use `enter:row,col:collection` for creatures.
+
 ### laserdamage
 Fires when tile takes laser damage.
 ```
 when(laserdamage:10,10)[WallDamaged];
+```
+
+### laserhit
+Fires when any laser hits tile (including floor).
+```
+when(laserhit:10,10)[LaserHitTile];
 ```
 
 ### change
@@ -69,8 +91,13 @@ Fires when tile changes.
 ```
 when(change:5,5)[TileChanged];
 when(change:10,10:1)[BecameGround];
-when(change:10,10:1:6)[ChangedFromWallToGround];
+when(change:10,10:1:6)[ChangedFromGroundToLava];
 ```
+
+Forms:
+- `change:row,col` - Any change
+- `change:row,col:newID` - Change to specific tile ID
+- `change:row,col:newID:oldID` - Specific transition
 
 ### drill
 Fires when wall is drilled.
@@ -105,17 +132,28 @@ when(click:BuildingToolStore_C)[ToolStoreClicked];
 when(click:MyBuildingVar)[SpecificBuildingClicked];
 ```
 
+**Note**: Tile must be visible for click triggers to work.
+
+### hover
+Fires when player hovers mouse over tile.
+```
+when(hover:10,10)[TileHovered];
+```
+
 ### hoverenter/hoverleave
-Fires on mouse hover.
+Fires on mouse hover state change.
 ```
 when(hoverenter:5,5)[MouseEntered];
 when(hoverleave:5,5)[MouseLeft];
 ```
 
+**Note**: Tiles must be visible for hover triggers to work.
+
 ### built
 Fires when building is placed.
 ```
 when(built:BuildingToolStore_C)[ToolStoreBuilt];
+when(built:10,10)[BuildingAtLocation];
 when(built:BuildingPowerStation_C:10,10)[PowerStationAtLocation];
 ```
 
@@ -125,6 +163,14 @@ Fires when unit is created.
 when(new:miners)[MinerTeleported];
 when(new:VehicleHoverScout_C)[ScoutCreated];
 when(new:CreatureRockMonster_C)[MonsterSpawned];
+```
+
+### comparison
+Evaluates mathematical expressions.
+```
+when(crystals>50)[HaveEnoughCrystals];
+when(time>=300)[FiveMinutes];
+when(miners+vehicles>10)[ManyUnits];
 ```
 
 ## Resource Triggers
@@ -379,6 +425,27 @@ when(time>60 and MessageShown==false)[ShowOnce];
 - Order of trigger execution is undefined
 - Cannot dynamically create/remove triggers
 
+### Multiple Identical Triggers Warning
+
+**Critical**: Using multiple identical triggers causes undefined behavior!
+
+```
+# WRONG - Undefined behavior!
+when(enter:4,5)[foo];
+when(enter:4,5)[bar];
+if(enter:4,5)[singleShot];
+```
+
+Only one of these will execute, but which one is unpredictable.
+
+**Exception**: Time triggers can be duplicated:
+```
+# OK - All will execute
+if(time:0)[startup1];
+if(time:0)[startup2];
+if(time:0)[startup3];
+```
+
 ## Examples
 
 ### Mission Timer
@@ -420,6 +487,34 @@ heal:MainBase,25;
 BaseLost::
 lose:MainBaseDestroyed;
 ```
+
+### Scalability Example
+
+Preventing trigger spam when many units are present:
+
+**Problem**: 200 miners entering a tile spawn 200 monsters!
+```
+# BAD - Creates too many monsters
+when(enter:50,50:miners)[SpawnMonster];
+
+SpawnMonster::
+emerge:50,50,A,CreatureRockMonster_C,10;
+```
+
+**Solution**: Use timing control to limit spawns
+```
+float LastSpawnTime=-100.0
+float SpawnCooldown=5.0
+
+when(enter:50,50:miners)[TrySpawnMonster];
+
+TrySpawnMonster::
+((time-LastSpawnTime < SpawnCooldown))return;
+LastSpawnTime:time;
+emerge:50,50,A,CreatureRockMonster_C,10;
+```
+
+This ensures monsters spawn at most once every 5 seconds, regardless of how many miners enter.
 
 ## See Also
 - [Events](events.md) - Actions triggers can execute

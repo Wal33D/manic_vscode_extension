@@ -416,6 +416,52 @@ ConditionTrue::
 - No complex math in conditions
 - String comparisons are exact only
 - Cannot compare different object types
+- No nested parentheses or complex boolean logic
+
+## Emulating Complex Conditions
+
+Since MMS doesn't support nested conditions or complex boolean logic, here are three patterns to work around this limitation:
+
+### Pattern 1: Multiple True Chains
+Break complex logic into separate chains:
+```
+# Want: IF (a AND b) OR (c AND d)
+Check::
+((a == true and b == true))[Success];
+((c == true and d == true))[Success];
+Failure;
+```
+
+### Pattern 2: Tracking with Variables
+Use an integer to track condition states:
+```
+int ConditionMet=0
+
+# Want: IF (a OR b) AND (c OR d)
+Check::
+ConditionMet:0;
+((a == true))ConditionMet+=1;
+((b == true))ConditionMet+=1;
+((ConditionMet > 0))CheckSecond;
+
+CheckSecond::
+ConditionMet:0;
+((c == true))ConditionMet+=1;
+((d == true))ConditionMet+=1;
+((ConditionMet > 0))[Success][Failure];
+```
+
+### Pattern 3: Early Exit with Return
+Use return to simplify complex NOT conditions:
+```
+# Want: IF NOT(a AND b AND c)
+Check::
+((a == false))return;
+((b == false))return;
+((c == false))return;
+# All conditions true, handle the NOT case
+HandleAllTrue;
+```
 
 ## Examples
 

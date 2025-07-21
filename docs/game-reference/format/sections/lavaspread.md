@@ -21,9 +21,9 @@ INTERVAL/DELAY:row,col/row,col/...
 
 ### Interval (Required)
 - **Type**: Float (seconds)
-- **Precision**: 0.1 second resolution
+- **Precision**: 0.1 second resolution (editor outputs to 0.1 precision)
 - **Behavior**: Time between erosion phases
-- **Actual timing**: Random between interval and 2×interval
+- **Actual timing**: Random between interval and 2×interval (game engine behavior)
 
 ### Delay (Required)
 - **Type**: Float (seconds)
@@ -33,8 +33,9 @@ INTERVAL/DELAY:row,col/row,col/...
 
 ### Tile Locations
 - **Format**: `row,col/` for each tile
-- **Grouping**: All tiles with same interval/delay on one line
+- **Grouping**: All tiles with same interval/delay MUST be on one line
 - **Restriction**: Each tile can only have ONE erosion setting
+- **Engine requirement**: Additional lines with same interval/delay are ignored
 
 ## Erosion Mechanics
 
@@ -49,14 +50,14 @@ Tiles progress through 5 phases:
 
 ### Requirements
 Erosion only starts if:
-- Tile is discovered (visible)
-- Adjacent to existing lava
+- Tile is discovered (visible) - erosions in undiscovered caverns are not active
+- Adjacent to existing lava (erosions require a neighboring lava tile)
 - Initial delay has passed
 - Global delay has passed
 
 ### Starting Mid-Phase
 If a tile already has erosion ID (7-10):
-- Starts at next phase after delay
+- After the delay and interval, progresses from the next phase
 - Example: Tile 8 becomes tile 7 after first interval
 
 ## Global Modifiers
@@ -172,6 +173,11 @@ lavaspread{
 - Tile delay: 30 seconds
 - Per phase: 20-40 seconds (10×2 to 10×2×2)
 - **Total**: 170-250 seconds
+
+## Special Notes
+
+- There is no known macro that returns the number of active erosions (unlike landslides which have `EventLandslide_C`)
+- Erosion tiles may be internally grouped at 0.1 second intervals
 
 ## Map Design Tips
 

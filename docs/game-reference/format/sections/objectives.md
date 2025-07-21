@@ -2,6 +2,8 @@
 
 The `objectives{}` section defines win conditions for the map. All objectives must be completed for automatic victory, though scripts can provide alternative win conditions.
 
+> **Note**: If the info section has an `oxygen:` statement, the map automatically has a requirement to not run out of air. If air ever reaches 0, the player loses the map.
+
 ## Objective Types
 
 ### 1. Building Construction
@@ -132,6 +134,8 @@ objectives{
 }
 ```
 
+> **Warning**: Be careful with variable conditions. If the condition has an error or is impossible to achieve through script logic, the user may not be able to win the map unless the script uses the `win` event. This can be useful for creating custom objectives communicated via `msg` events that aren't part of the objective display.
+
 ## Special Conditions
 
 ### Oxygen Requirement
@@ -173,7 +177,7 @@ objectives{
 2. **Building locations**: Must have actual buildings
 3. **Resources**: Only one resources objective allowed
 4. **Variables**: Must be valid script syntax
-5. **Reserved words**: Objective types are script reserved words
+5. **Reserved words**: Since the objective section is processed by the script engine, objective keywords (`building`, `discovertile`, `findbuilding`, `resources`, `variable`) are reserved words in script - no event chain or variables may have these names
 
 ## Performance Considerations
 
@@ -227,6 +231,13 @@ objectives{
     variable: crystals >= 300/Bonus: Collect 300 crystals
 }
 ```
+
+## Important Behavior Notes
+
+- **Objectives are loaded at map start** - cannot be changed during runtime
+- **Once completed, objectives stay completed** - even if condition becomes false later (e.g., building 5 Tool Stores then deleting them)
+- **"variable" is a reserved word** - do not use it for script variables or event chains
+- **Prevent auto-win** - use a final objective that only becomes true after win event to control victory timing
 
 ## See Also
 - [Script Section](script.md) - Alternative win conditions

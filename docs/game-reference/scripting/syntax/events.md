@@ -2,6 +2,26 @@
 
 Events are actions that modify game state. They execute when triggers fire or within event chains.
 
+## Predefined Event Chains
+
+There are two special event chains that are automatically called:
+
+### init
+Called at the start of the map before any other trigger.
+```
+init::
+disable:lights;
+msg:WelcomeToTheCaverns;
+```
+
+### tick
+Called on every frame update (up to 350 times per second).
+```
+tick::
+# WARNING: Not recommended! Severe performance impact
+# Use timers instead
+```
+
 ## Event Syntax
 
 ### In Triggers
@@ -32,12 +52,13 @@ Display message and wait for acknowledgment.
 qmsg:ImportantMessage;
 ```
 
-### msgChief
-Show Chief portrait with message.
+### msgChief  
+Show Chief portrait with message and pan camera.
 ```
 msgChief:row,col,audiofile;
 # Example: msgChief:10,10,warning;
 ```
+**Note**: Also pans camera to specified row,col location.
 
 ## Resource Events
 
@@ -83,12 +104,16 @@ place:row,col,tileID;
 # Example: place:10,10,1;  # Make ground
 ```
 
+**Warning**: Placing a wall on top of a miner or vehicle will phase them through the ground. This behavior will be updated in the future to bury them until dug out.
+
 ### drill
 Drill wall at location.
 ```
 drill:row,col;
 # Example: drill:15,15;
 ```
+
+**Note**: All wall tiles can be drilled with this event, including those not normally drillable. Drilling may cause other tiles to automatically collapse and fire drill triggers.
 
 ### placerubble
 Create rubble at location.
@@ -112,6 +137,14 @@ emerge:row,col,direction,CreatureType,radius;
 # direction: N,S,E,W,A (auto)
 # Example: emerge:10,10,A,CreatureRockMonster_C,2;
 ```
+
+**Parameters**:
+- `row,col`: Desired spawn location
+- `direction`: N/S/E/W for specific direction, A for automatic
+- `CreatureType`: Collection name (e.g., CreatureRockMonster_C)
+- `radius`: Search distance for emergeable wall
+
+**Failure Handling**: Use `~` modifier in event chains to handle emerge failures (see Special Modifiers section)
 
 ### miners
 Teleport Rock Raiders.
@@ -201,6 +234,18 @@ Lose the mission.
 ```
 lose:;          # Default message
 lose:DefeatMessage;
+```
+
+### reset
+Reset player's selection (equivalent to right-click).
+```
+reset:;
+```
+
+### resume
+Same as unpause.
+```
+resume:;
 ```
 
 ### objective
@@ -317,6 +362,7 @@ disable:vehicles;       # No vehicle teleport
 disable:buildings;      # No building teleport
 disable:BuildingToolStore_C;  # Specific type
 disable:lights;         # Turn off lights
+disable:Dynamite_C;     # Disable explosives
 ```
 
 ### enable
@@ -325,6 +371,16 @@ Re-enable abilities.
 enable:miners;
 enable:VehicleHoverScout_C;
 ```
+
+**Collection Types**:
+- `miners` - All Rock Raider teleportation
+- `vehicles` - All vehicle teleportation
+- `buildings` - All building teleportation
+- `[ClassName]_C` - Specific vehicle/building class
+- `lights`/`light` - Ambient cavern lighting
+- `Dynamite_C` - Explosive placement
+
+**Note**: Players cannot override light settings. Vehicle floodlights and some miner helmets still provide light when ambient is disabled.
 
 ## Timer Control
 
@@ -382,24 +438,28 @@ Save triggering miner.
 ```
 lastminer:MinerVariable;
 ```
+Alternative syntax: `save:MinerVariable`
 
-### lastvehicle
+### lastvehicle  
 Save triggering vehicle.
 ```
 lastvehicle:VehicleVariable;
 ```
+Alternative syntax: `savevehicle:VehicleVariable`
 
 ### lastbuilding
 Save triggering building.
 ```
 lastbuilding:BuildingVariable;
 ```
+Alternative syntax: `savebuilding:BuildingVariable`
 
 ### lastcreature
 Save triggering creature.
 ```
 lastcreature:CreatureVariable;
 ```
+Alternative syntax: `savecreature:CreatureVariable`
 
 ## Special Modifiers
 
@@ -419,6 +479,32 @@ TrySpawn::
 emerge:10,10,A,CreatureRockMonster_C,2;
 ~msg:SpawnFailed;
 ```
+
+**Important**: Successful emerge exits the event chain at the `~` line!
+
+**Correct Pattern**:
+```
+bool bEmergeGood
+
+MyEvent::
+DoEmerge;
+((bEmergeGood==true))[EmergeOk][EmergeBad];
+
+DoEmerge::
+bEmergeGood:true;
+emerge:2,3,A,CreatureIceMonster_C,0;
+~bEmergeGood:false;  # Only runs if emerge failed
+```
+
+**Incorrect Pattern**:
+```
+MyEvent::
+emerge:2,3,A,CreatureIceMonster_C,0;
+~msg:"Monster failed";
+MoreStuff;  # NEVER RUNS if emerge succeeded!
+```
+
+**Key Rule**: Place `~` events last in the event chain to avoid unexpected exits.
 
 ## Common Patterns
 
@@ -454,6 +540,64 @@ lastcreature:BossMonster;
 - ~630 tile changes per trigger maximum
 - Water/lava changes can't mix with other tiles
 - String variables required for messages
+
+### Tile Modification Details
+
+The engine collects all place and drill events and processes them after the trigger returns. This enables:
+- Creating new walls
+- Destroying walls  
+- Changing ground types
+- Adding/removing lava and water
+
+**Critical Limits**:
+- Maximum ~630 tiles per trigger (non-deterministic beyond this)
+- Water/lava tiles cannot mix with other tile changes in same trigger
+- Cannot create new undiscovered caverns via script
+- Wait events process queued place events
+
+**Water/Lava Restrictions**:
+In one trigger context, you can only place:
+- Only water tiles
+- Only lava tiles
+- Only non-water/lava tiles
+
+Mixing these causes non-deterministic results. Use wait events between different types.
+
+### Collapsing Walls
+
+Walls generally need to be two tiles thick. Drilling one side collapses the other, except for hidden areas which require drilling both sides.
+
+**Making Single-Drillable Hidden Walls**:
+
+1. **Visual Block System**: 
+   - Add change trigger on drillable wall
+   - Connect wire to drill event for opposite wall
+   - Can connect multiple wires for larger collapses
+
+2. **Script Method**:
+   ```
+   if(drill:row,col)[drill:row2,col2];
+   ```
+
+3. **Editor Method**:
+   - Use flat mode to draw single-width walls
+   - Only works properly enclosing undiscovered areas
+   - Single walls between discovered areas collapse at runtime
+
+**Wall Rules**:
+- Two tiles thick prevents collapsing (except hidden areas)
+- Single tile walls collapse if both sides discovered
+- Cliff tiles (experimental) have special collapse behavior
+
+## Unknown Events
+
+These events are recognized by the engine but have unknown syntax/behavior:
+
+### landslide
+```
+# landslide is a reserved word
+# Syntax unknown
+```
 
 ## See Also
 - [Variables](variables.md) - Data storage

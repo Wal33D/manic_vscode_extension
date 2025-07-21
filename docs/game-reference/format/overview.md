@@ -4,6 +4,39 @@
 
 Manic Miners level files use the `.dat` extension and contain all information needed to define a playable level. The format is text-based with a section structure, making it human-readable and editable.
 
+## File Encoding and Format
+
+### Supported Encodings
+DAT files support the following text encodings:
+
+1. **ANSI 8-bit** (Windows current code page) - No BOM
+2. **UTF-8 with BOM** - Starts with bytes `0xEF, 0xBB, 0xBF`
+3. **UTF-16LE with BOM** - Starts with bytes `0xFF, 0xFE` 
+4. **UTF-16BE with BOM** - Starts with bytes `0xFE, 0xFF`
+
+### Important Encoding Notes
+- **Line endings**: Must use Windows CRLF (`\r\n`)
+- **Unsupported**: UTF-16 without BOM, UTF-32 (important for Mac users)
+- **Editor behavior**: The Manic Miners editor saves as UTF-16LE BOM if any non-ANSI characters are present
+- **Legacy support**: If file ends with CTRL-Z (0x1A), content after is ignored
+
+### Internationalization Constraints
+While DAT files support Unicode, certain elements have restrictions:
+
+**Must be lowercase ANSI (a-z only)**:
+- Section names (e.g., `info`, `tiles`, `script`)
+
+**Must be ANSI western characters (A-Z, a-z, 0-9, underscore)**:
+- Variable names
+- Event chain names
+- Macro names
+
+**Support full Unicode**:
+- Level name and creator (in info section)
+- String variables and messages
+- Briefing text
+- Comments
+
 ## File Structure
 
 A DAT file consists of multiple sections, each with the format:
@@ -39,6 +72,14 @@ These sections add features and complexity to levels:
 - **briefingfailure{}** - Failure message
 - **landslidefrequency{}** - Landslide timing
 - **lavaspread{}** - Lava expansion timing
+
+### Legacy Sections (Deprecated)
+These sections are still accepted for backwards compatibility but are ignored:
+
+- **monsters{}** - Old enemy placement system (use creatures{} instead)
+- **monsterfrequency{}** - Old spawn timing (use script{} instead)
+
+**Note**: The editor no longer generates these sections.
 
 ## Data Types
 
@@ -105,9 +146,9 @@ script{
 - X = column, Y = row (note: this is often confusing!)
 
 ### World Coordinates
-- Each tile is 150 world units
-- Center of tile [0,0] is at world (75, 75)
-- Formula: `world = (grid * 150) + 75`
+- Each tile is 300 world units
+- Center of tile [0,0] is at world (150, 150)
+- Formula: `world = (grid * 300) + 150`
 - Used in: entity placement (buildings, vehicles, etc.)
 
 ### Important Note on Coordinates
@@ -132,10 +173,6 @@ The most common error is X/Y confusion:
 - **buildings**: At least one Tool Store required
 - **script**: Variables must be declared before use
 
-## File Encoding
-- UTF-8 encoding recommended
-- Windows line endings (CRLF) traditional but LF works
-- No BOM (Byte Order Mark)
 
 ## Example Minimal File
 ```

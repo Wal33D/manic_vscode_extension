@@ -1,6 +1,6 @@
 # Height Section
 
-The `height{}` section is required and defines the elevation of every tile corner in the map. This creates the 3D terrain topology.
+The `height{}` section (also written as `heights{}`) is required and defines the elevation of every tile corner in the map. This creates the 3D terrain topology. The map editor writes this section on every save.
 
 ## Format
 
@@ -28,6 +28,8 @@ For a map with `rowcount` x `colcount` tiles:
 
 ## Visual Representation
 
+![Example 3x3 map heights](../../../assets/MMHeightPointsTrans.png "Example 3x3 map heights")
+
 ```
 Heights:     Tiles:
 A---B---C    +---+---+
@@ -48,6 +50,7 @@ Each tile shares corners with adjacent tiles:
 - **Default**: 0 (ground level)
 - **Positive**: Above ground (300 = 1 tile higher)
 - **Negative**: Below ground (-300 = 1 tile lower)
+- **Script Access**: These same units are returned by the X, Y, Z data members in script
 - **Range**: No known limits, but extreme values may cause issues
 
 ## Important Rules

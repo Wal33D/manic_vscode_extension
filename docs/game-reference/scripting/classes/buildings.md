@@ -32,6 +32,7 @@ building MainBase         # Unassigned, set later
 - `BuildingUpgradeStation_C` - Upgrades miner abilities
 - `BuildingGeologicalCenter_C` - Scans for resources
 - `BuildingDocks_C` - Water vehicle support
+- `BuildingCanteen_C` - Provides food for miners
 
 ### Defensive Buildings
 - `BuildingBarracks_C` - Trains armed miners
@@ -77,28 +78,53 @@ when(Base.dead)[BaseDestroyed];
 
 # Click detection
 when(click:Base)[BaseClicked];
+
+# Power state changes
+when(Base.poweron)[BasePowered];
+when(Base.poweroff)[BaseLostPower];
+
+# Upgrade detection
+when(Base.levelup)[BaseUpgraded];
 ```
 
 ## Building Properties
 
-### Health Points (.hp)
+### Health Points (.hp/.health)
 ```
 building MainBase=10,10
 
 # Check health
 ((MainBase.hp < 50))[RepairBase];
-((MainBase.hp == 0))[BaseDestroyed];
+((MainBase.health == 0))[BaseDestroyed];  # .health is alias for .hp
 ```
 
-### Position (.row/.col)
+### Position Properties
 ```
-# Get building location
-int BaseRow=0
-int BaseCol=0
+# Basic position
+int BaseRow=MainBase.row      # or .row
+int BaseCol=MainBase.col      # or .column (alias)
 
-GetBasePosition::
-BaseRow:MainBase.row;
-BaseCol:MainBase.col;
+# Fine-grained position (300 units per tile)
+int PreciseX=MainBase.X
+int PreciseY=MainBase.Y  
+int PreciseZ=MainBase.Z
+
+# Tile ID at building location
+int TileAtBase=MainBase.tile  # or .tileid (alias)
+```
+
+### Power Status (.power/.powered/.ispowered)
+```
+# Check if building has power
+((MainBase.power == true))[BaseOperational];
+((MainBase.ispowered == false))[NeedPower];  # All three are aliases
+```
+
+### Upgrade Level (.level)
+```
+# Check building upgrade level
+((ToolStore.level == 2))[FullyUpgraded];
+((ToolStore.level < 2))[CanUpgrade];
 ```
 
 ## Building Management
@@ -360,6 +386,50 @@ msg:PowerStationDestroyed;
 # Must use static declarations
 # Cannot create triggers after lastbuilding
 ```
+
+## Special Notes
+
+### Electric Fence Limitations
+
+Electric Fences have significant scripting limitations:
+- `new` and `built` triggers do NOT fire for fences (not hooked up internally)
+- Cannot retrieve fence reference via `lastbuilding` 
+- No array support for tracking multiple fences
+- No triggers for power state changes
+- Can only read the total count via `ElectricFence_C` or `electricfence` macro
+
+```
+# This WON'T work for Electric Fences:
+when(built:BuildingElectricFence_C)[FenceBuilt];  # Never triggers!
+
+# This WILL work:
+when(electricfence > 0)[AtLeastOneFence];
+```
+
+### Building Assignment
+
+```
+# Static assignment (at map load)
+building Base=10,10  # Must exist in map
+
+# Dynamic assignment (during gameplay)
+when(built:BuildingToolStore_C)[SaveToolStore];
+
+SaveToolStore::
+lastbuilding:NewToolStore;  # Capture reference
+
+# LIMITATION: Cannot dynamically assign using row,col
+# building B=lastminer.row,lastminer.col  # NOT POSSIBLE
+```
+
+### Undiscovered Buildings
+
+Undiscovered buildings and their triggers are inactive until discovered. Plan accordingly for pre-placed buildings in undiscovered caverns.
+
+### Special Collection Notes
+
+- `BuildingPowerPath_C` - Only counts completed paths, deleted when finished
+- `building` collection can be used in triggers but NOT as a macro for counting
 
 ## Examples
 
