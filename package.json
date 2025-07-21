@@ -472,6 +472,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:golden": "tsx src/test/golden/runGoldenTests.ts",
+    "test:golden:update": "UPDATE_GOLDENS=true tsx src/test/golden/runGoldenTests.ts",
     "format": "prettier --write \"src/**/*.ts\"",
     "format:check": "prettier --check \"src/**/*.ts\"",
     "type-check": "tsc --noEmit",
