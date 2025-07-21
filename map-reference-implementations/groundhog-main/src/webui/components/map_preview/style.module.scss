@@ -1,0 +1,361 @@
+@property --pvw-yaw {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+@property --pvw-pitch {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+@property --pvw-tr-x {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --pvw-tr-y {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+@property --pvw-scale {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 1;
+}
+
+.cavernPreview {
+  position: absolute;
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+
+  // Blueprints
+  --pvw-bpak: #222222;
+  --pvw-bpck: #2d004b;
+  --pvw-bphk: #166921;
+  // Paths
+  --pvw-pathspan: yellow;
+  --pvw-pathaux: #24b136;
+  // Plans
+  --pvw-planisanchor: cyan;
+  --pvw-planhasscript: magenta;
+  // Entites
+  --pvw-entfriend: yellow;
+  --pvw-entenemy: red;
+  // Default tile overlays
+  --pvw-dlava: #912e00;
+  --pvw-dwater: #00195f;
+  --pvw-dsolid: transparent;
+  --pvw-dfloor: #180032;
+  --pvw-dwall: #2d004b;
+  // Tile overlays indicating numeric qty (ore, ec, landslideness...)
+  --pvw-scale0: #555544;
+  --pvw-scale1: #777744;
+  --pvw-scale2: #999944;
+  --pvw-scale3: #bbbb44;
+  --pvw-scale4: #dddd44;
+  --pvw-scale5: #ffff44;
+  --pvw-scale6: #ffff66;
+  --pvw-scale7: #ffff88;
+  // Specific tile IDs
+  --pvw-tile1: #2d004b;
+  --pvw-tile2: #180032;
+  --pvw-tile3: #180032;
+  --pvw-tile4: #180032;
+  --pvw-tile5: #180032;
+  --pvw-tile6: #ff5a00;
+  --pvw-tile11: #002fb5;
+  --pvw-tile12: #166921;
+  --pvw-tile14: #bfbfbf;
+  --pvw-tile24: #9d9b00;
+  --pvw-tile26: #ad59ef;
+  --pvw-tile30: #943cc3;
+  --pvw-tile34: #731cad;
+  --pvw-tile38: #800080;
+  --pvw-tile42: #b5ff00;
+  --pvw-tile46: #9c4108;
+  --pvw-tile50: #ffff00;
+  --pvw-tile60: #180032;
+  --pvw-tile61: #180032;
+  --pvw-tile62: #180032;
+  --pvw-tile63: #180032;
+  // Cavern Discovery
+  --pvw-disco0: #ffff44;
+  --pvw-disco1: #882222;
+  // Oxygen
+  --pvw-oxex: #555533;
+  --pvw-oxhc: var(--pvw-tile42);
+
+  .mapWrapper {
+    position: relative;
+    width: 100%;
+
+    .map {
+      position: absolute;
+      transition: transform 500ms linear;
+      transform: rotate3d(1, 0, 0, var(--pvw-pitch)) rotate(var(--pvw-yaw))
+        matrix(
+          var(--pvw-scale),
+          0,
+          0,
+          var(--pvw-scale),
+          calc(var(--pvw-tr-x) * var(--pvw-scale)),
+          calc(var(--pvw-tr-y) * var(--pvw-scale))
+        );
+
+      &.void {
+        transition: none;
+      }
+
+      .baseplate {
+        font-size: 8px;
+
+        .fg {
+          fill: white;
+        }
+
+        &.ambiguousKind .bg {
+          fill: var(--pvw-bpak);
+        }
+
+        &.caveKind .bg {
+          fill: var(--pvw-bpck);
+        }
+
+        &.hallKind .bg {
+          fill: var(--pvw-bphk);
+        }
+      }
+
+      .path {
+        stroke-linecap: round;
+        stroke-dasharray: 2, 3;
+
+        &.ambiguousKind {
+          --fg-color: white;
+          --fg-opacity: 0.3;
+        }
+
+        &.spanningKind {
+          --fg-color: var(--pvw-pathspan);
+        }
+
+        &.auxiliaryKind {
+          --fg-color: var(--pvw-pathaux);
+        }
+
+        & > path {
+          stroke: var(--fg-color);
+          stroke-opacity: var(--fg-opacity);
+          stroke-width: 2px;
+        }
+
+        & > text {
+          fill: var(--fg-color);
+          opacity: var(--fg-opacity);
+          font-size: 12px;
+        }
+      }
+
+      .plan {
+        --color-bg: #444444;
+        --color-fg: white;
+        &.caveKind {
+          .bg {
+            stroke-width: 2px;
+            fill: none;
+          }
+          &.hasScript {
+            --color-fg: var(--pvw-planhasscript);
+          }
+          &.isAnchor {
+            --color-fg: var(--pvw-planisanchor);
+          }
+        }
+        &.hallKind {
+          .bg {
+            stroke-linecap: round;
+            opacity: 0.4;
+          }
+          &.spanningPathKind {
+            --color-fg: var(--pvw-pathspan);
+          }
+          &.auxiliaryPathKind {
+            --color-fg: var(--pvw-pathaux);
+          }
+        }
+        &.fluid6 {
+          --color-bg: var(--pvw-tile6);
+        }
+        &.fluid11 {
+          --color-bg: var(--pvw-tile11);
+        }
+        &.left .label {
+          text-anchor: end;
+        }
+        &.inline .label {
+          text-anchor: middle;
+          font-size: 6px;
+        }
+        .label {
+          fill: var(--color-fg);
+          font-size: 12px;
+        }
+        .pointer {
+          fill: none;
+          stroke-width: 1px;
+          stroke: var(--color-fg);
+        }
+        .bg {
+          stroke: var(--color-bg);
+        }
+      }
+
+      .pearl {
+        &.innerPearl {
+          stroke-width: 1px;
+          &.caveKind {
+            --color0: #40ffff;
+            --color1: #40dddd;
+            --color2: #40bbbb;
+            --color3: #409999;
+          }
+          &.hallKind {
+            --color0: #ffff20;
+            --color1: #dddd20;
+            --color2: #bbbb20;
+            --color3: #999920;
+          }
+        }
+        &.outerPearl {
+          stroke-width: 0.5px;
+          --color0: #999999;
+          --color1: #888888;
+          --color2: #777777;
+          --color3: #666666;
+        }
+        .layer {
+          &.layer0 {
+            stroke: var(--color0);
+          }
+          &.layer1 {
+            stroke: var(--color1);
+          }
+          &.layer2 {
+            stroke: var(--color2);
+          }
+          &.layer3 {
+            stroke: var(--color3);
+          }
+        }
+      }
+
+      .tiles {
+        shape-rendering: crispEdges;
+        .tile {
+          transition: fill 500ms ease-out;
+        }
+      }
+
+      .resources {
+        .ore .ring {
+          fill: var(--pvw-tile46);
+        }
+        .crystals .ring {
+          fill: var(--pvw-tile42);
+        }
+      }
+
+      .height {
+        shape-rendering: crispEdges;
+      }
+
+      .entity {
+        --color-fg: var(--pvw-entfriend);
+        &.enemy {
+          --color-fg: var(--pvw-entenemy);
+        }
+        .marker {
+          fill: var(--color-fg);
+          stroke: black;
+          stroke-width: 0.5px;
+        }
+        .label {
+          fill: black;
+          font-family: "Outfit";
+          font-size: 2px;
+          text-anchor: middle;
+          pointer-events: none;
+        }
+      }
+
+      .openCaveFlag {
+        stroke: red;
+        fill: white;
+      }
+
+      .objectives {
+        .origin {
+          stroke: white;
+          stroke-width: 3px;
+          fill: none;
+        }
+        .objective > path {
+          stroke: white;
+          stroke-width: 3px;
+          fill: none;
+        }
+      }
+    }
+  }
+
+  .stats {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    color: var(--palette-accent);
+    background: var(--palette-bg);
+    font-family: var(--font-body);
+    font-size: 12px;
+    max-width: calc(100% - 200px);
+    border: 1px solid var(--palette-settings-bg);
+    padding: 4px 14px;
+    margin: 16px;
+
+    > * {
+      margin: 4px 0;
+    }
+
+    h1 {
+      font-family: var(--font-cyber);
+      font-size: 18px;
+    }
+
+    > ul {
+      padding: 0;
+
+      > li {
+        display: inline;
+
+        &:not(:first-child) {
+          padding-left: 16px;
+        }
+      }
+    }
+  }
+
+  .error {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    font-size: 24px;
+    color: #f18686;
+    font-family: var(--font-body);
+    text-align: center;
+    line-break: anywhere;
+  }
+}

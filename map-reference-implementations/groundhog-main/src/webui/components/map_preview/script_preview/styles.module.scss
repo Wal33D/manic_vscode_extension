@@ -1,0 +1,75 @@
+.script {
+  position: relative;
+  background: var(--palette-bg);
+  border-right: 1px solid var(--palette-settings-bg);
+  width: 450px;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  z-index: 1;
+
+  > h2,
+  > p {
+    padding: 0 12px;
+  }
+
+  .src {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    word-wrap: break-word;
+
+    .line {
+      color: var(--color-codehlt);
+      padding: 0 12px 0 26px;
+      text-indent: -14px;
+
+      &.hovered {
+        color: black;
+        background: var(--color-codehlt);
+      }
+    }
+  }
+}
+
+.scriptOverlay {
+  .tile {
+    fill: var(--color-codehlt);
+  }
+
+  .arrow {
+    fill: none;
+    stroke: var(--color-codehlt);
+    stroke-width: 2px;
+
+    &.misc {
+      stroke-dasharray: 8, 2;
+    }
+  }
+
+  .arrowhead {
+    fill: var(--palette-bg);
+    stroke: var(--color-codehlt);
+    stroke-width: 2px;
+
+    &.misc {
+      fill: none;
+    }
+  }
+}
+
+.h3 {
+  font-size: 20px;
+  font-family: var(--font-body);
+}
+.h4 {
+  font-size: 14px;
+  font-family: var(--font-body);
+}
+.misc {
+  --color-codehlt: var(--palette-fg);
+}
+.condition {
+  --color-codehlt: yellow;
+}
+.event {
+  --color-codehlt: cyan;
+}
