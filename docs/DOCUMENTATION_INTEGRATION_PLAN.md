@@ -369,5 +369,8 @@ docs/
 - [x] Create comprehensive code examples
   - [x] Parsing examples (basic-parser.ts, stream-parser.ts, validation.ts)
   - [x] Generation examples (simple-cave.ts, biome-specific.ts, resource-placement.ts)
-  - [x] Visualization examples (png-renderer.ts, thumbnail.ts)
+  - [x] Visualization examples (png-renderer.ts, thumbnail.ts, heat-map.ts)
+  - [x] Scripting examples (basic-triggers.dat, event-chains.dat, advanced-logic.dat)
+  - [x] Utilities examples (grid-operations.ts, pathfinding.ts, analysis.ts)
+- [ ] Implement comprehensive cross-references
 - [ ] Remove map-reference-implementations after full integration

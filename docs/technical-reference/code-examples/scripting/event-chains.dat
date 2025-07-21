@@ -1,0 +1,297 @@
+info{
+rowcount:50
+colcount:50  
+biome:ice
+creator:Example Scripts
+version:1.0
+name:Event Chains Example
+}
+
+script{
+// Event Chains Example
+// Demonstrates reusable event sequences and complex scripting patterns
+
+// ======================
+// State Variables
+// ======================
+int CurrentPhase=1
+int PowerLevel=0
+int DefenseRating=0
+bool ReactorOnline=false
+bool ShieldsActive=false
+bool EmergencyProtocol=false
+int MonsterWave=0
+
+// ======================
+// Main Game Flow
+// ======================
+init::
+InitializeLevel;
+StartPhase1;
+
+InitializeLevel::
+msg:Ice Cavern Research Station;
+msg:Establish power and defend against threats;
+place:25,25,BuildingPowerStation;
+reinforce:24,25,null,3;
+reinforce:26,25,null,3;
+reinforce:25,24,null,3;
+reinforce:25,26,null,3;
+
+// ======================
+// Phase Management Chain
+// ======================
+StartPhase1::
+msg:PHASE 1: Establish Power Grid;
+SetObjective:Construct 3 Power Stations;
+EnablePowerObjective;
+
+StartPhase2::
+CurrentPhase:2;
+msg:PHASE 2: Activate Defense Systems;
+SetObjective:Build defensive structures;
+EnableDefenseObjective;
+TriggerMonsterWave:1,3,60.0;
+
+StartPhase3::
+CurrentPhase:3;
+msg:PHASE 3: Survive the Onslaught;
+SetObjective:Defend the base for 5 minutes;
+EnableSurvivalMode;
+TriggerMonsterWave:2,5,45.0;
+
+// ======================
+// Reusable Event Chains
+// ======================
+
+// Objective setting chain
+SetObjective:string:NewObjective::
+msg:NEW OBJECTIVE: <NewObjective>;
+flash;
+
+// Power system chain
+PowerStationBuilt::
+PowerLevel:PowerLevel+1;
+msg:Power level increased to <PowerLevel>;
+CheckPowerStatus;
+
+CheckPowerStatus::
+((PowerLevel >= 3 and ReactorOnline == false))[ActivateReactor];
+((PowerLevel >= 5))[ActivateShields];
+
+ActivateReactor::
+ReactorOnline:true;
+msg:MAIN REACTOR ONLINE;
+light:25,25,10;
+PowerBonus;
+((CurrentPhase == 1))[StartPhase2];
+
+PowerBonus::
+generate:BuildingPowerStation;
+wait:1;
+generate:BuildingPowerStation;
+msg:Power surge! Generation rate doubled!;
+
+// Defense system chain
+DefenseBuilt:int:DefenseType::
+DefenseRating:DefenseRating+DefenseType;
+msg:Defense rating: <DefenseRating>;
+((DefenseRating >= 5 and ShieldsActive == false))[ActivateShields];
+((DefenseRating >= 10))[ActivateAutoDefense];
+
+ActivateShields::
+ShieldsActive:true;
+msg:ENERGY SHIELDS ACTIVATED;
+// Create shield perimeter effect
+CreateShieldEffect:20,20,30,30;
+
+CreateShieldEffect:int:X1,int:Y1,int:X2,int:Y2::
+place:X1,Y1,ElectricFence;
+place:X2,Y1,ElectricFence;
+place:X1,Y2,ElectricFence;
+place:X2,Y2,ElectricFence;
+
+// Monster wave chain
+TriggerMonsterWave:int:WaveNumber,int:MonsterCount,float:Delay::
+MonsterWave:WaveNumber;
+msg:WARNING: Monster wave <WaveNumber> incoming!;
+wait:3;
+SpawnWaveMonsters:MonsterCount,Delay;
+
+SpawnWaveMonsters:int:Count,float:Interval::
+((Count > 0))[
+    SpawnMonsterAtEdge;
+    wait:Interval;
+    SpawnWaveMonsters:Count-1,Interval;
+];
+((Count == 0))[WaveComplete];
+
+SpawnMonsterAtEdge::
+((random:4 == 0))[emerge:5,random:50,E,IceMonster,3];
+((random:4 == 1))[emerge:45,random:50,W,IceMonster,3];
+((random:4 == 2))[emerge:random:50,5,S,IceMonster,3];
+((random:4 == 3))[emerge:random:50,45,N,IceMonster,3];
+
+WaveComplete::
+msg:Wave <MonsterWave> defeated!;
+crystals:MonsterWave*10;
+ore:MonsterWave*5;
+
+// Emergency protocol chain
+TriggerEmergency:string:EmergencyType::
+((EmergencyProtocol == false))[
+    EmergencyProtocol:true;
+    msg:EMERGENCY PROTOCOL ACTIVATED: <EmergencyType>;
+    ExecuteEmergencyProcedure:EmergencyType;
+];
+
+ExecuteEmergencyProcedure:string:Type::
+((Type == "BREACH"))[HandleBreach];
+((Type == "POWER_FAILURE"))[HandlePowerFailure];
+((Type == "OVERWHELMING_FORCE"))[HandleOverwhelm];
+
+HandleBreach::
+msg:Hull breach detected! Sealing...;
+reinforce:random:50,random:50,null,5;
+wait:2;
+msg:Breach sealed;
+EmergencyProtocol:false;
+
+HandlePowerFailure::
+msg:Power failure! Backup systems engaging...;
+PowerLevel:1;
+wait:3;
+generate:BuildingPowerStation;
+msg:Backup power online;
+EmergencyProtocol:false;
+
+HandleOverwhelm::
+msg:Overwhelming force detected!;
+msg:Activating last resort defenses...;
+ActivateSelfDestruct:10;
+
+// Self destruct sequence (dramatic chain)
+ActivateSelfDestruct:int:Countdown::
+((Countdown > 0))[
+    msg:Self destruct in <Countdown>...;
+    flash;
+    wait:1;
+    ActivateSelfDestruct:Countdown-1;
+];
+((Countdown == 0))[ExecuteSelfDestruct];
+
+ExecuteSelfDestruct::
+msg:SELF DESTRUCT ACTIVATED;
+CreateExplosionChain:25,25,5;
+
+CreateExplosionChain:int:X,int:Y,int:Radius::
+((Radius > 0))[
+    explosion:X+Radius,Y;
+    explosion:X-Radius,Y;
+    explosion:X,Y+Radius;
+    explosion:X,Y-Radius;
+    wait:0.2;
+    CreateExplosionChain:X,Y,Radius-1;
+];
+
+// ======================
+// Trigger Definitions
+// ======================
+
+// Building triggers
+when(buildings.BuildingPowerStation_C > PowerLevel)[PowerStationBuilt];
+when(buildings.BuildingGunStation_C > 0)[DefenseBuilt:2];
+when(buildings.BuildingLaserStation_C > 0)[DefenseBuilt:3];
+
+// Phase triggers
+when(CurrentPhase == 2 and DefenseRating >= 8)[StartPhase3];
+
+// Emergency triggers
+when(buildings < 3 and CurrentPhase > 1)[TriggerEmergency:BREACH];
+when(PowerLevel < 2 and ReactorOnline == true)[TriggerEmergency:POWER_FAILURE];
+when(creatures > 10)[TriggerEmergency:OVERWHELMING_FORCE];
+
+// Victory condition
+when(CurrentPhase == 3 and time > 600)[VictorySequence];
+
+VictorySequence::
+msg:MISSION COMPLETE!;
+msg:Ice Cavern secured!;
+DisableAllThreats;
+wait:3;
+win;
+
+DisableAllThreats::
+// Clean up any remaining monsters
+((creatures > 0))[
+    laser:0;
+    wait:0.5;
+    DisableAllThreats;
+];
+
+// ======================
+// Enable/Disable Chains
+// ======================
+
+EnablePowerObjective::
+// Activates power-related goals
+msg:Power systems enabled;
+
+EnableDefenseObjective::
+// Activates defense construction
+msg:Defense protocols engaged;
+
+EnableSurvivalMode::
+// Activates survival timer
+msg:Survival mode active;
+timer SurvivalTimer=300.0,0.0,0.0,SurvivalComplete
+
+SurvivalComplete::
+msg:Survival objective complete!;
+VictorySequence;
+
+}
+
+objectives{
+// Build power infrastructure
+buildings,BuildingPowerStation,3
+// Establish defenses
+buildings,any,8
+// Survive the assault
+survive,600
+}
+
+comments{
+This level demonstrates advanced event chain patterns:
+
+1. Reusable Event Functions
+   - Pass parameters to events using colons
+   - Create modular, reusable code sequences
+   - Build complex behaviors from simple chains
+
+2. Phase-Based Gameplay
+   - Manage game progression through phases
+   - Each phase has different objectives
+   - Smooth transitions between game states
+
+3. Recursive Chains
+   - Events that call themselves with modified parameters
+   - Useful for countdowns, spawning sequences
+   - Create loops with termination conditions
+
+4. Emergency Protocols
+   - Reactive systems that respond to threats
+   - Conditional execution based on game state
+   - Dramatic sequences for player engagement
+
+5. Complex Victory Conditions
+   - Multi-stage objectives
+   - Clean up sequences before ending
+   - Proper state management
+
+Key Patterns:
+- Event:Type:Parameters::Implementation
+- Recursive calls with decremented counters
+- State machines using phase variables
+- Conditional chains based on multiple variables
+}
