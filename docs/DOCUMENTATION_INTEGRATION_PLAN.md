@@ -339,7 +339,7 @@ docs/
   - [x] landslidefrequency.md - Falling hazards
   - [x] lavaspread.md - Erosion mechanics
 
-### In Progress
+### Completed Integration Tasks
 - [x] Extract algorithms from map-generator source
   - [x] terrain-generation.md (speleogenesis, biomes, height maps, flow systems)
 - [x] Extract parsing patterns from map-parser source
@@ -371,6 +371,8 @@ docs/
   - [x] Generation examples (simple-cave.ts, biome-specific.ts, resource-placement.ts)
   - [x] Visualization examples (png-renderer.ts, thumbnail.ts, heat-map.ts)
   - [x] Scripting examples (basic-triggers.dat, event-chains.dat, advanced-logic.dat)
-  - [x] Utilities examples (grid-operations.ts, pathfinding.ts, analysis.ts)
-- [ ] Implement comprehensive cross-references
-- [ ] Remove map-reference-implementations after full integration
+  - [x] Utilities examples (grid-operations.ts, pathfinding.ts, analysis.ts, batch-validation.ts)
+- [x] Implement comprehensive cross-references
+
+### Final Cleanup Task
+- [x] Remove map-reference-implementations directory after full integration verification
