@@ -90,9 +90,7 @@ export class Terrain3DProvider implements vscode.WebviewViewProvider {
         const text = this._currentDocument.getText();
         const tilesMatch = text.match(/tiles\s*{[\s\S]*?}/);
         if (tilesMatch) {
-          vscode.window.showInformationMessage(
-            `Tile at (${x}, ${z}): ID ${tileId}`
-          );
+          vscode.window.showInformationMessage(`Tile at (${x}, ${z}): ID ${tileId}`);
         }
       }
     }

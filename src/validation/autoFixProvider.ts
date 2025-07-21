@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { MapValidator } from './mapValidator';
+import { MapValidator, ValidationError } from './mapValidator';
 import { DatFileParser } from '../parser/datFileParser';
 import { getEnhancedTileInfo } from '../data/enhancedTileDefinitions';
 import { getTileInfo } from '../data/tileDefinitions';
@@ -45,7 +45,10 @@ export class AutoFixProvider implements vscode.CodeActionProvider {
     return actions;
   }
 
-  private getFixesForError(document: vscode.TextDocument, error: any): vscode.CodeAction[] {
+  private getFixesForError(
+    document: vscode.TextDocument,
+    error: ValidationError
+  ): vscode.CodeAction[] {
     const actions: vscode.CodeAction[] = [];
 
     // Invalid tile ID fixes
@@ -163,7 +166,7 @@ export class AutoFixProvider implements vscode.CodeActionProvider {
 
   private createReplaceTileAction(
     document: vscode.TextDocument,
-    error: any,
+    error: ValidationError,
     replacementId: number,
     title: string
   ): vscode.CodeAction {
@@ -203,7 +206,10 @@ export class AutoFixProvider implements vscode.CodeActionProvider {
     return action;
   }
 
-  private createRemoveTileAction(document: vscode.TextDocument, error: any): vscode.CodeAction {
+  private createRemoveTileAction(
+    document: vscode.TextDocument,
+    error: ValidationError
+  ): vscode.CodeAction {
     const action = new vscode.CodeAction('Remove invalid tile', vscode.CodeActionKind.QuickFix);
     action.edit = new vscode.WorkspaceEdit();
 
@@ -339,7 +345,7 @@ buildings{
 
   private createAdjustObjectiveAction(
     document: vscode.TextDocument,
-    error: any
+    error: ValidationError
   ): vscode.CodeAction {
     const action = new vscode.CodeAction(
       'Adjust objective to match available resources',
@@ -373,7 +379,10 @@ buildings{
     return action;
   }
 
-  private createFixCoordinatesAction(document: vscode.TextDocument, error: any): vscode.CodeAction {
+  private createFixCoordinatesAction(
+    document: vscode.TextDocument,
+    error: ValidationError
+  ): vscode.CodeAction {
     const action = new vscode.CodeAction(
       'Fix coordinates to be within map bounds',
       vscode.CodeActionKind.QuickFix
@@ -422,7 +431,7 @@ buildings{
 
   private createFixNegativeValueAction(
     document: vscode.TextDocument,
-    error: any
+    error: ValidationError
   ): vscode.CodeAction {
     const action = new vscode.CodeAction(
       'Replace negative value with 0',
@@ -450,7 +459,7 @@ buildings{
 
   private createFixGridDimensionsAction(
     document: vscode.TextDocument,
-    error: any
+    error: ValidationError
   ): vscode.CodeAction {
     const action = new vscode.CodeAction(
       'Add/remove tiles to match dimensions',

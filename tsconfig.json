@@ -21,6 +21,7 @@
 	},
 	"exclude": [
 		"node_modules",
-		"additional_context_manic_miner_dat_files"
+		"map-reference-implementations",
+		"src/levelGenerators/**"
 	]
 }

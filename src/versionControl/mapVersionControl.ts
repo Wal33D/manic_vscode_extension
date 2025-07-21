@@ -263,7 +263,7 @@ export class MapVersionControl {
         const data = JSON.parse(stored);
         this.versions = new Map(
           data.versions.map(
-            (v: any) => [v.hash, { ...v, date: new Date(v.date) }] as [string, MapVersion]
+            (v: MapVersion) => [v.hash, { ...v, date: new Date(v.date) }] as [string, MapVersion]
           )
         );
         this.currentVersion = data.currentVersion;

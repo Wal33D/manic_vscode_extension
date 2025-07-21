@@ -13,6 +13,7 @@ export interface ValidationError {
   message: string;
   line?: number;
   column?: number;
+  section?: string;
   severity: vscode.DiagnosticSeverity;
 }
 
@@ -21,12 +22,14 @@ export interface ValidationWarning {
   message: string;
   line?: number;
   column?: number;
+  section?: string;
   severity: vscode.DiagnosticSeverity;
 }
 
 export interface ValidationInfo {
   type: 'info';
   message: string;
+  section?: string;
   data?: unknown;
 }
 

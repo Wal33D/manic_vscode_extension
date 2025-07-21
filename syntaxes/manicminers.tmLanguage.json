@@ -495,7 +495,32 @@
     "script-content": {
       "patterns": [
         {
-          "match": "\\b(int|string|float|bool)\\s+(\\w+)\\s*=\\s*(.+)",
+          "include": "#script-variables"
+        },
+        {
+          "include": "#script-events"
+        },
+        {
+          "include": "#script-commands"
+        },
+        {
+          "include": "#script-operators"
+        },
+        {
+          "include": "#script-strings"
+        },
+        {
+          "include": "#script-numbers"
+        },
+        {
+          "include": "#script-comments"
+        }
+      ]
+    },
+    "script-variables": {
+      "patterns": [
+        {
+          "match": "\\b(int|string|float|bool|timer)\\s+(\\w+)\\s*=\\s*([^;\\n]+)",
           "captures": {
             "1": {
               "name": "storage.type.variable.manicminers"
@@ -509,7 +534,15 @@
           }
         },
         {
-          "match": "(\\w+)\\s*::\\s*;",
+          "match": "\\b(time|crystals|ore|studs|miners|buildings|vehicles|erosion|oxygen|landslides|monsters)\\b",
+          "name": "variable.language.builtin.manicminers"
+        }
+      ]
+    },
+    "script-events": {
+      "patterns": [
+        {
+          "match": "(\\w+)\\s*::\\s*(?=;)",
           "captures": {
             "1": {
               "name": "entity.name.function.event.manicminers"
@@ -517,34 +550,130 @@
           }
         },
         {
-          "match": "\\(\\((.+?)\\)\\)\\s*(\\w+)\\s*;",
+          "match": "\\(\\(([^)]+)\\)\\)\\s*(\\w+)\\s*(?=;)",
           "captures": {
             "1": {
-              "name": "keyword.control.condition.manicminers"
+              "name": "meta.condition.manicminers"
             },
             "2": {
               "name": "entity.name.function.event.manicminers"
             }
           }
-        },
+        }
+      ]
+    },
+    "script-commands": {
+      "patterns": [
         {
-          "match": "(msg|pan|wait|truewait|shake|drill|place|emerge|sound|enable|disable|wake|stoptimer)\\s*:\\s*([^;]+)\\s*;",
+          "match": "\\b(msg|wait|spawn|timer|starttimer|stoptimer|playsound|camera|shake|objective|win|lose)\\s*:",
           "captures": {
             "1": {
-              "name": "support.function.command.manicminers"
-            },
-            "2": {
-              "name": "string.unquoted.parameters.manicminers"
+              "name": "support.function.command.basic.manicminers"
             }
           }
         },
         {
-          "match": "\"([^\"]+)\"",
-          "name": "string.quoted.double.manicminers"
+          "match": "\\b(drill|reinforce|place|teleport|destroy|setproperty)\\s*:",
+          "captures": {
+            "1": {
+              "name": "support.function.command.action.manicminers"
+            }
+          }
+        },
+        {
+          "match": "\\b(if|then|else|endif|when)\\b",
+          "name": "keyword.control.conditional.manicminers"
+        },
+        {
+          "match": "\\b(pan|truewait|emerge|sound|enable|disable|wake)\\s*:",
+          "captures": {
+            "1": {
+              "name": "support.function.command.legacy.manicminers"
+            }
+          }
         },
         {
           "match": ";",
           "name": "punctuation.terminator.statement.manicminers"
+        }
+      ]
+    },
+    "script-operators": {
+      "patterns": [
+        {
+          "match": "(==|!=|<=|>=|<|>)",
+          "name": "keyword.operator.comparison.manicminers"
+        },
+        {
+          "match": "(\\+|-|\\*|/|%)",
+          "name": "keyword.operator.arithmetic.manicminers"
+        },
+        {
+          "match": "(&&|\\|\\||!)",
+          "name": "keyword.operator.logical.manicminers"
+        },
+        {
+          "match": "(and|or|not|AND|OR|NOT)",
+          "name": "keyword.operator.logical.word.manicminers"
+        },
+        {
+          "match": "=",
+          "name": "keyword.operator.assignment.manicminers"
+        }
+      ]
+    },
+    "script-strings": {
+      "patterns": [
+        {
+          "begin": "\"",
+          "end": "\"",
+          "name": "string.quoted.double.manicminers",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.manicminers"
+            }
+          ]
+        },
+        {
+          "begin": "'",
+          "end": "'",
+          "name": "string.quoted.single.manicminers",
+          "patterns": [
+            {
+              "match": "\\\\.",
+              "name": "constant.character.escape.manicminers"
+            }
+          ]
+        }
+      ]
+    },
+    "script-numbers": {
+      "patterns": [
+        {
+          "match": "\\b\\d+\\.\\d+\\b",
+          "name": "constant.numeric.float.manicminers"
+        },
+        {
+          "match": "\\b\\d+\\b",
+          "name": "constant.numeric.integer.manicminers"
+        },
+        {
+          "match": "\\b(true|false|TRUE|FALSE)\\b",
+          "name": "constant.language.boolean.manicminers"
+        }
+      ]
+    },
+    "script-comments": {
+      "patterns": [
+        {
+          "match": "//.*$",
+          "name": "comment.line.double-slash.manicminers"
+        },
+        {
+          "begin": "/\\*",
+          "end": "\\*/",
+          "name": "comment.block.manicminers"
         }
       ]
     },

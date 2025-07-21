@@ -8,7 +8,7 @@
 import {createToken, ITokenConfig, Lexer, TokenType} from 'chevrotain';
 import {mapValues} from 'lodash';
 
-function createTokens<K extends string>(tokenDefinitions: Record<K, Omit<ITokenConfig, 'name') {
+function createTokens<K extends string>(tokenDefinitions: Record<K, Omit<ITokenConfig, 'name'>>) {
     const ret = {} as {[K2 in K]: TokenType};
     for(const entry of Object.entries(tokenDefinitions)) {
         const [name, definition] = entry as [string, Omit<ITokenConfig, 'name'>];
