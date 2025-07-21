@@ -218,9 +218,64 @@ To switch back to the text editor:
 
 ## Future Enhancements
 
-Planned features for future releases:
-- Auto-tiling system for intelligent tile placement
-- Map validation and error checking
-- Pre-made map templates
+## Auto-Tiling System
+
+The auto-tiling feature automatically selects the correct tile variant based on neighboring tiles.
+
+### Supported Tile Types
+- **Rock/Walls**: Tiles 30-44
+- **Water**: Tiles 11-16
+- **Lava**: Tiles 6-10
+- **Crystals**: Tiles 42-45
+- **Ore**: Tiles 46-49
+
+### How to Use
+1. Click the **Auto-Tile** button in the toolbar (or press **A**)
+2. Paint with supported tile types
+3. The system automatically chooses appropriate variants
+
+## Map Validation
+
+The validation system helps ensure your maps are playable and well-designed.
+
+### How to Use
+1. Click the **Validate** button (or press **V**)
+2. Review issues in the validation panel
+3. Click on issues to highlight them on the map
+4. Use fix buttons where available
+
+### Validation Categories
+- Structure, Tiles, Accessibility, Resources
+- Objectives, Buildings, Spawn Points
+- Hazards, Performance
+
+## Map Templates
+
+Start with pre-made map layouts that you can customize.
+
+### Built-in Templates
+- **Basic Tutorial** (20x20) - Beginner
+- **Combat Arena** (30x30) - Intermediate  
+- **Puzzle Chamber** (25x25) - Advanced
+- **Resource Rush** (35x35) - Intermediate
+- **Exploration Cavern** (40x40) - Intermediate
+
+### Using Templates
+1. Click **Templates** button (or press **T**)
+2. Browse and preview templates
+3. Click **Use Template** to start
+4. Press **Ctrl+Shift+S** to save current map as template
+
+## Updated Keyboard Shortcuts
+
+- **A**: Toggle auto-tiling
+- **T**: Open templates gallery
+- **V**: Validate map
+- **Ctrl+Shift+S**: Save as template
+
+## Still Coming Soon
+
 - Advanced selection tools (magic wand, lasso)
 - Animated tile preview
+- Collaborative editing
+- Map scripting integration
