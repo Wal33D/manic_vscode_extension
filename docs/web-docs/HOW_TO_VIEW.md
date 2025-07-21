@@ -1,57 +1,55 @@
-# How to View the Web Documentation
+# How to View the Documentation
 
-This documentation is built using Docsify, which requires a web server to function properly due to browser security restrictions.
+This documentation is now a simple, clean HTML site that works directly in your browser!
 
-## Quick Start Options
+## Viewing the Documentation
 
-### Option 1: VS Code Live Server (Recommended)
-1. Install the "Live Server" extension in VS Code
-2. Right-click on `index.html`
-3. Select "Open with Live Server"
-4. Your browser will open with the documentation
+Simply open `index.html` in your web browser:
+- **Windows**: Double-click the `index.html` file
+- **Mac**: Double-click the `index.html` file or right-click and choose "Open With" → your browser
+- **Linux**: Right-click and choose "Open With" → your browser
 
-### Option 2: Python HTTP Server
-```bash
-# Python 3
-python -m http.server 8000
+## Features
 
-# Python 2
-python -m SimpleHTTPServer 8000
-```
-Then open http://localhost:8000 in your browser
-
-### Option 3: Node.js HTTP Server
-```bash
-# Install globally (one time)
-npm install -g http-server
-
-# Run in this directory
-http-server -p 8000
-```
-Then open http://localhost:8000 in your browser
-
-### Option 4: NPX (No installation needed)
-```bash
-npx http-server -p 8000
-```
-Then open http://localhost:8000 in your browser
-
-## Why is this needed?
-
-Modern browsers block loading local files via JavaScript for security reasons (CORS policy). Docsify needs to load Markdown files dynamically, which requires serving the files through a web server.
+- **📍 No server required** - Works directly from the file system
+- **🔍 Search functionality** - Filter documentation by keywords
+- **📱 Responsive design** - Works on desktop and mobile
+- **🌙 Dark theme** - Easy on the eyes
+- **📚 Organized content** - Documentation grouped by topic
 
 ## Documentation Contents
 
-This documentation includes:
-- **DAT File Format Reference**: Complete specification of all sections
-- **Scripting Guide**: How to write scripts for Manic Miners maps  
-- **Tile Reference**: All tile types and their IDs
-- **Classes Reference**: Buildings, vehicles, miners, creatures, etc.
-- **Examples**: Sample scripts and common patterns
+### Core Documentation
+- **Getting Started** - Extension overview and user guide
+- **DAT File Format** - Complete specification of all sections
+- **Scripting Guide** - Variables, triggers, events, and more
+- **Game Classes** - Buildings, vehicles, miners, creatures
 
-## Alternative Viewing
+### Advanced Topics
+- **Blocks** - Advanced scripting blocks
+- **Macros** - Reusable code snippets
+- **Arrays** - Array handling in scripts
+- **Examples** - Real-world scripting examples
 
-If you can't run a local server, you can also:
-1. View the markdown files directly in VS Code or any text editor
-2. Browse the `_pages/` directory for individual documentation files
-3. Check if this documentation is hosted online
+### Developer Tools
+- **Map Generator** - Procedural map generation
+- **Map Parser** - Parse and manipulate DAT files
+- **Map Visualizer** - Generate map previews
+- **Common Patterns** - Best practices and gotchas
+
+## Navigation Tips
+
+1. **Use the search box** to quickly find topics
+2. **Click on cards** to see available documentation
+3. **All links open the markdown files** which are readable in any text editor
+4. **Quick Links** provide fast access to external resources
+
+## Viewing Markdown Files
+
+The documentation links to `.md` (Markdown) files which can be viewed:
+- **In VS Code** - Best experience with syntax highlighting
+- **In any text editor** - Readable as plain text
+- **On GitHub** - Navigate to the file on GitHub for formatted viewing
+- **With a Markdown viewer** - Many free tools available
+
+Enjoy exploring the documentation!
