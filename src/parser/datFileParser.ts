@@ -180,7 +180,7 @@ export class DatFileParser {
       const key = trimmed.substring(0, colonIndex).trim();
       const value = trimmed.substring(colonIndex + 1).trim();
 
-      switch (key) {
+      switch (key.toLowerCase()) {
         case 'rowcount':
           info.rowcount = parseInt(value);
           break;

@@ -5,19 +5,13 @@ import * as path from 'path';
 import { DatFileParser } from '../src/parser/datFileParser';
 import { 
   DatFile, 
-  TileType, 
-  BuildingType, 
-  VehicleType, 
-  CreatureType,
-  Objective,
-  ScriptEvent
+  Objective
 } from '../src/types/datFileTypes';
 
 // Import analysis functions
 import {
   analyzeMap,
-  MapAnalysis,
-  generateReport
+  MapAnalysis
 } from '../docs/technical-reference/code-examples/utilities/analysis';
 
 interface MapInfo {
@@ -59,7 +53,7 @@ const MAPS_TO_ANALYZE: MapInfo[] = [
   { category: 'baz', filename: 'moltenmeltdown.dat', filepath: 'samples/levels/campaign/BAZ/moltenmeltdown.dat' },
 ];
 
-// Tile type names for readability
+// Tile type names for readability - Enhanced with all known tile types
 const TILE_NAMES: Record<number, string> = {
   1: 'Ground',
   6: 'Lava (Dormant)',
@@ -81,10 +75,16 @@ const TILE_NAMES: Record<number, string> = {
   101: 'Diggable',
   103: 'Ice',
   111: 'Water',
+  114: 'Water (Deep)',
   163: 'Landslide',
   164: 'Dense Rubble',
   165: 'Unstable Rubble',
 };
+
+// Get human-readable name for a tile type
+function getTileName(tileId: number): string {
+  return TILE_NAMES[tileId] || `Unknown (${tileId})`;
+}
 
 // Analyze a single map
 async function analyzeMapFile(mapInfo: MapInfo): Promise<void> {
@@ -105,14 +105,14 @@ async function analyzeMapFile(mapInfo: MapInfo): Promise<void> {
       datFile.script ? JSON.stringify(datFile.script) : undefined
     );
   } catch (error) {
-    mapInfo.parseError = error.message;
-    console.error(`Error parsing ${mapInfo.filename}: ${error.message}`);
+    mapInfo.parseError = error instanceof Error ? error.message : String(error);
+    console.error(`Error parsing ${mapInfo.filename}: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
 // Extract objectives information
 function formatObjectives(objectives?: Objective[]): string {
-  if (!objectives || objectives.length === 0) return 'None specified';
+  if (!objectives || objectives.length === 0) {return 'None specified';}
   
   return objectives.map(obj => {
     switch (obj.type) {
@@ -152,17 +152,17 @@ function analyzeScriptComplexity(datFile: DatFile): {
   // Check for advanced features
   const eventNames = datFile.script.events.map(e => e.name.toLowerCase());
   
-  if (eventNames.some(n => n.includes('timer'))) features.push('Timers');
-  if (eventNames.some(n => n.includes('emerge'))) features.push('Monster spawning');
-  if (eventNames.some(n => n.includes('message'))) features.push('Messages');
-  if (eventNames.some(n => n.includes('arrow'))) features.push('Arrows/Guidance');
-  if (datFile.script.events.some(e => e.condition)) features.push('Conditional events');
+  if (eventNames.some(n => n.includes('timer'))) {features.push('Timers');}
+  if (eventNames.some(n => n.includes('emerge'))) {features.push('Monster spawning');}
+  if (eventNames.some(n => n.includes('message'))) {features.push('Messages');}
+  if (eventNames.some(n => n.includes('arrow'))) {features.push('Arrows/Guidance');}
+  if (datFile.script.events.some(e => e.condition)) {features.push('Conditional events');}
   
   // Determine complexity
   let complexity = 'Simple';
-  if (variableCount > 5 || eventCount > 10) complexity = 'Moderate';
-  if (variableCount > 10 || eventCount > 20) complexity = 'Complex';
-  if (variableCount > 20 || eventCount > 40) complexity = 'Very Complex';
+  if (variableCount > 5 || eventCount > 10) {complexity = 'Moderate';}
+  if (variableCount > 10 || eventCount > 20) {complexity = 'Complex';}
+  if (variableCount > 20 || eventCount > 40) {complexity = 'Very Complex';}
   
   return { complexity, variableCount, eventCount, features };
 }
@@ -180,13 +180,13 @@ function analyzeTerrainFeatures(datFile: DatFile): string[] {
   }
   
   // Check for specific features
-  if (tileSet.has(6) || tileSet.has(7) || tileSet.has(11)) features.push('Lava hazards');
-  if (tileSet.has(111) || tileSet.has(114)) features.push('Water');
-  if (tileSet.has(60) || tileSet.has(61) || tileSet.has(62)) features.push('Erosion');
-  if (tileSet.has(84)) features.push('Slug holes');
-  if (tileSet.has(163) || tileSet.has(164) || tileSet.has(165)) features.push('Landslides');
-  if (tileSet.has(103)) features.push('Ice terrain');
-  if (datFile.info.oxygen && datFile.info.oxygen < 100) features.push('Limited oxygen');
+  if (tileSet.has(6) || tileSet.has(7) || tileSet.has(11)) {features.push('Lava hazards');}
+  if (tileSet.has(111) || tileSet.has(114)) {features.push('Water');}
+  if (tileSet.has(60) || tileSet.has(61) || tileSet.has(62)) {features.push('Erosion');}
+  if (tileSet.has(84)) {features.push('Slug holes');}
+  if (tileSet.has(163) || tileSet.has(164) || tileSet.has(165)) {features.push('Landslides');}
+  if (tileSet.has(103)) {features.push('Ice terrain');}
+  if (datFile.info.oxygen && datFile.info.oxygen < 100) {features.push('Limited oxygen');}
   
   return features;
 }
@@ -201,7 +201,7 @@ function generateMapReport(mapInfo: MapInfo): string {
   }
   
   const { datFile, analysis } = mapInfo;
-  if (!datFile || !analysis) return report + 'No data available\n\n';
+  if (!datFile || !analysis) {return report + 'No data available\n\n';}
   
   // Basic info
   report += `### Basic Information\n`;
@@ -306,9 +306,9 @@ function identifyNotableElements(datFile: DatFile, analysis: MapAnalysis): strin
 
 // Get size category
 function getSizeCategory(totalTiles: number): string {
-  if (totalTiles < 625) return 'Small (<25x25)';
-  if (totalTiles < 1600) return 'Medium (25x25 - 40x40)';
-  if (totalTiles < 4096) return 'Large (40x40 - 64x64)';
+  if (totalTiles < 625) {return 'Small (<25x25)';}
+  if (totalTiles < 1600) {return 'Medium (25x25 - 40x40)';}
+  if (totalTiles < 4096) {return 'Large (40x40 - 64x64)';}
   return 'Very Large (>64x64)';
 }
 
@@ -419,14 +419,35 @@ async function analyzeAllMaps(): Promise<void> {
   report += '## Key Insights\n\n';
   report += generateKeyInsights(MAPS_TO_ANALYZE);
   
+  // Add tile type reference at the end
+  report += '\n## Tile Type Reference\n\n';
+  report += 'Common tile types found in analyzed maps:\n\n';
+  const usedTiles = new Set<number>();
+  for (const mapInfo of MAPS_TO_ANALYZE) {
+    if (mapInfo.datFile) {
+      for (const row of mapInfo.datFile.tiles) {
+        for (const tile of row) {
+          usedTiles.add(tile);
+        }
+      }
+    }
+  }
+  
+  const sortedTiles = Array.from(usedTiles).sort((a, b) => a - b);
+  for (const tileId of sortedTiles) {
+    report += `- **${tileId}**: ${getTileName(tileId)}\n`;
+  }
+  
   // Write report
   const reportPath = path.join(process.cwd(), 'MAP_ANALYSIS_REPORT.md');
   fs.writeFileSync(reportPath, report);
   console.log(`\nAnalysis complete! Report saved to: ${reportPath}`);
+  console.log(`\nAnalyzed ${MAPS_TO_ANALYZE.length} maps across ${categories.size} categories.`);
+  console.log(`Found ${sortedTiles.length} unique tile types in use.`);
 }
 
 // Generate design principles section
-function generateDesignPrinciples(maps: MapInfo[]): string {
+function generateDesignPrinciples(_maps: MapInfo[]): string {
   let principles = '';
   
   principles += '### 1. Progressive Complexity\n';
@@ -466,7 +487,7 @@ function generateDesignPrinciples(maps: MapInfo[]): string {
 }
 
 // Generate key insights section
-function generateKeyInsights(maps: MapInfo[]): string {
+function generateKeyInsights(_maps: MapInfo[]): string {
   let insights = '';
   
   insights += '### Tutorial Design Excellence\n';
