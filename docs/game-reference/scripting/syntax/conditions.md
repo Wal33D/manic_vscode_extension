@@ -178,6 +178,43 @@ vehicle Truck=1
 ((not (miners == 0 and vehicles == 0)))
 ```
 
+### Real-World Compound Conditions
+
+#### Building Requirements Met
+```
+# Check if player can build advanced structures
+((buildings.BuildingToolStore_C > 0 and buildings.BuildingPowerStation_C > 0 and crystals >= 20))
+```
+
+#### Resource Threshold Combinations
+```
+# Different reward tiers based on multiple resources
+((crystals >= 100 and ore >= 50))  # Gold tier
+((crystals >= 50 and ore >= 25))   # Silver tier
+((crystals >= 25 or ore >= 15))    # Bronze tier
+```
+
+#### Time-Based Progression
+```
+# Events that depend on both time and achievements
+((time > 300 and buildings > 5 and ObjectivesShown == true))
+((time < 600 and miners < 3))  # Early game with few miners
+```
+
+#### Emergency Conditions
+```
+# Multiple failure states
+((air < 50 and buildings.BuildingSupportStation_C == 0))  # No air support
+((miners == 0 or (vehicles == 0 and buildings.BuildingToolStore_C == 0)))
+```
+
+#### Discovery-Based Progression
+```
+# Combine exploration with resource gathering
+((discovered > 80 and crystals >= 50))  # Most map explored + resources
+((foundbuilding[25,30] and ore >= 20))  # Found specific building + ore
+```
+
 ## Condition Patterns
 
 ### State Checks

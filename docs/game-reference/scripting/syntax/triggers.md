@@ -246,6 +246,66 @@ when(enter:6,5:miners)[Zone1Enter];
 when(enter:6,6:miners)[Zone1Enter];
 ```
 
+### Discovery-Based Events
+```
+# Trigger when specific areas are revealed
+when(discovertile[15,20])[FoundSecretCave];
+when(discovertile[30,30])[FoundHiddenOre];
+
+# Trigger when buildings are discovered
+when(foundbuilding[25,30])[RescuedStructure];
+
+# Trigger based on exploration percentage
+when(discovered>50)[HalfMapExplored];
+when(discovered>80)[MostMapExplored];
+when(discovered==100)[FullyExplored];
+
+# Combine discovery with other conditions
+when(discovertile[40,40] and crystals>=25)[SecretBonusAvailable];
+```
+
+### Progressive Difficulty
+```
+int DifficultyLevel=1
+int TimeThreshold=300
+
+# Increase difficulty at time intervals
+when(time>300 and DifficultyLevel==1)[IncreaseDifficulty];
+when(time>600 and DifficultyLevel==2)[IncreaseDifficulty];
+when(time>900 and DifficultyLevel==3)[IncreaseDifficulty];
+
+IncreaseDifficulty::
+DifficultyLevel:DifficultyLevel+1;
+spawncap:CreatureRockMonster_C,DifficultyLevel,DifficultyLevel*3;
+msg:"Difficulty increased to level " + DifficultyLevel;
+
+# Adaptive difficulty based on performance
+when(crystals>100 and time<300 and DifficultyLevel==1)[RaiseDifficulty];
+when(miners==0 and DifficultyLevel>1)[LowerDifficulty];
+```
+
+### Resource Management Events
+```
+# Low resource warnings with state tracking
+bool LowCrystalWarned=false
+bool LowOreWarned=false
+bool CriticalOxygenWarned=false
+
+when(crystals<10 and LowCrystalWarned==false)[WarnLowCrystals];
+when(ore<10 and LowOreWarned==false)[WarnLowOre];
+when(air<100 and CriticalOxygenWarned==false)[WarnCriticalOxygen];
+
+# Reset warnings when resources recovered
+when(crystals>=20 and LowCrystalWarned==true)[ClearCrystalWarning];
+
+# Reward systems based on building count
+bool FirstRewardGiven=false
+bool SecondRewardGiven=false
+
+when(buildings>5 and FirstRewardGiven==false)[GiveBuildingBonus];
+when(buildings>10 and SecondRewardGiven==false)[GiveMajorBonus];
+```
+
 ## Performance Considerations
 
 ### Efficient Triggers

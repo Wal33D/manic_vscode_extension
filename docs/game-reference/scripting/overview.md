@@ -276,6 +276,10 @@ script{
 - [Event Chains](syntax/event-chains.md) - Functions
 - [Macros](syntax/macros.md) - Built-in constants
 
+### Patterns & Best Practices
+- [Common Patterns](patterns/common-patterns.md) - Production-ready script patterns
+- [Debugging Guide](debugging.md) - Troubleshooting and testing strategies
+
 ### Class Reference
 - [Buildings Class](classes/buildings.md) - Building properties
 - [Creatures Class](classes/creatures.md) - Creature properties
