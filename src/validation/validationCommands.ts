@@ -215,7 +215,10 @@ async function fixCommonIssues(editor: vscode.TextEditor): Promise<void> {
 }
 
 // Helper functions for specific fixes
-async function fixInvalidTiles(editor: vscode.TextEditor, errors: any[]): Promise<void> {
+async function fixInvalidTiles(
+  editor: vscode.TextEditor,
+  errors: ValidationError[]
+): Promise<void> {
   const edit = new vscode.WorkspaceEdit();
   const fixes: string[] = [];
 
@@ -335,7 +338,10 @@ async function addGroundTiles(editor: vscode.TextEditor): Promise<void> {
   vscode.window.showInformationMessage('Added ground tiles to map center');
 }
 
-async function adjustObjectives(editor: vscode.TextEditor, errors: any[]): Promise<void> {
+async function adjustObjectives(
+  editor: vscode.TextEditor,
+  errors: ValidationError[]
+): Promise<void> {
   const edit = new vscode.WorkspaceEdit();
   let fixCount = 0;
 
@@ -369,7 +375,10 @@ async function adjustObjectives(editor: vscode.TextEditor, errors: any[]): Promi
   }
 }
 
-async function fixNegativeValues(editor: vscode.TextEditor, errors: any[]): Promise<void> {
+async function fixNegativeValues(
+  editor: vscode.TextEditor,
+  errors: ValidationError[]
+): Promise<void> {
   const edit = new vscode.WorkspaceEdit();
   let fixCount = 0;
 
@@ -401,7 +410,10 @@ async function fixNegativeValues(editor: vscode.TextEditor, errors: any[]): Prom
   }
 }
 
-async function fixGridDimensions(editor: vscode.TextEditor, errors: any[]): Promise<void> {
+async function fixGridDimensions(
+  editor: vscode.TextEditor,
+  errors: ValidationError[]
+): Promise<void> {
   const edit = new vscode.WorkspaceEdit();
   let fixCount = 0;
 

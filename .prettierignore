@@ -17,3 +17,6 @@ coverage/
 
 # Markdown files (optional, remove if you want to format markdown)
 *.md
+
+# Reference implementations
+map-reference-implementations/

@@ -38,6 +38,8 @@
         "**/*.d.ts",
         "**/*.test.ts",
         "**/__mocks__/**",
-        "jest.config.js"
+        "jest.config.js",
+        "map-reference-implementations/**",
+        "src/levelGenerators/**"
     ]
 }

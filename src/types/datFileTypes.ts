@@ -5,9 +5,13 @@
 // Tile type constants
 export enum TileType {
   Ground = 1,
+  Rubble1 = 2,
+  Rubble2 = 3,
+  Rubble3 = 4,
   Lava1 = 6,
   Lava2 = 7,
   Lava = 11,
+  PowerPath = 12,
   Dirt = 14,
   LooseRock = 24,
   SolidRock = 26,
@@ -17,12 +21,20 @@ export enum TileType {
   OreSeam = 42,
   CrystalSeam = 46,
   ReinforcedWall = 50,
+  Erosion1 = 60,
+  Erosion2 = 61,
+  Erosion3 = 62,
   SpecialTerrain = 63,
+  SlugHole = 84,
+  RechargeSeam = 88,
   DiggableTerrain = 101,
+  IceTerrain = 103,
   Special1 = 105,
   Special2 = 106,
   Water1 = 111,
   Water2 = 114,
+  HardRock = 124,
+  SuperHardRock = 163,
 }
 
 // Biome types

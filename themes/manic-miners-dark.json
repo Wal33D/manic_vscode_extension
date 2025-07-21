@@ -1,0 +1,194 @@
+{
+  "name": "Manic Miners Dark",
+  "type": "dark",
+  "colors": {
+    "editor.background": "#1e1e1e",
+    "editor.foreground": "#d4d4d4",
+    "editorLineNumber.foreground": "#858585",
+    "editorCursor.foreground": "#f8f8f0",
+    "editor.selectionBackground": "#264f78",
+    "editor.lineHighlightBackground": "#2a2a2a"
+  },
+  "tokenColors": [
+    {
+      "name": "Comments",
+      "scope": ["comment", "comment.line", "comment.block"],
+      "settings": {
+        "foreground": "#608b4e",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "name": "Section Headers",
+      "scope": ["storage.type.section.manicminers"],
+      "settings": {
+        "foreground": "#569cd6",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Script Variables",
+      "scope": ["variable.other.manicminers"],
+      "settings": {
+        "foreground": "#9cdcfe"
+      }
+    },
+    {
+      "name": "Script Variable Types",
+      "scope": ["storage.type.variable.manicminers"],
+      "settings": {
+        "foreground": "#4ec9b0"
+      }
+    },
+    {
+      "name": "Script Built-in Variables",
+      "scope": ["variable.language.builtin.manicminers"],
+      "settings": {
+        "foreground": "#c586c0",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "name": "Script Events",
+      "scope": ["entity.name.function.event.manicminers"],
+      "settings": {
+        "foreground": "#dcdcaa",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Script Basic Commands",
+      "scope": ["support.function.command.basic.manicminers"],
+      "settings": {
+        "foreground": "#569cd6"
+      }
+    },
+    {
+      "name": "Script Action Commands",
+      "scope": ["support.function.command.action.manicminers"],
+      "settings": {
+        "foreground": "#ff8c00"
+      }
+    },
+    {
+      "name": "Script Legacy Commands",
+      "scope": ["support.function.command.legacy.manicminers"],
+      "settings": {
+        "foreground": "#b5cea8",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "name": "Script Control Flow",
+      "scope": ["keyword.control.conditional.manicminers"],
+      "settings": {
+        "foreground": "#c586c0",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "name": "Script Operators",
+      "scope": [
+        "keyword.operator.comparison.manicminers",
+        "keyword.operator.arithmetic.manicminers",
+        "keyword.operator.logical.manicminers",
+        "keyword.operator.logical.word.manicminers",
+        "keyword.operator.assignment.manicminers"
+      ],
+      "settings": {
+        "foreground": "#d4d4d4"
+      }
+    },
+    {
+      "name": "Strings",
+      "scope": ["string.quoted", "string.unquoted"],
+      "settings": {
+        "foreground": "#ce9178"
+      }
+    },
+    {
+      "name": "Numbers",
+      "scope": ["constant.numeric"],
+      "settings": {
+        "foreground": "#b5cea8"
+      }
+    },
+    {
+      "name": "Booleans",
+      "scope": ["constant.language.boolean.manicminers"],
+      "settings": {
+        "foreground": "#569cd6"
+      }
+    },
+    {
+      "name": "Tile IDs - Ground",
+      "scope": ["constant.numeric.tile.ground.manicminers"],
+      "settings": {
+        "foreground": "#4ec9b0"
+      }
+    },
+    {
+      "name": "Tile IDs - Wall",
+      "scope": ["constant.numeric.tile.wall.manicminers"],
+      "settings": {
+        "foreground": "#858585"
+      }
+    },
+    {
+      "name": "Tile IDs - Lava",
+      "scope": ["constant.numeric.tile.lava.manicminers"],
+      "settings": {
+        "foreground": "#ff6347"
+      }
+    },
+    {
+      "name": "Tile IDs - Water",
+      "scope": ["constant.numeric.tile.water.manicminers"],
+      "settings": {
+        "foreground": "#4682b4"
+      }
+    },
+    {
+      "name": "Tile IDs - Resources",
+      "scope": ["constant.numeric.tile.resource.manicminers"],
+      "settings": {
+        "foreground": "#ffd700"
+      }
+    },
+    {
+      "name": "Tile IDs - Rubble",
+      "scope": ["constant.numeric.tile.rubble.manicminers"],
+      "settings": {
+        "foreground": "#cd853f"
+      }
+    },
+    {
+      "name": "Entity Types",
+      "scope": ["entity.name.type.manicminers", "entity.name.type.building.manicminers"],
+      "settings": {
+        "foreground": "#4ec9b0"
+      }
+    },
+    {
+      "name": "Keywords",
+      "scope": ["keyword.other"],
+      "settings": {
+        "foreground": "#c586c0"
+      }
+    },
+    {
+      "name": "Properties",
+      "scope": ["variable.parameter", "support.constant"],
+      "settings": {
+        "foreground": "#9cdcfe"
+      }
+    },
+    {
+      "name": "Punctuation",
+      "scope": ["punctuation"],
+      "settings": {
+        "foreground": "#d4d4d4"
+      }
+    }
+  ]
+}

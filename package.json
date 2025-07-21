@@ -276,6 +276,12 @@
         "title": "Show 3D Terrain Preview",
         "category": "Manic Miners",
         "icon": "$(map-filled)"
+      },
+      {
+        "command": "manicMiners.generateLevel",
+        "title": "Generate New Level",
+        "category": "Manic Miners",
+        "icon": "$(add)"
       }
     ],
     "hoverProviders": [
@@ -353,6 +359,11 @@
           "when": "resourceExtname == .dat",
           "command": "manicMiners.openObjectiveBuilder",
           "group": "navigation"
+        },
+        {
+          "when": "resourceExtname == .dat",
+          "command": "manicMiners.generateLevel",
+          "group": "1_generate"
         }
       ]
     },
@@ -410,6 +421,13 @@
       {
         "language": "manicminers",
         "path": "./snippets/manicminers.code-snippets"
+      }
+    ],
+    "themes": [
+      {
+        "label": "Manic Miners Dark",
+        "uiTheme": "vs-dark",
+        "path": "./themes/manic-miners-dark.json"
       }
     ]
   },

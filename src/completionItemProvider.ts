@@ -55,52 +55,112 @@ const infoFieldCompletions: Map<string, { detail: string; documentation: string 
 // Script commands
 const scriptCommands = [
   // Messages and UI
-  { name: 'msg', detail: 'Display message', documentation: 'Shows a message to the player (msg:MessageString)' },
-  { name: 'playsound', detail: 'Play sound', documentation: 'Play a sound file (playsound:soundfile)' },
+  {
+    name: 'msg',
+    detail: 'Display message',
+    documentation: 'Shows a message to the player (msg:MessageString)',
+  },
+  {
+    name: 'playsound',
+    detail: 'Play sound',
+    documentation: 'Play a sound file (playsound:soundfile)',
+  },
   { name: 'sound', detail: 'Play sound', documentation: 'Play a sound file (sound:soundfile)' },
-  
+
   // Camera control
   { name: 'pan', detail: 'Pan camera', documentation: 'Pan camera to coordinates (pan:x,y)' },
   { name: 'camera', detail: 'Set camera position', documentation: 'Set camera position and angle' },
-  { name: 'shake', detail: 'Shake screen', documentation: 'Shake the screen with intensity (shake:intensity)' },
-  
+  {
+    name: 'shake',
+    detail: 'Shake screen',
+    documentation: 'Shake the screen with intensity (shake:intensity)',
+  },
+
   // Time control
-  { name: 'wait', detail: 'Wait duration', documentation: 'Wait for specified seconds (wait:seconds)' },
+  {
+    name: 'wait',
+    detail: 'Wait duration',
+    documentation: 'Wait for specified seconds (wait:seconds)',
+  },
   { name: 'truewait', detail: 'Blocking wait', documentation: 'Wait that blocks other events' },
-  
+
   // Timer management
-  { name: 'timer', detail: 'Define timer', documentation: 'Define a timer (timer TimerName=delay[,min,max][,event])' },
-  { name: 'starttimer', detail: 'Start timer', documentation: 'Start a defined timer (starttimer:TimerName)' },
-  { name: 'stoptimer', detail: 'Stop timer', documentation: 'Stop a running timer (stoptimer:TimerName)' },
-  
+  {
+    name: 'timer',
+    detail: 'Define timer',
+    documentation: 'Define a timer (timer TimerName=delay[,min,max][,event])',
+  },
+  {
+    name: 'starttimer',
+    detail: 'Start timer',
+    documentation: 'Start a defined timer (starttimer:TimerName)',
+  },
+  {
+    name: 'stoptimer',
+    detail: 'Stop timer',
+    documentation: 'Stop a running timer (stoptimer:TimerName)',
+  },
+
   // Terrain modification
-  { name: 'drill', detail: 'Drill tile', documentation: 'Drill at coordinates (drill:x,y[,tileId])' },
-  { name: 'place', detail: 'Place tile', documentation: 'Place tile at coordinates (place:x,y,tileId)' },
-  { name: 'reinforce', detail: 'Reinforce wall', documentation: 'Reinforce wall at coordinates (reinforce:x,y)' },
-  
+  {
+    name: 'drill',
+    detail: 'Drill tile',
+    documentation: 'Drill at coordinates (drill:x,y[,tileId])',
+  },
+  {
+    name: 'place',
+    detail: 'Place tile',
+    documentation: 'Place tile at coordinates (place:x,y,tileId)',
+  },
+  {
+    name: 'reinforce',
+    detail: 'Reinforce wall',
+    documentation: 'Reinforce wall at coordinates (reinforce:x,y)',
+  },
+
   // Entity spawning
-  { name: 'spawn', detail: 'Spawn entity', documentation: 'Spawn an entity (spawn:type,x,y[,properties])' },
-  { name: 'emerge', detail: 'Spawn creature', documentation: 'Make creature emerge (emerge:CreatureType:x,y)' },
+  {
+    name: 'spawn',
+    detail: 'Spawn entity',
+    documentation: 'Spawn an entity (spawn:type,x,y[,properties])',
+  },
+  {
+    name: 'emerge',
+    detail: 'Spawn creature',
+    documentation: 'Make creature emerge (emerge:CreatureType:x,y)',
+  },
   { name: 'teleport', detail: 'Teleport entity', documentation: 'Teleport entity to location' },
-  { name: 'destroy', detail: 'Destroy entity', documentation: 'Destroy entity at location or by ID' },
-  
+  {
+    name: 'destroy',
+    detail: 'Destroy entity',
+    documentation: 'Destroy entity at location or by ID',
+  },
+
   // Entity control
   { name: 'enable', detail: 'Enable entity', documentation: 'Enable a building or entity' },
   { name: 'disable', detail: 'Disable entity', documentation: 'Disable a building or entity' },
   { name: 'wake', detail: 'Wake creature', documentation: 'Wake a sleeping creature' },
-  { name: 'setproperty', detail: 'Set entity property', documentation: 'Set property of an entity' },
-  
+  {
+    name: 'setproperty',
+    detail: 'Set entity property',
+    documentation: 'Set property of an entity',
+  },
+
   // Game flow
   { name: 'objective', detail: 'Set objective', documentation: 'Set or update an objective' },
   { name: 'win', detail: 'Win level', documentation: 'Trigger level win condition' },
   { name: 'lose', detail: 'Lose level', documentation: 'Trigger level lose condition' },
-  
+
   // Conditional logic
   { name: 'if', detail: 'If condition', documentation: 'Start conditional block (if:condition)' },
   { name: 'then', detail: 'Then block', documentation: 'Execute if condition is true' },
   { name: 'else', detail: 'Else block', documentation: 'Execute if condition is false' },
   { name: 'endif', detail: 'End if', documentation: 'End conditional block' },
-  { name: 'when', detail: 'When event', documentation: 'Define event trigger (when(condition)[event])' },
+  {
+    name: 'when',
+    detail: 'When event',
+    documentation: 'Define event trigger (when(condition)[event])',
+  },
 ];
 
 export class DatCompletionItemProvider implements vscode.CompletionItemProvider {
@@ -631,7 +691,9 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
       for (const type of types) {
         const item = new vscode.CompletionItem(type, vscode.CompletionItemKind.Keyword);
         if (type === 'timer') {
-          item.insertText = new vscode.SnippetString('timer ${1:TimerName}=${2:5},${3:3},${4:8},${5:EventName}');
+          item.insertText = new vscode.SnippetString(
+            'timer ${1:TimerName}=${2:5},${3:3},${4:8},${5:EventName}'
+          );
           item.detail = 'Declare timer variable';
           item.documentation = new vscode.MarkdownString('Timer format: delay[,min,max][,event]');
         } else {
@@ -661,7 +723,7 @@ export class DatCompletionItemProvider implements vscode.CompletionItemProvider 
         const item = new vscode.CompletionItem(cmd.name, vscode.CompletionItemKind.Function);
         item.detail = cmd.detail;
         item.documentation = new vscode.MarkdownString(cmd.documentation);
-        
+
         // Provide specific snippets for common commands
         switch (cmd.name) {
           case 'msg':

@@ -1,4 +1,11 @@
-import { DatFile, ValidationError, InfoSection, Entity, BuildingType, ScriptSection } from '../types/datFileTypes';
+import {
+  DatFile,
+  ValidationError,
+  InfoSection,
+  Entity,
+  BuildingType,
+  ScriptSection,
+} from '../types/datFileTypes';
 import { getTileInfo } from '../data/tileDefinitions';
 import {
   getEnhancedTileInfo,
@@ -737,23 +744,44 @@ export class DatFileValidator {
     // Validate script variables
     const definedVariables = new Set<string>();
     const validScriptCommands = [
-      'msg', 'wait', 'spawn', 'timer', 'starttimer', 'stoptimer',
-      'playsound', 'camera', 'shake', 'objective', 'win', 'lose',
-      'drill', 'reinforce', 'place', 'teleport', 'destroy',
-      'setproperty', 'if', 'then', 'else', 'endif', 'when'
+      'msg',
+      'wait',
+      'spawn',
+      'timer',
+      'starttimer',
+      'stoptimer',
+      'playsound',
+      'camera',
+      'shake',
+      'objective',
+      'win',
+      'lose',
+      'drill',
+      'reinforce',
+      'place',
+      'teleport',
+      'destroy',
+      'setproperty',
+      'if',
+      'then',
+      'else',
+      'endif',
+      'when',
     ];
 
     // Track defined variables
     script.variables.forEach((value: unknown, name: string) => {
       definedVariables.add(name);
-      
+
       // Validate timer syntax
       if (name.toLowerCase().includes('timer') && typeof value === 'string') {
         const timerMatch = value.match(/^(\d+)(?:,(\d+))?(?:,(\d+))?(?:,(\w+))?$/);
         if (!timerMatch) {
           this.addError(
             `Invalid timer syntax for '${name}': ${value}. Expected: delay[,min,max][,event]`,
-            0, 0, 'script'
+            0,
+            0,
+            'script'
           );
         }
       }
@@ -764,10 +792,7 @@ export class DatFileValidator {
     for (const event of script.events) {
       // Check for duplicate event names
       if (eventNames.has(event.name)) {
-        this.addWarning(
-          `Duplicate event name: ${event.name}`,
-          0, 0, 'script'
-        );
+        this.addWarning(`Duplicate event name: ${event.name}`, 0, 0, 'script');
       }
       eventNames.add(event.name);
 
@@ -776,11 +801,15 @@ export class DatFileValidator {
         // Check if condition references undefined variables
         const conditionVars = event.condition.match(/\b[a-zA-Z_]\w*\b/g) || [];
         for (const varName of conditionVars) {
-          if (!definedVariables.has(varName) && 
-              !['time', 'crystals', 'ore', 'miners', 'buildings'].includes(varName)) {
+          if (
+            !definedVariables.has(varName) &&
+            !['time', 'crystals', 'ore', 'miners', 'buildings'].includes(varName)
+          ) {
             this.addWarning(
               `Event '${event.name}' references undefined variable: ${varName}`,
-              0, 0, 'script'
+              0,
+              0,
+              'script'
             );
           }
         }
@@ -791,7 +820,9 @@ export class DatFileValidator {
         if (!validScriptCommands.includes(command.command.toLowerCase())) {
           this.addWarning(
             `Unknown script command '${command.command}' in event '${event.name}'`,
-            0, 0, 'script'
+            0,
+            0,
+            'script'
           );
         }
 
@@ -799,26 +830,22 @@ export class DatFileValidator {
         switch (command.command.toLowerCase()) {
           case 'wait':
             if (command.parameters.length !== 1 || isNaN(Number(command.parameters[0]))) {
-              this.addError(
-                `'wait' command requires a single numeric parameter`,
-                0, 0, 'script'
-              );
+              this.addError(`'wait' command requires a single numeric parameter`, 0, 0, 'script');
             }
             break;
           case 'spawn':
             if (command.parameters.length < 3) {
               this.addError(
                 `'spawn' command requires at least 3 parameters: type, x, y`,
-                0, 0, 'script'
+                0,
+                0,
+                'script'
               );
             }
             break;
           case 'timer':
             if (command.parameters.length < 1) {
-              this.addError(
-                `'timer' command requires a timer name`,
-                0, 0, 'script'
-              );
+              this.addError(`'timer' command requires a timer name`, 0, 0, 'script');
             }
             break;
         }
@@ -832,8 +859,17 @@ export class DatFileValidator {
   private validateObjectiveCondition(condition: string, datFile: DatFile): void {
     // Built-in variables that are always available
     const builtInVariables = [
-      'crystals', 'ore', 'studs', 'miners', 'buildings', 'vehicles',
-      'time', 'erosion', 'oxygen', 'landslides', 'monsters'
+      'crystals',
+      'ore',
+      'studs',
+      'miners',
+      'buildings',
+      'vehicles',
+      'time',
+      'erosion',
+      'oxygen',
+      'landslides',
+      'monsters',
     ];
 
     // Collect variables from script section if it exists
@@ -847,7 +883,7 @@ export class DatFileValidator {
     // Parse the condition for variable references
     // Match variable names (alphanumeric + underscore, not starting with number)
     const variableRefs = condition.match(/\b[a-zA-Z_]\w*\b/g) || [];
-    
+
     for (const varRef of variableRefs) {
       // Skip operators and keywords
       if (['and', 'or', 'not', 'true', 'false', 'AND', 'OR', 'NOT'].includes(varRef)) {
@@ -858,7 +894,9 @@ export class DatFileValidator {
       if (!builtInVariables.includes(varRef.toLowerCase()) && !scriptVariables.has(varRef)) {
         this.addWarning(
           `Objective condition references undefined variable: ${varRef}`,
-          0, 0, 'objectives'
+          0,
+          0,
+          'objectives'
         );
       }
     }
@@ -866,11 +904,13 @@ export class DatFileValidator {
     // Validate operator syntax
     const validOperators = ['==', '!=', '>', '<', '>=', '<='];
     const hasValidOperator = validOperators.some(op => condition.includes(op));
-    
+
     if (!hasValidOperator) {
       this.addWarning(
         'Objective condition should contain a comparison operator (==, !=, >, <, >=, <=)',
-        0, 0, 'objectives'
+        0,
+        0,
+        'objectives'
       );
     }
 
@@ -884,18 +924,12 @@ export class DatFileValidator {
         parenCount--;
       }
       if (parenCount < 0) {
-        this.addError(
-          'Objective condition has unmatched closing parenthesis',
-          0, 0, 'objectives'
-        );
+        this.addError('Objective condition has unmatched closing parenthesis', 0, 0, 'objectives');
         return;
       }
     }
     if (parenCount > 0) {
-      this.addError(
-        'Objective condition has unmatched opening parenthesis',
-        0, 0, 'objectives'
-      );
+      this.addError('Objective condition has unmatched opening parenthesis', 0, 0, 'objectives');
     }
   }
 }

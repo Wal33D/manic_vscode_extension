@@ -29,6 +29,7 @@ import { AccessibleMapPreviewProvider } from './accessibility/accessibleMapPrevi
 import { registerAccessibilityCommands } from './accessibility/accessibilityCommands';
 import { HeatMapProvider } from './heatmap/heatMapProvider';
 import { Terrain3DProvider } from './terrain3d/terrain3DProvider';
+import { registerLevelGeneratorCommands } from './levelGenerators/levelGeneratorProvider';
 
 export function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -199,6 +200,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register Accessibility Commands
   registerAccessibilityCommands(context);
+
+  // Register Level Generator Commands
+  registerLevelGeneratorCommands(context);
 
   // Register Heat Map Provider
   const heatMapProvider = new HeatMapProvider(context.extensionUri);
