@@ -299,12 +299,21 @@
 
   function renderMap() {
     if (!tileData || tileData.length === 0) {
+      console.log('No tile data to render');
       return;
     }
     
     const tileSize = scale * zoomLevel;
     const width = tileData[0].length * tileSize;
     const height = tileData.length * tileSize;
+    
+    console.log('Rendering map:', {
+      tileSize,
+      canvasWidth: width,
+      canvasHeight: height,
+      rows: tileData.length,
+      cols: tileData[0].length
+    });
     
     canvas.width = width;
     canvas.height = height;
@@ -413,6 +422,14 @@
       case 'updateTiles':
         tileData = message.tiles;
         colorMap = message.colorMap;
+        console.log('Received tile data:', {
+          rows: tileData.length,
+          cols: tileData[0]?.length,
+          expectedRows: message.rowcount,
+          expectedCols: message.colcount,
+          firstRow: tileData[0]?.slice(0, 10),
+          colorMapSize: Object.keys(colorMap).length
+        });
         document.getElementById('dimensions').textContent = 
           `Map: ${message.rowcount}×${message.colcount}`;
         renderMap();

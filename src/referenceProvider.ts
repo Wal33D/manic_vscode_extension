@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { DatFileParser } from './parser/datFileParser';
 import { SectionInfo } from './types/datFileTypes';
+import { VisualBlocksParser } from './parser/visualBlocksParser';
 
 export class DatReferenceProvider implements vscode.ReferenceProvider {
   provideReferences(
@@ -228,6 +229,44 @@ export class DatReferenceProvider implements vscode.ReferenceProvider {
             )
           )
         );
+      }
+
+      // Find call: command references
+      const callCommandRegex = new RegExp(`call\\s*:\\s*${eventName}\\b`);
+      if (callCommandRegex.test(lines[i])) {
+        const line = scriptSection.startLine + i + 1;
+        const col = lines[i].lastIndexOf(eventName);
+        references.push(
+          new vscode.Location(
+            document.uri,
+            new vscode.Range(
+              new vscode.Position(line, col),
+              new vscode.Position(line, col + eventName.length)
+            )
+          )
+        );
+      }
+    }
+
+    // Also check in visual blocks section
+    const blocksSection = parser.getSection('blocks');
+    if (blocksSection) {
+      const blocksParser = new VisualBlocksParser(blocksSection.content, blocksSection.startLine);
+      const { blocks } = blocksParser.parse();
+
+      for (const block of blocks) {
+        // Check EventCallEvent blocks
+        if (block.name === 'EventCallEvent' && block.parameters.function === eventName) {
+          references.push(
+            new vscode.Location(
+              document.uri,
+              new vscode.Range(
+                new vscode.Position((block.line || blocksSection.startLine) - 1, 0),
+                new vscode.Position((block.line || blocksSection.startLine) - 1, 100)
+              )
+            )
+          );
+        }
       }
     }
 

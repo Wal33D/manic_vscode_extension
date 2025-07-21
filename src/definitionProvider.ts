@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { DatFileParser } from './parser/datFileParser';
+import { VisualBlocksParser } from './parser/visualBlocksParser';
 
 export class DatDefinitionProvider implements vscode.DefinitionProvider {
   provideDefinition(
@@ -46,6 +47,18 @@ export class DatDefinitionProvider implements vscode.DefinitionProvider {
         return this.findEventDefinition(document, eventName, parser);
       }
 
+      // Check for event chain calls (call:EventName)
+      const callMatch = lineText.match(/call\s*:\s*(\w+)/);
+      if (callMatch && position.character >= lineText.indexOf(callMatch[1])) {
+        const eventName = callMatch[1];
+        // First check visual blocks, then script events
+        const blocksLocation = this.findEventInBlocks(document, eventName, parser);
+        if (blocksLocation) {
+          return blocksLocation;
+        }
+        return this.findEventDefinition(document, eventName, parser);
+      }
+
       // Check for variable references
       const varRefMatch = lineText.match(/(\w+)\s*:/);
       if (varRefMatch && !lineText.includes('::') && position.character <= lineText.indexOf(':')) {
@@ -57,8 +70,37 @@ export class DatDefinitionProvider implements vscode.DefinitionProvider {
       if (lineText.includes('::') || lineText.includes('))')) {
         const eventName = this.extractEventName(lineText);
         if (eventName) {
+          // First check visual blocks, then script events
+          const blocksLocation = this.findEventInBlocks(document, eventName, parser);
+          if (blocksLocation) {
+            return blocksLocation;
+          }
           return this.findEventDefinition(document, eventName, parser);
         }
+      }
+    }
+
+    // Handle visual blocks section
+    if (currentSection?.name === 'blocks') {
+      // Check for wire connections (e.g., 1-2, 1~2, 1?2)
+      const wireMatch = lineText.match(/(\d+)([-~?])(\d+)/);
+      if (wireMatch) {
+        const fromId = parseInt(wireMatch[1]);
+        const toId = parseInt(wireMatch[3]);
+        // Navigate to the block definition based on cursor position
+        const cursorPos = position.character;
+        const fromStart = lineText.indexOf(wireMatch[1]);
+        const toStart = lineText.indexOf(wireMatch[3], fromStart + wireMatch[1].length);
+
+        const targetId = cursorPos <= toStart ? fromId : toId;
+        return this.findBlockDefinition(document, targetId, parser);
+      }
+
+      // Check for EventCallEvent function references
+      const eventCallMatch = lineText.match(/EventCallEvent:[^,]+,[^,]+,[^,]+,(\w+)/);
+      if (eventCallMatch && position.character >= lineText.indexOf(eventCallMatch[1])) {
+        const eventName = eventCallMatch[1];
+        return this.findEventDefinition(document, eventName, parser);
       }
     }
 
@@ -215,6 +257,57 @@ export class DatDefinitionProvider implements vscode.DefinitionProvider {
     const oldStyleMatch = lineText.match(/\)\)\s*(\w+)\s*;/);
     if (oldStyleMatch) {
       return oldStyleMatch[1];
+    }
+
+    return undefined;
+  }
+
+  private findEventInBlocks(
+    document: vscode.TextDocument,
+    eventName: string,
+    parser: DatFileParser
+  ): vscode.Location | undefined {
+    const blocksSection = parser.getSection('blocks');
+    if (!blocksSection) {
+      return undefined;
+    }
+
+    const blocksParser = new VisualBlocksParser(blocksSection.content, blocksSection.startLine);
+    const { blocks } = blocksParser.parse();
+
+    // Look for TriggerEventChain blocks with matching name
+    for (const block of blocks) {
+      if (block.name === 'TriggerEventChain' && block.parameters.name === eventName) {
+        return new vscode.Location(
+          document.uri,
+          new vscode.Position((block.line || blocksSection.startLine) - 1, 0)
+        );
+      }
+    }
+
+    return undefined;
+  }
+
+  private findBlockDefinition(
+    document: vscode.TextDocument,
+    blockId: number,
+    parser: DatFileParser
+  ): vscode.Location | undefined {
+    const blocksSection = parser.getSection('blocks');
+    if (!blocksSection) {
+      return undefined;
+    }
+
+    const lines = blocksSection.content.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+      // Look for block definition (e.g., 1/TriggerTimer:...)
+      const blockMatch = lines[i].match(/^(\d+)\/(\w+):/);
+      if (blockMatch && parseInt(blockMatch[1]) === blockId) {
+        return new vscode.Location(
+          document.uri,
+          new vscode.Position(blocksSection.startLine + i + 1, 0)
+        );
+      }
     }
 
     return undefined;

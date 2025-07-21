@@ -68,12 +68,14 @@ export class MapPreviewProvider implements vscode.WebviewViewProvider {
       const tileRows = tilesSection.content
         .split('\n')
         .filter((line: string) => line.trim().length > 0)
-        .map((line: string) =>
-          line
-            .split(',')
-            .filter((tile: string) => tile.trim().length > 0)
-            .map((tile: string) => parseInt(tile.trim()))
-        );
+        .map((line: string) => {
+          const tiles = line.split(',').map((tile: string) => tile.trim());
+          // Remove last element if it's empty (trailing comma)
+          if (tiles[tiles.length - 1] === '') {
+            tiles.pop();
+          }
+          return tiles.map((tile: string) => parseInt(tile) || 0);
+        });
 
       // Get map dimensions from info section
       const infoSection = parser.getSection('info');
@@ -81,8 +83,8 @@ export class MapPreviewProvider implements vscode.WebviewViewProvider {
       let colcount = tileRows[0]?.length || 0;
 
       if (infoSection) {
-        const rowMatch = infoSection.content.match(/rowcount:\s*(\d+)/);
-        const colMatch = infoSection.content.match(/colcount:\s*(\d+)/);
+        const rowMatch = infoSection.content.match(/rowcount:\s*(\d+)/i);
+        const colMatch = infoSection.content.match(/colcount:\s*(\d+)/i);
         if (rowMatch) {
           rowcount = parseInt(rowMatch[1]);
         }

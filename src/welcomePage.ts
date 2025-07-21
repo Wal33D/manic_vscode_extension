@@ -1,8 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-// Import extension package metadata for version display
-import pkg from '../package.json';
 
 export class WelcomePageProvider {
   private static readonly viewType = 'manicMinersWelcome';
@@ -37,7 +35,7 @@ export class WelcomePageProvider {
     // Send initial data
     this.panel.webview.postMessage({
       type: 'init',
-      version: pkg.version,
+      version: '0.3.0', // Get from package.json
       recentMaps: this.getRecentMaps(),
       stats: this.getExtensionStats(),
     });

@@ -192,11 +192,44 @@
       terrain.material.dispose();
     }
     
-    tileData = data.tiles;
-    heightData = data.height;
+    if (wireframe) {
+      scene.remove(wireframe);
+      wireframe.geometry.dispose();
+      wireframe.material.dispose();
+    }
+    
+    // Convert 1D arrays to 2D arrays if needed
+    if (data.tiles && !Array.isArray(data.tiles[0])) {
+      console.log('Converting 1D arrays to 2D:', {
+        tilesLength: data.tiles.length,
+        heightLength: data.height.length,
+        rows: data.rows,
+        cols: data.cols,
+        expectedTotal: data.rows * data.cols
+      });
+      
+      tileData = [];
+      heightData = [];
+      for (let i = 0; i < data.rows; i++) {
+        tileData[i] = data.tiles.slice(i * data.cols, (i + 1) * data.cols);
+        heightData[i] = data.height.slice(i * data.cols, (i + 1) * data.cols);
+      }
+    } else {
+      tileData = data.tiles;
+      heightData = data.height;
+    }
+    
     colorMap = data.colorMap;
     rows = data.rows;
     cols = data.cols;
+    
+    console.log('Terrain data loaded:', {
+      rows,
+      cols,
+      tileDataRows: tileData.length,
+      tileDataCols: tileData[0]?.length,
+      colorMapSize: Object.keys(colorMap).length
+    });
 
     // Create geometry
     const geometry = new THREE.PlaneGeometry(cols, rows, cols - 1, rows - 1);
@@ -263,7 +296,14 @@
       return new THREE.Color().setHSL(hue, 0.7, 0.5);
     } else {
       // Color based on tile type
-      const tileColor = colorMap[tileId] || '#808080';
+      const tileColor = colorMap[tileId] || { r: 128, g: 128, b: 128 };
+      if (typeof tileColor === 'object') {
+        // Handle RGB object format
+        const r = (tileColor.r || 0) / 255;
+        const g = (tileColor.g || 0) / 255;
+        const b = (tileColor.b || 0) / 255;
+        return new THREE.Color(r, g, b);
+      }
       return new THREE.Color(tileColor);
     }
   }
