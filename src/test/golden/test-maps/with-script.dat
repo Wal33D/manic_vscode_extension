@@ -1,0 +1,125 @@
+comments{
+  Test map with script section
+  Tests script parsing and validation
+}
+info{
+  rowcount:10
+  colcount:10
+  biome:lava
+  creator:GoldenTest
+  levelname:Script Test
+  camerapos:Translation X=5.0 Y=10.0 Z=5.0,Rotation X=0.5 Y=0.0 Z=0.0
+}
+tiles{
+38,38,38,38,38,38,38,38,38,38
+38,1,1,1,1,1,1,1,1,38
+38,1,0,0,0,0,0,0,1,38
+38,1,0,42,42,42,0,0,1,38
+38,1,0,42,42,42,0,0,1,38
+38,1,0,0,0,0,0,0,1,38
+38,1,0,0,46,46,0,0,1,38
+38,1,1,1,12,1,1,1,1,38
+38,6,6,6,6,6,6,6,6,38
+38,38,38,38,38,38,38,38,38,38
+}
+height{
+10,10,10,10,10,10,10,10,10,10
+10,5,5,5,5,5,5,5,5,10
+10,5,5,5,5,5,5,5,5,10
+10,5,5,5,5,5,5,5,5,10
+10,5,5,5,5,5,5,5,5,10
+10,5,5,5,5,5,5,5,5,10
+10,5,5,5,5,5,5,5,5,10
+10,5,5,5,5,5,5,5,5,10
+10,3,3,3,3,3,3,3,3,10
+10,10,10,10,10,10,10,10,10,10
+}
+resources{
+  crystals:
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,1,1,1,0,0,0,0
+  0,0,0,1,1,1,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  ore:
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,1,1,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+  0,0,0,0,0,0,0,0,0,0
+}
+objectives{
+  crystals:20
+  buildings.BuildingToolStore_C>0/sufficient
+}
+buildings{
+  ID=1000
+  type=BuildingToolStore_C
+  xPos=2.0
+  yPos=2.0
+  heading=90.0
+  teleportAtStart=true
+}
+miners{
+  ID=2000
+  type=Pilot
+  xPos=3.0
+  yPos=3.0
+  heading=0.0
+}
+script{
+  # Variables
+  int GameState=0
+  bool IntroShown=false
+  timer SpawnTimer=120,SpawnCreatures
+  
+  # Initial setup
+  when(init and IntroShown==false)[ShowIntro]
+  
+  ShowIntro::
+  IntroShown:true;
+  msg:WelcomeMessage;
+  objective:CollectCrystals;
+  GameState:1;
+  
+  # Crystal collection milestone
+  when(crystals>=10 and GameState==1)[Milestone1]
+  
+  Milestone1::
+  GameState:2;
+  msg:HalfwayMessage;
+  starttimer:SpawnTimer;
+  
+  # Spawn creatures event
+  SpawnCreatures::
+  emerge:8,8,A,CreatureSmallSpider_C,3;
+  msg:CreaturesEmerged;
+  
+  # Victory condition
+  when(crystals>=20 and buildings.BuildingToolStore_C>0)[Victory]
+  
+  Victory::
+  GameState:3;
+  msg:VictoryMessage;
+  win:;
+}
+briefing{
+  Collect 20 crystals and build a Tool Store to complete this test level.
+  Watch out for emerging creatures!
+}
+briefingsuccess{
+  Well done! You have completed the test level.
+}
+briefingfailure{
+  Mission failed. Try again!
+}
