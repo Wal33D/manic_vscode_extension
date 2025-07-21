@@ -215,6 +215,28 @@ vehicle Truck=1
 ((foundbuilding[25,30] and ore >= 20))  # Found specific building + ore
 ```
 
+### Complex Game State
+```
+# Tutorial completion with multiple checkpoints
+((Step1Done == true and Step2Done == true and TutorialActive == true))
+
+# Wave defense state management
+((creatures == 0 and WaveActive == true))  # All enemies defeated in current wave
+
+# Resource collection milestones
+((crystals >= ResourceTarget and ObjectivesShown == true))
+```
+
+### Progressive Conditions
+```
+# Difficulty scaling based on time AND current level
+((time > 300 and DifficultyLevel == 1))
+((time > 600 and DifficultyLevel == 2))
+
+# Performance-based adjustments
+((EnemiesDefeated > 10 and DifficultyLevel == 1))
+```
+
 ## Condition Patterns
 
 ### State Checks

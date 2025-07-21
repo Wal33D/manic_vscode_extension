@@ -262,6 +262,24 @@ when(discovered==100)[FullyExplored];
 
 # Combine discovery with other conditions
 when(discovertile[40,40] and crystals>=25)[SecretBonusAvailable];
+
+# Multi-area exploration tracking
+bool Cave1Found=false
+bool Cave2Found=false 
+bool Cave3Found=false
+int CavesFound=0
+
+when(discovertile[20,20] and Cave1Found==false)[FoundCave1];
+when(discovertile[30,30] and Cave2Found==false)[FoundCave2];
+when(discovertile[40,40] and Cave3Found==false)[FoundCave3];
+
+# Progressive exploration rewards
+when(discovered>25 and discovered<=50)[FirstExplorationReward];
+when(discovered>50 and discovered<=75)[SecondExplorationReward];
+when(discovered>75)[FinalExplorationReward];
+
+# Discovery chains
+when(foundbuilding[25,30] and ore>=20)[UnlockSpecialPath];
 ```
 
 ### Progressive Difficulty
