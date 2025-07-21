@@ -38,6 +38,10 @@
   // Auto-tile state
   let autoTileEnabled = false;
   
+  // Validation state
+  let validationResult = null;
+  let validationHighlights = [];
+  
   // Layer state
   let currentLayer = mapLayers.find(l => l.id === currentLayerId) || mapLayers[0];
   
@@ -1131,6 +1135,11 @@
     showStatus(autoTileEnabled ? 'Auto-tiling enabled' : 'Auto-tiling disabled');
   });
   
+  // Validate button
+  document.getElementById('validateBtn').addEventListener('click', () => {
+    runValidation();
+  });
+  
   // Export functionality
   document.getElementById('exportBtn').addEventListener('click', () => {
     const dialog = document.createElement('div');
@@ -1746,6 +1755,244 @@
       case 'autoTileSupport':
         // Handle auto-tile support check response if needed
         break;
+      case 'validationResult':
+        handleValidationResult(message.result);
+        break;
     }
   });
+  
+  // Validation functions
+  function runValidation() {
+    const btn = document.getElementById('validateBtn');
+    btn.classList.add('validating');
+    btn.textContent = '⏳ Validating...';
+    btn.disabled = true;
+    
+    showStatus('Running map validation...');
+    
+    vscode.postMessage({
+      type: 'validateMap'
+    });
+  }
+  
+  function handleValidationResult(result) {
+    const btn = document.getElementById('validateBtn');
+    btn.classList.remove('validating');
+    btn.textContent = '✓ Validate';
+    btn.disabled = false;
+    
+    validationResult = result;
+    showValidationPanel();
+  }
+  
+  function showValidationPanel() {
+    // Remove existing panel if any
+    const existingPanel = document.querySelector('.validation-panel');
+    if (existingPanel) {
+      existingPanel.remove();
+    }
+    
+    // Create validation panel
+    const panel = document.createElement('div');
+    panel.className = 'validation-panel active';
+    
+    // Group issues by category
+    const issuesByCategory = {};
+    for (const issue of validationResult.issues) {
+      if (!issuesByCategory[issue.category]) {
+        issuesByCategory[issue.category] = [];
+      }
+      issuesByCategory[issue.category].push(issue);
+    }
+    
+    panel.innerHTML = `
+      <div class="validation-header">
+        <h3>Map Validation Results</h3>
+        <button class="validation-close">×</button>
+      </div>
+      <div class="validation-content">
+        <div class="validation-stats">
+          <div class="validation-stat">
+            <span class="validation-stat-label">Total Tiles:</span>
+            <span class="validation-stat-value">${validationResult.statistics.totalTiles}</span>
+          </div>
+          <div class="validation-stat">
+            <span class="validation-stat-label">Walkable Area:</span>
+            <span class="validation-stat-value">${Math.round(validationResult.statistics.walkableArea / validationResult.statistics.totalTiles * 100)}%</span>
+          </div>
+          <div class="validation-stat">
+            <span class="validation-stat-label">Resources:</span>
+            <span class="validation-stat-value">
+              ${validationResult.statistics.resourceCount.crystals} 💎
+              ${validationResult.statistics.resourceCount.ore} ⛏️
+            </span>
+          </div>
+        </div>
+        
+        <div class="validation-issues">
+          ${Object.keys(issuesByCategory).map(category => `
+            <div class="validation-category">
+              <div class="validation-category-header">
+                <span class="validation-category-toggle">▼</span>
+                <span>${formatCategoryName(category)}</span>
+                <span>(${issuesByCategory[category].length})</span>
+              </div>
+              <div class="validation-issues-list">
+                ${issuesByCategory[category].map((issue, index) => `
+                  <div class="validation-issue ${issue.type}" data-category="${category}" data-index="${index}">
+                    <div class="validation-issue-icon">
+                      ${issue.type === 'error' ? '❌' : issue.type === 'warning' ? '⚠️' : 'ℹ️'}
+                    </div>
+                    <div class="validation-issue-content">
+                      <div class="validation-issue-message">${issue.message}</div>
+                      ${issue.position ? `
+                        <div class="validation-issue-location">
+                          Location: [${issue.position.row}, ${issue.position.col}]
+                        </div>
+                      ` : ''}
+                      ${getFixButton(issue)}
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        
+        ${validationResult.suggestions.length > 0 ? `
+          <div class="validation-suggestions">
+            <h4>Suggestions</h4>
+            ${validationResult.suggestions.map(suggestion => `
+              <div class="validation-suggestion">
+                <div class="validation-suggestion-message">${suggestion.message}</div>
+                <span class="validation-suggestion-priority ${suggestion.priority}">${suggestion.priority}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : ''}
+      </div>
+    `;
+    
+    document.body.appendChild(panel);
+    
+    // Add event listeners
+    panel.querySelector('.validation-close').addEventListener('click', () => {
+      panel.classList.remove('active');
+      setTimeout(() => panel.remove(), 300);
+      clearValidationHighlights();
+    });
+    
+    // Category toggle
+    panel.querySelectorAll('.validation-category-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const category = header.parentElement;
+        category.classList.toggle('collapsed');
+      });
+    });
+    
+    // Issue click handlers
+    panel.querySelectorAll('.validation-issue').forEach(issue => {
+      issue.addEventListener('click', () => {
+        const category = issue.dataset.category;
+        const index = parseInt(issue.dataset.index);
+        const issueData = issuesByCategory[category][index];
+        
+        if (issueData.position) {
+          highlightIssue(issueData);
+          centerOnPosition(issueData.position.row, issueData.position.col);
+        } else if (issueData.area) {
+          highlightArea(issueData.area, issueData.type);
+        }
+      });
+    });
+    
+    // Fix button handlers
+    panel.querySelectorAll('.validation-issue-fix').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const fix = btn.dataset.fix;
+        const category = btn.closest('.validation-issue').dataset.category;
+        const index = parseInt(btn.closest('.validation-issue').dataset.index);
+        const issue = issuesByCategory[category][index];
+        
+        vscode.postMessage({
+          type: 'fixValidationIssue',
+          issue: issue,
+          fix: fix
+        });
+        
+        showStatus(`Applying fix: ${fix}`);
+      });
+    });
+  }
+  
+  function formatCategoryName(category) {
+    return category.charAt(0).toUpperCase() + category.slice(1).replace(/_/g, ' ');
+  }
+  
+  function getFixButton(issue) {
+    if (issue.message.includes('No Tool Store')) {
+      return '<button class="validation-issue-fix" data-fix="addSpawnPoint">Add Spawn Point</button>';
+    }
+    if (issue.message.includes('isolated area')) {
+      return '<button class="validation-issue-fix" data-fix="connectArea">Connect Area</button>';
+    }
+    return '';
+  }
+  
+  function highlightIssue(issue) {
+    clearValidationHighlights();
+    
+    if (issue.position) {
+      const highlight = document.createElement('div');
+      highlight.className = `validation-highlight ${issue.type}`;
+      highlight.style.left = issue.position.col * TILE_SIZE + 'px';
+      highlight.style.top = issue.position.row * TILE_SIZE + 'px';
+      highlight.style.width = TILE_SIZE + 'px';
+      highlight.style.height = TILE_SIZE + 'px';
+      
+      document.getElementById('mapViewport').appendChild(highlight);
+      validationHighlights.push(highlight);
+    }
+  }
+  
+  function highlightArea(area, type) {
+    clearValidationHighlights();
+    
+    for (const pos of area) {
+      const highlight = document.createElement('div');
+      highlight.className = `validation-highlight ${type}`;
+      highlight.style.left = pos.col * TILE_SIZE + 'px';
+      highlight.style.top = pos.row * TILE_SIZE + 'px';
+      highlight.style.width = TILE_SIZE + 'px';
+      highlight.style.height = TILE_SIZE + 'px';
+      
+      document.getElementById('mapViewport').appendChild(highlight);
+      validationHighlights.push(highlight);
+    }
+  }
+  
+  function clearValidationHighlights() {
+    validationHighlights.forEach(h => h.remove());
+    validationHighlights = [];
+  }
+  
+  function centerOnPosition(row, col) {
+    const mapContainer = document.getElementById('mapContainer');
+    const containerRect = mapContainer.getBoundingClientRect();
+    
+    const targetX = col * TILE_SIZE * zoomLevel;
+    const targetY = row * TILE_SIZE * zoomLevel;
+    
+    const centerX = containerRect.width / 2;
+    const centerY = containerRect.height / 2;
+    
+    panX = centerX - targetX;
+    panY = centerY - targetY;
+    
+    const mapViewport = document.getElementById('mapViewport');
+    mapViewport.style.transform = `scale(${zoomLevel}) translate(${panX/zoomLevel}px, ${panY/zoomLevel}px)`;
+    
+    updateMinimapViewport();
+  }
 })();
