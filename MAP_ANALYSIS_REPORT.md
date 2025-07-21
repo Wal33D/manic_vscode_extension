@@ -424,11 +424,86 @@ This report analyzes map structure, patterns, and design principles across tutor
 
 ## BAZ: coldcomfort.dat
 
-**Error**: Failed to parse map - Missing required rowcount or colcount in info section
+### Basic Information
+- **Level Name**: Cold Comfort
+- **Creator**: Batman
+- **Biome**: ice
+- **Dimensions**: 42x42 (1764 tiles)
+- **Complexity**: Large (40x40 - 64x64)
+
+### Objectives
+- Collect 60 crystals, 0 ore, 0 studs
+
+### Resources
+- **Initial Crystals**: 0
+- **Initial Ore**: 0
+- **Crystal Seams**: 56 (3.17% density)
+- **Ore Seams**: 49 (2.78% density)
+- **Distribution**: balanced
+
+### Script Complexity
+- **Overall**: Simple
+- **Variables**: 0
+- **Events**: 0
+
+### Terrain Features
+- Water
+
+### Map Characteristics
+- **Open Space**: 6.6%
+- **Edge Type**: sealed
+- **Difficulty**: medium
+- **Accessibility**: 1.1% connected
+- **Choke Points**: 116
+- **Strategic Depth**: 98%
+
+### Notable Design Elements
+- 45 isolated regions requiring strategic planning
+- Multiple resource clusters encouraging expansion
+- Fast erosion creating time pressure
+- Multiple strategic choke points
 
 ## BAZ: mineovermanner.dat
 
-**Error**: Failed to parse map - Missing required rowcount or colcount in info section
+### Basic Information
+- **Level Name**: Mine Over Manner
+- **Creator**: Batman
+- **Biome**: rock
+- **Dimensions**: 39x41 (1599 tiles)
+- **Complexity**: Medium (25x25 - 40x40)
+
+### Objectives
+- Collect 40 crystals, 0 ore, 0 studs
+
+### Resources
+- **Initial Crystals**: 0
+- **Initial Ore**: 0
+- **Crystal Seams**: 49 (3.06% density)
+- **Ore Seams**: 51 (3.19% density)
+- **Distribution**: balanced
+
+### Script Complexity
+- **Overall**: Simple
+- **Variables**: 0
+- **Events**: 0
+
+### Terrain Features
+- Lava hazards
+- Water
+
+### Map Characteristics
+- **Open Space**: 8.2%
+- **Edge Type**: sealed
+- **Difficulty**: medium
+- **Accessibility**: 1.1% connected
+- **Choke Points**: 131
+- **Strategic Depth**: 97%
+
+### Notable Design Elements
+- 44 isolated regions requiring strategic planning
+- Multiple resource clusters encouraging expansion
+- Fast erosion creating time pressure
+- Multiple strategic choke points
 
 ## BAZ: moltenmeltdown.dat
 
@@ -513,9 +588,9 @@ This report analyzes map structure, patterns, and design principles across tutor
 ### BAZ Maps
 
 **Patterns:**
-- Average map size: 1482 tiles
-- Primary difficulty: medium (1/1 maps)
-- Average crystal density: 2.97%
+- Average map size: 1615 tiles
+- Primary difficulty: medium (3/3 maps)
+- Average crystal density: 3.07%
 
 **Insights:**
 - BAZ maps feature extreme challenges and unique mechanics
