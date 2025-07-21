@@ -1995,4 +1995,320 @@
     
     updateMinimapViewport();
   }
+  
+  // Template Gallery functionality
+  let selectedTemplate = null;
+  let templates = [];
+  
+  // Template button
+  document.getElementById('templateBtn').addEventListener('click', () => {
+    showTemplateGallery();
+  });
+  
+  // Close template gallery
+  document.getElementById('templateClose').addEventListener('click', () => {
+    hideTemplateGallery();
+  });
+  
+  // Template category selection
+  document.querySelectorAll('.template-category').forEach(cat => {
+    cat.addEventListener('click', (e) => {
+      const category = e.currentTarget.dataset.category;
+      filterTemplates(category);
+      
+      // Update active state
+      document.querySelectorAll('.template-category').forEach(c => c.classList.remove('active'));
+      e.currentTarget.classList.add('active');
+    });
+  });
+  
+  // Template details close
+  document.getElementById('templateDetailsClose').addEventListener('click', () => {
+    hideTemplateDetails();
+  });
+  
+  // Use template button
+  document.getElementById('templateUseBtn').addEventListener('click', () => {
+    if (selectedTemplate) {
+      useTemplate(selectedTemplate);
+    }
+  });
+  
+  // Customize template button
+  document.getElementById('templateCustomizeBtn').addEventListener('click', () => {
+    if (selectedTemplate) {
+      useTemplate(selectedTemplate);
+      hideTemplateGallery();
+      showStatus('Template loaded. You can now customize it.');
+    }
+  });
+  
+  // Save as template
+  document.getElementById('saveTemplateConfirm').addEventListener('click', () => {
+    saveAsTemplate();
+  });
+  
+  document.getElementById('saveTemplateCancel').addEventListener('click', () => {
+    hideSaveTemplateDialog();
+  });
+  
+  // Template gallery functions
+  function showTemplateGallery() {
+    document.getElementById('templateGallery').classList.add('active');
+    loadTemplates();
+  }
+  
+  function hideTemplateGallery() {
+    document.getElementById('templateGallery').classList.remove('active');
+    hideTemplateDetails();
+  }
+  
+  function loadTemplates() {
+    // Request templates from extension
+    vscode.postMessage({
+      type: 'getTemplates'
+    });
+  }
+  
+  function displayTemplates(templateList) {
+    templates = templateList;
+    const grid = document.getElementById('templateGrid');
+    grid.innerHTML = '';
+    
+    if (templates.length === 0) {
+      grid.innerHTML = `
+        <div class="template-empty">
+          <div class="template-empty-icon">📋</div>
+          <div class="template-empty-text">No templates available</div>
+        </div>
+      `;
+      return;
+    }
+    
+    templates.forEach(template => {
+      const card = createTemplateCard(template);
+      grid.appendChild(card);
+    });
+  }
+  
+  function createTemplateCard(template) {
+    const card = document.createElement('div');
+    card.className = 'template-card';
+    card.dataset.templateId = template.id;
+    
+    // Create preview
+    const preview = document.createElement('div');
+    preview.className = 'template-preview';
+    
+    const previewCanvas = document.createElement('canvas');
+    previewCanvas.width = template.size.cols * 8;
+    previewCanvas.height = template.size.rows * 8;
+    renderTemplatePreview(previewCanvas, template);
+    preview.appendChild(previewCanvas);
+    
+    // Add difficulty badge
+    const difficulty = document.createElement('div');
+    difficulty.className = `template-difficulty ${template.difficulty}`;
+    difficulty.textContent = template.difficulty;
+    preview.appendChild(difficulty);
+    
+    card.appendChild(preview);
+    
+    // Add info
+    const info = document.createElement('div');
+    info.className = 'template-info';
+    
+    const name = document.createElement('div');
+    name.className = 'template-name';
+    name.textContent = template.name;
+    info.appendChild(name);
+    
+    const description = document.createElement('div');
+    description.className = 'template-description';
+    description.textContent = template.description;
+    info.appendChild(description);
+    
+    const meta = document.createElement('div');
+    meta.className = 'template-meta';
+    
+    const size = document.createElement('div');
+    size.className = 'template-size';
+    size.innerHTML = `📐 ${template.size.rows}×${template.size.cols}`;
+    meta.appendChild(size);
+    
+    if (template.objectives && template.objectives.length > 0) {
+      const objectives = document.createElement('div');
+      objectives.className = 'template-objectives';
+      objectives.innerHTML = `🎯 ${template.objectives.length} objectives`;
+      meta.appendChild(objectives);
+    }
+    
+    info.appendChild(meta);
+    card.appendChild(info);
+    
+    // Click handler
+    card.addEventListener('click', () => {
+      selectTemplate(template);
+    });
+    
+    return card;
+  }
+  
+  function renderTemplatePreview(canvas, template) {
+    const ctx = canvas.getContext('2d');
+    const scale = Math.min(canvas.width / template.size.cols, canvas.height / template.size.rows);
+    
+    ctx.fillStyle = '#1e1e1e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Render tiles
+    for (let r = 0; r < template.tiles.length; r++) {
+      for (let c = 0; c < template.tiles[r].length; c++) {
+        const tileId = template.tiles[r][c];
+        const color = tileColors[tileId] || '#666666';
+        
+        ctx.fillStyle = color;
+        ctx.fillRect(c * scale, r * scale, scale, scale);
+      }
+    }
+  }
+  
+  function filterTemplates(category) {
+    const filteredTemplates = category === 'all' 
+      ? templates 
+      : templates.filter(t => t.category === category);
+    
+    displayTemplates(filteredTemplates);
+  }
+  
+  function selectTemplate(template) {
+    selectedTemplate = template;
+    
+    // Update selected state
+    document.querySelectorAll('.template-card').forEach(card => {
+      card.classList.toggle('selected', card.dataset.templateId === template.id);
+    });
+    
+    showTemplateDetails(template);
+  }
+  
+  function showTemplateDetails(template) {
+    const details = document.getElementById('templateDetails');
+    details.classList.add('active');
+    
+    // Update title
+    document.getElementById('templateDetailsTitle').textContent = template.name;
+    
+    // Update description
+    document.getElementById('templateDetailsDescription').textContent = template.description;
+    
+    // Update objectives
+    const objectivesList = document.getElementById('templateDetailsObjectives');
+    objectivesList.innerHTML = '';
+    if (template.objectives) {
+      template.objectives.forEach(obj => {
+        const li = document.createElement('li');
+        li.textContent = obj;
+        objectivesList.appendChild(li);
+      });
+    }
+    
+    // Update properties
+    const properties = document.getElementById('templateDetailsProperties');
+    properties.innerHTML = `
+      <div>Size: ${template.size.rows} × ${template.size.cols}</div>
+      <div>Difficulty: ${template.difficulty}</div>
+      <div>Category: ${template.category}</div>
+      ${template.info?.biome ? `<div>Biome: ${template.info.biome}</div>` : ''}
+      ${template.info?.creator ? `<div>Creator: ${template.info.creator}</div>` : ''}
+    `;
+    
+    // Render large preview
+    const previewCanvas = document.getElementById('templatePreviewCanvas');
+    previewCanvas.width = 360;
+    previewCanvas.height = 360;
+    renderTemplatePreview(previewCanvas, template);
+  }
+  
+  function hideTemplateDetails() {
+    document.getElementById('templateDetails').classList.remove('active');
+  }
+  
+  function useTemplate(template) {
+    vscode.postMessage({
+      type: 'useTemplate',
+      template: template
+    });
+  }
+  
+  function showSaveTemplateDialog() {
+    document.getElementById('saveTemplateDialog').style.display = 'flex';
+    document.getElementById('templateName').value = '';
+    document.getElementById('templateDescription').value = '';
+    document.getElementById('templateObjectives').value = '';
+  }
+  
+  function hideSaveTemplateDialog() {
+    document.getElementById('saveTemplateDialog').style.display = 'none';
+  }
+  
+  function saveAsTemplate() {
+    const name = document.getElementById('templateName').value.trim();
+    const description = document.getElementById('templateDescription').value.trim();
+    const objectivesText = document.getElementById('templateObjectives').value.trim();
+    
+    if (!name) {
+      showStatus('Please enter a template name', 'error');
+      return;
+    }
+    
+    const objectives = objectivesText ? objectivesText.split('\n').filter(o => o.trim()) : [];
+    
+    vscode.postMessage({
+      type: 'saveAsTemplate',
+      name: name,
+      description: description,
+      objectives: objectives,
+      tiles: tiles
+    });
+    
+    hideSaveTemplateDialog();
+  }
+  
+  // Add keyboard shortcut for templates
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 't' || e.key === 'T') {
+      if (!e.ctrlKey && !e.metaKey && !e.altKey && 
+          e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        showTemplateGallery();
+      }
+    }
+    
+    // Ctrl+Shift+S to save as template
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 's') {
+      e.preventDefault();
+      showSaveTemplateDialog();
+    }
+  });
+  
+  // Handle template messages
+  window.addEventListener('message', event => {
+    const message = event.data;
+    switch (message.type) {
+      case 'templates':
+        displayTemplates(message.templates);
+        break;
+      case 'templateSaved':
+        showStatus('Template saved successfully');
+        loadTemplates(); // Reload templates
+        break;
+      case 'templateLoaded':
+        hideTemplateGallery();
+        tiles = message.tiles;
+        render();
+        showStatus('Template loaded successfully');
+        break;
+    }
+  });
 })();
