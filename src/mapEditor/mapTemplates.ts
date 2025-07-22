@@ -171,12 +171,14 @@ export class MapTemplateManager {
 
     // Add paths
     for (let c = 3; c < 17; c++) {
-      if (c !== 10) { // Don't overwrite spawn point
+      if (c !== 10) {
+        // Don't overwrite spawn point
         map[10][c] = 1; // Horizontal path
       }
     }
     for (let r = 3; r < 17; r++) {
-      if (r !== 10) { // Don't overwrite spawn point
+      if (r !== 10) {
+        // Don't overwrite spawn point
         map[r][10] = 1; // Vertical path
       }
     }
