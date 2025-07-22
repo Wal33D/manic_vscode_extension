@@ -30,7 +30,19 @@ colcount:10
 1,0,0,0,0,0,46,0,0,1
 1,0,0,0,0,0,0,0,0,1
 1,0,0,0,0,0,0,0,0,1
-1,1,1,1,1,1,1,1,1,1`;
+1,1,1,1,1,1,1,1,1,1
+
+[height]
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -49,7 +61,14 @@ colcount:5
 1,0,0,0,1
 1,0,0,0,1
 1,0,0,0,1
-1,1,1,1,1`;
+1,1,1,1,1
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -74,7 +93,14 @@ colcount:5
 40,40,40,40,40
 40,40,101,40,40
 40,40,40,40,40
-40,40,40,40,40`;
+40,40,40,40,40
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -97,7 +123,14 @@ colcount:5
 1,101,0,101,1
 1,0,0,0,1
 1,101,0,0,1
-1,1,1,1,1`;
+1,1,1,1,1
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -122,7 +155,14 @@ colcount:5
 1,0,6,0,1
 1,0,0,0,1
 1,0,0,0,1
-1,1,1,1,1`;
+1,1,1,1,1
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -145,7 +185,14 @@ colcount:5
 1,101,6,0,1
 1,0,0,0,1
 1,0,0,0,1
-1,1,1,1,1`;
+1,1,1,1,1
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -170,7 +217,14 @@ colcount:5
 1,101,0,0,1
 1,0,0,0,1
 1,0,0,46,1
-1,1,1,1,1`;
+1,1,1,1,1
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -193,7 +247,14 @@ colcount:5
 1,101,42,42,1
 1,42,42,42,1
 1,42,42,46,1
-1,1,1,1,1`;
+1,1,1,1,1
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -220,7 +281,10 @@ rowcount:${rows}
 colcount:${cols}
 
 [tiles]
-${tiles.join('\n')}`;
+${tiles.join('\n')}
+
+[height]
+${Array(rows).fill(null).map(() => Array(cols).fill('10').join(',')).join('\n')}`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -245,7 +309,14 @@ colcount:5
 40,1,1,1,40
 40,1,101,42,40
 40,1,46,6,40
-40,40,40,40,40`;
+40,40,40,40,40
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -272,7 +343,14 @@ colcount:5
 1,0,0,0,1
 1,0,0,0,1
 1,0,0,0,1
-1,1,1,1,1`;
+1,1,1,1,1
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -301,7 +379,19 @@ colcount:10
 1,0,0,0,0,0,0,0,0,1
 1,0,0,0,0,0,0,0,0,1
 1,0,0,0,0,0,0,0,0,1
-1,1,1,1,1,1,1,1,1,1`;
+1,1,1,1,1,1,1,1,1,1
+
+[height]
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10
+10,10,10,10,10,10,10,10,10,10`;
 
       const doc = createMockDocument(content);
       const validator = new MapEditorValidator(doc);
@@ -327,6 +417,13 @@ colcount:5
 1,0,0,0,1
 1,0,0,0,1
 1,1,1,1,1
+
+[height]
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
+10,10,10,10,10
 
 [objectives]
 collect 10 crystals`;

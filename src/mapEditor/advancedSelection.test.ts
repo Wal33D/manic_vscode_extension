@@ -66,11 +66,11 @@ describe('AdvancedSelectionTool', () => {
 
       const selection = tool.lassoSelect(path);
 
-      expect(selection.points.length).toBe(9); // Actual lasso area
+      expect(selection.points.length).toBe(9); // 3x3 interior area
       expect(selection.bounds.minRow).toBe(1);
-      expect(selection.bounds.maxRow).toBe(4);
+      expect(selection.bounds.maxRow).toBe(3); // Only interior points selected
       expect(selection.bounds.minCol).toBe(1);
-      expect(selection.bounds.maxCol).toBe(4);
+      expect(selection.bounds.maxCol).toBe(3); // Only interior points selected
     });
 
     it('should handle non-rectangular lasso shapes', () => {

@@ -104,7 +104,7 @@ describe('AutoTiling', () => {
       const autoTiler = new AutoTiler(tiles, 10, 10);
       const results = autoTiler.getAutoTiledPositions(positions);
 
-      expect(results[0].tileId).toBe(30); // Should return base tile
+      expect(results[0].tileId).toBe(34); // Isolated rock gets hard_default variant
     });
   });
 
