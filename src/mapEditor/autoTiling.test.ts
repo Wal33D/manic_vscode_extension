@@ -38,8 +38,10 @@ describe('AutoTiling', () => {
   describe('AutoTiler.getAutoTiledPositions', () => {
     it('should auto-tile multiple positions', () => {
       // Create a 10x10 map filled with ground (1)
-      const tiles = Array(10).fill(null).map(() => Array(10).fill(1));
-      
+      const tiles = Array(10)
+        .fill(null)
+        .map(() => Array(10).fill(1));
+
       const positions = [
         { row: 5, col: 5, tileId: 30 },
         { row: 5, col: 6, tileId: 30 },
@@ -56,15 +58,17 @@ describe('AutoTiling', () => {
       const results = autoTiler.getAutoTiledPositions(positions);
 
       expect(results).toHaveLength(4);
-      results.forEach(result => {
+      results.forEach((result: { row: number; col: number; tileId: number }) => {
         expect(result.tileId).toBeGreaterThanOrEqual(30);
         expect(result.tileId).toBeLessThanOrEqual(44);
       });
     });
 
     it('should handle water tiles with proper variants', () => {
-      const tiles = Array(10).fill(null).map(() => Array(10).fill(1));
-      
+      const tiles = Array(10)
+        .fill(null)
+        .map(() => Array(10).fill(1));
+
       // Create a water line
       const positions = [
         { row: 5, col: 3, tileId: 11 },
@@ -82,34 +86,38 @@ describe('AutoTiling', () => {
       const results = autoTiler.getAutoTiledPositions(positions);
 
       // Middle water tiles should connect horizontally
-      results.forEach(result => {
+      results.forEach((result: { row: number; col: number; tileId: number }) => {
         expect(result.tileId).toBeGreaterThanOrEqual(11);
         expect(result.tileId).toBeLessThanOrEqual(16); // Water range
       });
     });
 
     it('should return original tile if no matching pattern', () => {
-      const tiles = Array(10).fill(null).map(() => Array(10).fill(1));
-      
+      const tiles = Array(10)
+        .fill(null)
+        .map(() => Array(10).fill(1));
+
       // Single isolated tile
       const positions = [{ row: 5, col: 5, tileId: 30 }];
       tiles[5][5] = 30;
-      
+
       const autoTiler = new AutoTiler(tiles, 10, 10);
       const results = autoTiler.getAutoTiledPositions(positions);
-      
+
       expect(results[0].tileId).toBe(30); // Should return base tile
     });
   });
 
   describe('Edge cases', () => {
     it('should handle tiles at map boundaries', () => {
-      const tiles = Array(10).fill(null).map(() => Array(10).fill(1));
-      
+      const tiles = Array(10)
+        .fill(null)
+        .map(() => Array(10).fill(1));
+
       // Top-left corner
       tiles[0][0] = 30;
       const tlPositions = [{ row: 0, col: 0, tileId: 30 }];
-      
+
       const autoTiler = new AutoTiler(tiles, 10, 10);
       const tlResults = autoTiler.getAutoTiledPositions(tlPositions);
       expect(tlResults[0].tileId).toBeGreaterThanOrEqual(30);
@@ -122,7 +130,9 @@ describe('AutoTiling', () => {
     });
 
     it('should handle empty positions array', () => {
-      const tiles = Array(10).fill(null).map(() => Array(10).fill(1));
+      const tiles = Array(10)
+        .fill(null)
+        .map(() => Array(10).fill(1));
       const autoTiler = new AutoTiler(tiles, 10, 10);
       const results = autoTiler.getAutoTiledPositions([]);
       expect(results).toEqual([]);
@@ -131,7 +141,7 @@ describe('AutoTiling', () => {
     it('should handle single row/column maps', () => {
       const singleRow = [[1, 1, 1, 1, 1]];
       const autoTiler = new AutoTiler(singleRow, 1, 5);
-      
+
       singleRow[0][2] = 30;
       const positions = [{ row: 0, col: 2, tileId: 30 }];
       const results = autoTiler.getAutoTiledPositions(positions);

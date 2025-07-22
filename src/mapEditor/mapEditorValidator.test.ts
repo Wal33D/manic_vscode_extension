@@ -211,8 +211,10 @@ colcount:5
     it('should warn about large maps', async () => {
       const rows = 250;
       const cols = 250;
-      const tiles = Array(rows).fill(null).map(() => Array(cols).fill('1').join(','));
-      
+      const tiles = Array(rows)
+        .fill(null)
+        .map(() => Array(cols).fill('1').join(','));
+
       const content = `[info]
 rowcount:${rows}
 colcount:${cols}
@@ -276,8 +278,8 @@ colcount:5
       const validator = new MapEditorValidator(doc);
       const result = await validator.validateForEditor();
 
-      const spawnSuggestion = result.suggestions.find(
-        s => s.message.includes('Add at least one Tool Store')
+      const spawnSuggestion = result.suggestions.find(s =>
+        s.message.includes('Add at least one Tool Store')
       );
       expect(spawnSuggestion).toBeDefined();
       expect(spawnSuggestion?.priority).toBe('high');
@@ -305,8 +307,8 @@ colcount:10
       const validator = new MapEditorValidator(doc);
       const result = await validator.validateForEditor();
 
-      const resourceSuggestion = result.suggestions.find(
-        s => s.message.includes('Consider adding more resources')
+      const resourceSuggestion = result.suggestions.find(s =>
+        s.message.includes('Consider adding more resources')
       );
       expect(resourceSuggestion).toBeDefined();
       expect(resourceSuggestion?.priority).toBe('medium');
@@ -338,7 +340,9 @@ collect 10 crystals`;
       expect(spawnIssues.length).toBeGreaterThan(0);
 
       // Should have objective issue (not enough crystals)
-      const objectiveIssues = result.issues.filter(i => i.category === ValidationCategory.OBJECTIVES);
+      const objectiveIssues = result.issues.filter(
+        i => i.category === ValidationCategory.OBJECTIVES
+      );
       expect(objectiveIssues.length).toBeGreaterThan(0);
     });
   });

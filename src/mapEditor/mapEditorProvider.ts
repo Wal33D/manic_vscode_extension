@@ -6,13 +6,26 @@ import { getTileName } from '../data/tileDefinitions';
 import { AutoTiler, supportsAutoTiling } from './autoTiling';
 import { MapEditorValidator } from './mapEditorValidator';
 import { MapTemplateManager, MapTemplate } from './mapTemplates';
+import { AdvancedSelectionTool, SelectionMode, SelectionRegion } from './advancedSelection';
 
 export interface PaintTool {
-  type: 'paint' | 'fill' | 'line' | 'rectangle' | 'picker' | 'select' | 'stamp';
+  type:
+    | 'paint'
+    | 'fill'
+    | 'line'
+    | 'rectangle'
+    | 'picker'
+    | 'select'
+    | 'stamp'
+    | 'magic_wand'
+    | 'lasso'
+    | 'ellipse'
+    | 'polygon';
   size: number;
   tileId: number;
   mirrorMode?: 'horizontal' | 'vertical' | 'both' | 'off';
   autoTile?: boolean;
+  selectionMode?: SelectionMode;
 }
 
 export interface SelectionData {
@@ -197,6 +210,21 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             message.description,
             message.objectives,
             message.tiles
+          );
+          break;
+        case 'advancedSelect':
+          await this.handleAdvancedSelect(
+            webviewPanel.webview,
+            document,
+            message.mode,
+            message.params
+          );
+          break;
+        case 'modifySelection':
+          await this.handleModifySelection(
+            webviewPanel.webview,
+            message.operation,
+            message.selection
           );
           break;
       }
@@ -948,6 +976,23 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
           </div>
           
           <div class="tool-group">
+            <label>Selection:</label>
+            <button class="tool-btn" data-tool="magic_wand" title="Magic Wand (W)">🪄 Magic</button>
+            <button class="tool-btn" data-tool="lasso" title="Lasso (O)">🔲 Lasso</button>
+            <button class="tool-btn" data-tool="ellipse" title="Ellipse (E)">⭕ Ellipse</button>
+            <button class="tool-btn" data-tool="polygon" title="Polygon (G)">🔺 Polygon</button>
+          </div>
+          
+          <div class="tool-group" id="selectionOptions" style="display: none;">
+            <label>Selection Options:</label>
+            <button id="expandSelectionBtn" title="Expand Selection">⊕ Expand</button>
+            <button id="contractSelectionBtn" title="Contract Selection">⊖ Contract</button>
+            <button id="invertSelectionBtn" title="Invert Selection">⇄ Invert</button>
+            <button id="selectAllBtn" title="Select All (Ctrl+A)">⬚ All</button>
+            <button id="selectByTypeBtn" title="Select by Tile Type">🎯 By Type</button>
+          </div>
+          
+          <div class="tool-group">
             <label>Brush Size:</label>
             <input type="range" id="brushSize" min="1" max="10" value="1">
             <span id="brushSizeDisplay">1</span>
@@ -1284,6 +1329,158 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       vscode.window.showErrorMessage(`Error saving template: ${errorMessage}`);
+    }
+  }
+
+  private async handleAdvancedSelect(
+    webview: vscode.Webview,
+    document: vscode.TextDocument,
+    mode: SelectionMode,
+    params: any
+  ): Promise<void> {
+    try {
+      const parser = new DatFileParser(document.getText());
+      const datFile = parser.parse();
+      const tiles = parser.getTileArray();
+
+      if (!tiles) {
+        vscode.window.showErrorMessage('Failed to parse map tiles');
+        return;
+      }
+
+      const advancedTool = new AdvancedSelectionTool(
+        tiles,
+        datFile.info.rowcount,
+        datFile.info.colcount
+      );
+
+      let selection: SelectionRegion;
+
+      switch (mode) {
+        case SelectionMode.MAGIC_WAND:
+          selection = advancedTool.magicWandSelect(params.row, params.col, params.tolerance || 0);
+          break;
+
+        case SelectionMode.LASSO:
+          selection = advancedTool.lassoSelect(params.path);
+          break;
+
+        case SelectionMode.ELLIPSE:
+          selection = advancedTool.ellipseSelect(
+            params.centerRow,
+            params.centerCol,
+            params.radiusRows,
+            params.radiusCols
+          );
+          break;
+
+        case SelectionMode.POLYGON:
+          selection = advancedTool.polygonSelect(params.vertices);
+          break;
+
+        default:
+          vscode.window.showErrorMessage(`Unknown selection mode: ${mode}`);
+          return;
+      }
+
+      // Send selection back to webview
+      webview.postMessage({
+        type: 'selectionResult',
+        selection: {
+          points: selection.points,
+          bounds: selection.bounds,
+          mode: mode,
+        },
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Selection error: ${errorMessage}`);
+    }
+  }
+
+  private async handleModifySelection(
+    webview: vscode.Webview,
+    operation: string,
+    selection: any
+  ): Promise<void> {
+    try {
+      const currentDoc = vscode.window.activeTextEditor?.document;
+      if (!currentDoc) {
+        return;
+      }
+
+      const parser = new DatFileParser(currentDoc.getText());
+      const datFile = parser.parse();
+      const tiles = parser.getTileArray();
+
+      if (!tiles) {
+        vscode.window.showErrorMessage('Failed to parse map tiles');
+        return;
+      }
+
+      const advancedTool = new AdvancedSelectionTool(
+        tiles,
+        datFile.info.rowcount,
+        datFile.info.colcount
+      );
+
+      let modifiedSelection: SelectionRegion;
+      const currentSelection: SelectionRegion = {
+        points: selection.points,
+        bounds: selection.bounds,
+      };
+
+      switch (operation) {
+        case 'expand':
+          modifiedSelection = advancedTool.expandSelection(currentSelection);
+          break;
+
+        case 'contract':
+          modifiedSelection = advancedTool.contractSelection(currentSelection);
+          break;
+
+        case 'invert':
+          modifiedSelection = advancedTool.invertSelection(currentSelection);
+          break;
+
+        case 'selectByType':
+          modifiedSelection = advancedTool.selectByTileType(selection.tileType);
+          break;
+
+        case 'selectByRange':
+          modifiedSelection = advancedTool.selectByRange(selection.minTileId, selection.maxTileId);
+          break;
+
+        case 'combine': {
+          const secondSelection: SelectionRegion = {
+            points: selection.secondSelection.points,
+            bounds: selection.secondSelection.bounds,
+          };
+          modifiedSelection = advancedTool.combineSelections(
+            currentSelection,
+            secondSelection,
+            selection.combineMode || 'add'
+          );
+          break;
+        }
+
+        default:
+          vscode.window.showErrorMessage(`Unknown selection operation: ${operation}`);
+          return;
+      }
+
+      // Send modified selection back to webview
+      webview.postMessage({
+        type: 'selectionModified',
+        selection: {
+          points: modifiedSelection.points,
+          bounds: modifiedSelection.bounds,
+          operation: operation,
+        },
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Selection modification error: ${errorMessage}`);
     }
   }
 
