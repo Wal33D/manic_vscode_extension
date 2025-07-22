@@ -310,7 +310,10 @@ ${tiles.join('\n')}
 
 }
 height{
-${Array(rows).fill(null).map(() => Array(cols).fill('10').join(',')).join('\n')}
+${Array(rows)
+  .fill(null)
+  .map(() => Array(cols).fill('10').join(','))
+  .join('\n')}
 }`;
 
       const doc = createMockDocument(content);
