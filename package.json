@@ -331,35 +331,68 @@
         "language": "manicminers"
       }
     ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "manic-miners",
+          "title": "Manic Miners",
+          "icon": "images/activity-bar-icon.svg"
+        }
+      ]
+    },
     "views": {
-      "explorer": [
+      "manic-miners": [
+        {
+          "id": "manicMiners.explorer",
+          "name": "Maps Explorer",
+          "icon": "$(files)",
+          "contextualTitle": "Manic Miners Maps"
+        },
         {
           "type": "webview",
           "id": "manicMiners.mapPreview",
           "name": "Map Preview",
           "icon": "$(map)",
-          "contextualTitle": "Manic Miners Map Preview"
+          "contextualTitle": "Map Preview"
+        },
+        {
+          "id": "manicMiners.tilePalette",
+          "name": "Tile Palette",
+          "icon": "$(symbol-color)",
+          "contextualTitle": "Tile Palette"
         },
         {
           "type": "webview",
           "id": "manicMiners.objectiveBuilder",
           "name": "Objective Builder",
           "icon": "$(target)",
-          "contextualTitle": "Manic Miners Objective Builder"
+          "contextualTitle": "Objective Builder"
+        },
+        {
+          "id": "manicMiners.scriptSnippets",
+          "name": "Script Patterns",
+          "icon": "$(code)",
+          "contextualTitle": "Script Patterns"
+        },
+        {
+          "id": "manicMiners.validation",
+          "name": "Validation",
+          "icon": "$(checklist)",
+          "contextualTitle": "Map Validation"
         },
         {
           "type": "webview",
           "id": "manicMiners.mapDiff",
           "name": "Version Diff",
           "icon": "$(diff)",
-          "contextualTitle": "Manic Miners Version Diff"
+          "contextualTitle": "Version Diff"
         },
         {
           "type": "webview",
           "id": "manicMiners.heatMap",
           "name": "Heat Map",
           "icon": "$(graph-line)",
-          "contextualTitle": "Manic Miners Heat Map Analysis"
+          "contextualTitle": "Heat Map Analysis"
         },
         {
           "type": "webview",

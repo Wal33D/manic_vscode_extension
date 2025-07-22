@@ -147,6 +147,18 @@ export const window = {
     hide: jest.fn(),
     dispose: jest.fn(),
   })),
+  createTreeView: jest.fn(() => ({
+    dispose: jest.fn(),
+    onDidExpandElement: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidCollapseElement: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChangeSelection: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidChangeVisibility: jest.fn(() => ({ dispose: jest.fn() })),
+    reveal: jest.fn(),
+    badge: undefined,
+    message: undefined,
+    title: undefined,
+    description: undefined,
+  })),
 };
 
 export const commands = {
@@ -166,6 +178,8 @@ export const languages = {
     clear: jest.fn(),
     dispose: jest.fn(),
   })),
+  onDidChangeDiagnostics: jest.fn(() => ({ dispose: jest.fn() })),
+  getDiagnostics: jest.fn(() => []),
 };
 
 export const workspace = {
@@ -179,6 +193,7 @@ export const workspace = {
     inspect: jest.fn(),
     update: jest.fn(),
   })),
+  workspaceFolders: undefined,
 };
 
 export enum CodeActionKind {
@@ -252,6 +267,60 @@ export enum ViewColumn {
 export enum StatusBarAlignment {
   Left = 1,
   Right = 2,
+}
+
+export enum TreeItemCollapsibleState {
+  None = 0,
+  Collapsed = 1,
+  Expanded = 2,
+}
+
+export class TreeItem {
+  public label?: string;
+  public id?: string;
+  public iconPath?: any;
+  public description?: string;
+  public contextValue?: string;
+  public command?: any;
+  public collapsibleState?: TreeItemCollapsibleState;
+  public resourceUri?: Uri;
+  public tooltip?: string | MarkdownString;
+
+  constructor(label: string, collapsibleState?: TreeItemCollapsibleState) {
+    this.label = label;
+    this.collapsibleState = collapsibleState;
+  }
+}
+
+export class ThemeIcon {
+  constructor(
+    public id: string,
+    public color?: any
+  ) {}
+}
+
+export class EventEmitter<T> {
+  private listeners: Array<(e: T) => void> = [];
+
+  event = (listener: (e: T) => void) => {
+    this.listeners.push(listener);
+    return {
+      dispose: () => {
+        const index = this.listeners.indexOf(listener);
+        if (index >= 0) {
+          this.listeners.splice(index, 1);
+        }
+      },
+    };
+  };
+
+  fire(event: T): void {
+    this.listeners.forEach(listener => listener(event));
+  }
+
+  dispose(): void {
+    this.listeners = [];
+  }
 }
 
 // Mock TextDocument

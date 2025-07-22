@@ -35,6 +35,11 @@ import { WelcomePageProvider } from './welcomePage';
 import { registerScriptPatternCommands } from './commands/scriptPatternCommands';
 import { registerMapEditorCommands } from './mapEditor/mapEditorCommands';
 import { MapEditorProvider } from './mapEditor/mapEditorProvider';
+import { MapsExplorerProvider } from './views/mapsExplorerProvider';
+import { TilePaletteProvider } from './views/tilePaletteProvider';
+import { ScriptSnippetsProvider } from './views/scriptSnippetsProvider';
+import { ValidationProvider } from './views/validationProvider';
+import { StatusBarManager } from './statusBar/statusBarManager';
 
 export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -367,6 +372,158 @@ script{
     vscode.commands.executeCommand('manicMiners.terrain3D.focus');
   });
   context.subscriptions.push(show3DTerrainCommand);
+
+  // Initialize Status Bar Manager
+  const statusBarManager = new StatusBarManager();
+  context.subscriptions.push(statusBarManager);
+
+  // Update status bar when active editor changes
+  context.subscriptions.push(
+    vscode.window.onDidChangeActiveTextEditor(editor => {
+      statusBarManager.updateActiveDocument(editor?.document);
+    })
+  );
+
+  // Update status bar when document changes
+  context.subscriptions.push(
+    vscode.workspace.onDidChangeTextDocument(e => {
+      if (e.document === vscode.window.activeTextEditor?.document) {
+        statusBarManager.updateActiveDocument(e.document);
+      }
+    })
+  );
+
+  // Initialize with current document
+  statusBarManager.updateActiveDocument(vscode.window.activeTextEditor?.document);
+
+  // Register Maps Explorer Provider
+  const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  const mapsExplorerProvider = new MapsExplorerProvider(workspaceRoot, context);
+  vscode.window.createTreeView('manicMiners.mapsExplorer', {
+    treeDataProvider: mapsExplorerProvider,
+    showCollapseAll: true,
+  });
+
+  // Register Tile Palette Provider
+  const tilePaletteProvider = new TilePaletteProvider(context);
+  vscode.window.createTreeView('manicMiners.tilePalette', {
+    treeDataProvider: tilePaletteProvider,
+  });
+
+  // Register Script Snippets Provider
+  const scriptSnippetsProvider = new ScriptSnippetsProvider(context);
+  vscode.window.createTreeView('manicMiners.scriptSnippets', {
+    treeDataProvider: scriptSnippetsProvider,
+    showCollapseAll: true,
+  });
+
+  // Register Validation Provider
+  const validationProvider = new ValidationProvider(context);
+  vscode.window.createTreeView('manicMiners.validation', {
+    treeDataProvider: validationProvider,
+  });
+
+  // Register commands for new UI components
+  context.subscriptions.push(
+    vscode.commands.registerCommand('manicMiners.refreshMapsExplorer', () =>
+      mapsExplorerProvider.refresh()
+    ),
+    vscode.commands.registerCommand('manicMiners.openMap', async (mapPath: string) => {
+      const document = await vscode.workspace.openTextDocument(mapPath);
+      await vscode.window.showTextDocument(document);
+      mapsExplorerProvider.addRecentMap(mapPath);
+    }),
+    vscode.commands.registerCommand('manicMiners.selectTile', (tileId: number) => {
+      tilePaletteProvider.setSelectedTile(tileId);
+    }),
+    vscode.commands.registerCommand('manicMiners.showTilePalette', () => {
+      vscode.commands.executeCommand('manicMiners.tilePalette.focus');
+    }),
+    vscode.commands.registerCommand(
+      'manicMiners.insertScriptSnippet',
+      async (pattern: { snippet: string }) => {
+        const editor = vscode.window.activeTextEditor;
+        if (editor) {
+          const position = editor.selection.active;
+          await editor.edit(editBuilder => {
+            editBuilder.insert(position, pattern.snippet);
+          });
+        }
+      }
+    ),
+    vscode.commands.registerCommand('manicMiners.addCustomSnippet', async () => {
+      const name = await vscode.window.showInputBox({ prompt: 'Snippet name' });
+      if (!name) {
+        return;
+      }
+
+      const description = await vscode.window.showInputBox({ prompt: 'Snippet description' });
+      if (!description) {
+        return;
+      }
+
+      const snippet = await vscode.window.showInputBox({
+        prompt: 'Script snippet',
+        placeHolder: 'timer::;\\nwait:30;',
+      });
+      if (!snippet) {
+        return;
+      }
+
+      await scriptSnippetsProvider.addCustomSnippet({
+        name,
+        description,
+        snippet,
+        category: 'custom',
+      });
+    }),
+    vscode.commands.registerCommand('manicMiners.runValidation', () => {
+      vscode.commands.executeCommand('manicMiners.validateMap');
+    }),
+    vscode.commands.registerCommand('manicMiners.showMapInfo', () => {
+      // Show detailed map info in a quick pick or information message
+      const editor = vscode.window.activeTextEditor;
+      if (editor?.document.fileName.endsWith('.dat')) {
+        vscode.window.showInformationMessage('Map information displayed in status bar');
+      }
+    }),
+    vscode.commands.registerCommand(
+      'manicMiners.updateStatusBar',
+      (updates: { selectedTile?: string; validation?: string }) => {
+        statusBarManager.updateStatusBarItem(updates);
+      }
+    ),
+    vscode.commands.registerCommand('manicMiners.goToLine', (line: number) => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const position = new vscode.Position(line - 1, 0);
+        editor.selection = new vscode.Selection(position, position);
+        editor.revealRange(new vscode.Range(position, position));
+      }
+    })
+  );
+
+  // Update validation provider when diagnostics change
+  context.subscriptions.push(
+    vscode.languages.onDidChangeDiagnostics(() => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor?.document.languageId === 'manicminers') {
+        const diagnostics = vscode.languages.getDiagnostics(editor.document.uri);
+        const issues = diagnostics.map(d => ({
+          severity:
+            d.severity === vscode.DiagnosticSeverity.Error
+              ? ('error' as const)
+              : d.severity === vscode.DiagnosticSeverity.Warning
+                ? ('warning' as const)
+                : ('info' as const),
+          message: d.message,
+          line: d.range.start.line + 1,
+          category: d.source || 'General',
+        }));
+        validationProvider.updateValidation(issues);
+      }
+    })
+  );
 }
 
 export function deactivate() {}
