@@ -107,11 +107,11 @@ export class CancellationToken {
 export { TextDocument as default };
 
 export const window = {
-  showInformationMessage: jest.fn(),
-  showErrorMessage: jest.fn(),
-  showWarningMessage: jest.fn(),
-  showInputBox: jest.fn(),
-  showQuickPick: jest.fn(),
+  showInformationMessage: jest.fn(() => Promise.resolve()),
+  showErrorMessage: jest.fn(() => Promise.resolve()),
+  showWarningMessage: jest.fn(() => Promise.resolve()),
+  showInputBox: jest.fn(() => Promise.resolve()),
+  showQuickPick: jest.fn(() => Promise.resolve()),
   registerWebviewViewProvider: jest.fn(() => ({ dispose: jest.fn() })),
   registerCustomEditorProvider: jest.fn(() => ({ dispose: jest.fn() })),
   onDidChangeActiveTextEditor: jest.fn(() => ({ dispose: jest.fn() })),
@@ -159,6 +159,21 @@ export const window = {
     title: undefined,
     description: undefined,
   })),
+  createQuickPick: jest.fn(() => ({
+    placeholder: '',
+    matchOnDescription: false,
+    matchOnDetail: false,
+    items: [],
+    buttons: [],
+    show: jest.fn(),
+    hide: jest.fn(),
+    onDidChangeSelection: jest.fn(() => ({ dispose: jest.fn() })),
+    onDidTriggerButton: jest.fn(() => ({ dispose: jest.fn() })),
+    dispose: jest.fn(),
+  })),
+  showTextDocument: jest.fn(),
+  showSaveDialog: jest.fn(),
+  showOpenDialog: jest.fn(),
 };
 
 export const commands = {
@@ -172,6 +187,7 @@ export const languages = {
   registerDefinitionProvider: jest.fn(),
   registerReferenceProvider: jest.fn(),
   registerCodeActionsProvider: jest.fn(),
+  registerCodeLensProvider: jest.fn(),
   createDiagnosticCollection: jest.fn(() => ({
     set: jest.fn(),
     delete: jest.fn(),
@@ -194,6 +210,16 @@ export const workspace = {
     update: jest.fn(),
   })),
   workspaceFolders: undefined,
+  fs: {
+    writeFile: jest.fn(() => Promise.resolve()),
+    readFile: jest.fn(() => Promise.resolve(Buffer.from(''))),
+    delete: jest.fn(() => Promise.resolve()),
+    rename: jest.fn(() => Promise.resolve()),
+    copy: jest.fn(() => Promise.resolve()),
+    createDirectory: jest.fn(() => Promise.resolve()),
+    readDirectory: jest.fn(() => Promise.resolve([])),
+    stat: jest.fn(() => Promise.resolve({ type: 1, ctime: 0, mtime: 0, size: 0 })),
+  },
 };
 
 export enum CodeActionKind {
@@ -264,6 +290,11 @@ export enum ViewColumn {
   Nine = 9,
 }
 
+export enum QuickPickItemKind {
+  Separator = -1,
+  Default = 0,
+}
+
 export enum StatusBarAlignment {
   Left = 1,
   Right = 2,
@@ -297,6 +328,10 @@ export class ThemeIcon {
     public id: string,
     public color?: any
   ) {}
+}
+
+export class ThemeColor {
+  constructor(public id: string) {}
 }
 
 export class EventEmitter<T> {

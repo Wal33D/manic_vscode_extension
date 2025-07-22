@@ -6,7 +6,7 @@
 
 A comprehensive Visual Studio Code extension providing full language support, visual editing tools, and advanced analysis for Manic Miner `.dat` level files. Create, edit, and optimize game levels with professional development tools.
 
-![Manic Miner DAT File Extension Demo](images/demo.gif)
+![Manic Miner DAT Map Editor](images/extension-screenshot-example.png)
 
 ## Features
 
