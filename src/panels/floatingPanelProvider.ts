@@ -123,16 +123,16 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
     <body>
       <div class="workspace-container">
         <!-- Dock zones -->
-        <div class="dock-zone dock-left" ondrop="dropPanel(event, 'left')" ondragover="allowDrop(event)">
+        <div class="dock-zone dock-left" data-position="left">
           <div class="dock-indicator">⬅️ Dock Left</div>
         </div>
-        <div class="dock-zone dock-right" ondrop="dropPanel(event, 'right')" ondragover="allowDrop(event)">
+        <div class="dock-zone dock-right" data-position="right">
           <div class="dock-indicator">➡️ Dock Right</div>
         </div>
-        <div class="dock-zone dock-top" ondrop="dropPanel(event, 'top')" ondragover="allowDrop(event)">
+        <div class="dock-zone dock-top" data-position="top">
           <div class="dock-indicator">⬆️ Dock Top</div>
         </div>
-        <div class="dock-zone dock-bottom" ondrop="dropPanel(event, 'bottom')" ondragover="allowDrop(event)">
+        <div class="dock-zone dock-bottom" data-position="bottom">
           <div class="dock-indicator">⬇️ Dock Bottom</div>
         </div>
 
@@ -142,24 +142,24 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
             <div class="toolbar-dropdown">
               <button class="toolbar-button" title="Tools">🛠️ Tools</button>
               <div class="dropdown-menu" id="dropdown-tools">
-                <button onclick="selectTool('brush')">🖌️ Brush</button>
-                <button onclick="selectTool('eraser')">🧹 Eraser</button>
-                <button onclick="selectTool('fill')">🪣 Fill</button>
-                <button onclick="selectTool('pick')">💧 Pick</button>
-                <button onclick="selectTool('line')">📏 Line</button>
-                <button onclick="selectTool('rect')">⬛ Rectangle</button>
-                <button onclick="selectTool('circle')">⭕ Circle</button>
-                <button onclick="selectTool('select')">✂️ Select</button>
+                <button data-action="selectTool" data-value="brush">🖌️ Brush</button>
+                <button data-action="selectTool" data-value="eraser">🧹 Eraser</button>
+                <button data-action="selectTool" data-value="fill">🪣 Fill</button>
+                <button data-action="selectTool" data-value="pick">💧 Pick</button>
+                <button data-action="selectTool" data-value="line">📏 Line</button>
+                <button data-action="selectTool" data-value="rect">⬛ Rectangle</button>
+                <button data-action="selectTool" data-value="circle">⭕ Circle</button>
+                <button data-action="selectTool" data-value="select">✂️ Select</button>
               </div>
             </div>
             <div class="toolbar-dropdown">
               <button class="toolbar-button" title="Layers">📚 Layers</button>
               <div class="dropdown-menu" id="dropdown-layers">
-                <button onclick="toggleLayer('tiles')">🗺️ Tiles</button>
-                <button onclick="toggleLayer('height')">📏 Height</button>
-                <button onclick="toggleLayer('resources')">💎 Resources</button>
-                <button onclick="toggleLayer('buildings')">🏢 Buildings</button>
-                <button onclick="toggleLayer('vehicles')">🚗 Vehicles</button>
+                <button data-action="toggleLayer" data-value="tiles">🗺️ Tiles</button>
+                <button data-action="toggleLayer" data-value="height">📏 Height</button>
+                <button data-action="toggleLayer" data-value="resources">💎 Resources</button>
+                <button data-action="toggleLayer" data-value="buildings">🏢 Buildings</button>
+                <button data-action="toggleLayer" data-value="vehicles">🚗 Vehicles</button>
               </div>
             </div>
             <button class="toolbar-action-btn" data-action="showPanel" data-panel="properties" title="Properties">

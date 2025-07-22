@@ -283,16 +283,23 @@ body {
   min-width: 180px;
   padding: 6px;
   z-index: 1000;
-  opacity: 0;
-  transform: translateY(-10px);
-  pointer-events: none;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  display: none;
 }
 
 .dropdown-menu.show {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
+  display: block;
+  animation: dropdownShow 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes dropdownShow {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .dropdown-menu button {

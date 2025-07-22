@@ -19,16 +19,37 @@
     // Main document click handler for all interactions
     document.addEventListener('click', handleDocumentClick);
     document.addEventListener('mousedown', handleMouseDown);
-    
-    // Initialize dropdowns
-    initializeDropdowns();
-    
-    // Initialize panel interactions
-    initializePanelInteractions();
   }
   
   function handleDocumentClick(e) {
     const target = e.target;
+    
+    // Handle dropdown toggles
+    const dropdownBtn = target.closest('.toolbar-dropdown .toolbar-button');
+    if (dropdownBtn) {
+      e.stopPropagation();
+      const dropdown = dropdownBtn.closest('.toolbar-dropdown');
+      const menu = dropdown.querySelector('.dropdown-menu');
+      toggleDropdown(menu);
+      return;
+    }
+    
+    // Handle dropdown menu items
+    const dropdownItem = target.closest('.dropdown-menu button');
+    if (dropdownItem) {
+      e.stopPropagation();
+      const action = dropdownItem.getAttribute('data-action');
+      const value = dropdownItem.getAttribute('data-value');
+      
+      if (action === 'selectTool') {
+        selectTool(value);
+      } else if (action === 'toggleLayer') {
+        toggleLayer(value);
+      }
+      
+      closeAllDropdowns();
+      return;
+    }
     
     // Close dropdowns when clicking outside
     if (!target.closest('.toolbar-dropdown')) {
@@ -52,9 +73,10 @@
     }
     
     // Handle panel control buttons
-    if (target.matches('.panel-btn')) {
-      const action = target.getAttribute('data-action');
-      const panel = target.closest('.floating-panel');
+    const panelBtn = target.closest('.panel-btn');
+    if (panelBtn) {
+      const action = panelBtn.getAttribute('data-action');
+      const panel = panelBtn.closest('.floating-panel');
       if (panel) {
         const panelId = panel.getAttribute('data-panel-id');
         if (action === 'collapse') {
@@ -90,29 +112,32 @@
     }
   }
   
-  // Initialize dropdown functionality
-  function initializeDropdowns() {
-    document.addEventListener('click', (e) => {
-      const dropdown = e.target.closest('.toolbar-dropdown');
-      if (dropdown) {
-        const button = dropdown.querySelector('.toolbar-button');
-        const menu = dropdown.querySelector('.dropdown-menu');
-        if (e.target === button || button.contains(e.target)) {
-          e.stopPropagation();
-          toggleDropdown(menu);
-        }
-      }
-      
-      // Handle dropdown menu items
-      if (e.target.matches('.dropdown-menu button')) {
-        e.stopPropagation();
-        closeAllDropdowns();
-      }
+  // Tool selection from dropdown
+  function selectTool(tool) {
+    // Send tool selection message
+    vscode.postMessage({
+      command: 'toolSelected',
+      tool: tool
     });
+    
+    // Update UI to show selected tool
+    document.querySelectorAll('.tool-button').forEach(btn => {
+      btn.classList.remove('active');
+    });
+    
+    // Optionally show the tools panel
+    showPanel('tools');
   }
   
-  function initializePanelInteractions() {
-    // Additional panel-specific initialization if needed
+  // Layer toggle from dropdown
+  function toggleLayer(layer) {
+    vscode.postMessage({
+      command: 'layerToggled',
+      layer: layer
+    });
+    
+    // Optionally show the layers panel
+    showPanel('layers');
   }
   
   function toggleDropdown(menu) {
@@ -133,33 +158,9 @@
     activeDropdown = null;
   }
   
-  // Tool selection from dropdown
-  window.selectTool = function(tool) {
-    // Send tool selection message
-    vscode.postMessage({
-      command: 'toolSelected',
-      tool: tool
-    });
-    
-    // Update UI to show selected tool
-    document.querySelectorAll('.tool-button').forEach(btn => {
-      btn.classList.remove('active');
-    });
-    
-    // Optionally show the tools panel
-    showPanel('tools');
-  };
-  
-  // Layer toggle from dropdown
-  window.toggleLayer = function(layer) {
-    vscode.postMessage({
-      command: 'layerToggled',
-      layer: layer
-    });
-    
-    // Optionally show the layers panel
-    showPanel('layers');
-  };
+  // Keep window functions for backward compatibility
+  window.selectTool = selectTool;
+  window.toggleLayer = toggleLayer;
   
   window.showPanel = function(panelId) {
     vscode.postMessage({
@@ -270,9 +271,7 @@
         const rect = zone.getBoundingClientRect();
         if (event.clientX >= rect.left && event.clientX <= rect.right &&
             event.clientY >= rect.top && event.clientY <= rect.bottom) {
-          const position = zone.classList.contains('dock-left') ? 'left' :
-                         zone.classList.contains('dock-right') ? 'right' :
-                         zone.classList.contains('dock-top') ? 'top' : 'bottom';
+          const position = zone.getAttribute('data-position');
           
           vscode.postMessage({
             command: 'dockPanel',
@@ -337,32 +336,36 @@
     };
   }
 
-  // Dock zone handlers
-  window.allowDrop = function(event) {
-    event.preventDefault();
-  };
-
-  window.dropPanel = function(event, position) {
-    event.preventDefault();
-    if (draggedPanel) {
+  // Setup drag and drop for dock zones
+  document.addEventListener('dragover', (e) => {
+    if (draggedPanel && e.target.closest('.dock-zone')) {
+      e.preventDefault();
+    }
+  });
+  
+  document.addEventListener('drop', (e) => {
+    if (draggedPanel && e.target.closest('.dock-zone')) {
+      e.preventDefault();
+      const zone = e.target.closest('.dock-zone');
+      const position = zone.getAttribute('data-position');
       vscode.postMessage({
         command: 'dockPanel',
         panelId: draggedPanel.id,
         position: position
       });
     }
-  };
+  });
 
   // Layout management
-  window.resetLayout = function() {
+  function resetLayout() {
     if (confirm('Reset all panels to default layout?')) {
       vscode.postMessage({
         command: 'resetLayout'
       });
     }
-  };
+  }
 
-  window.saveLayout = function() {
+  function saveLayout() {
     const layoutName = prompt('Enter layout name:');
     if (layoutName) {
       vscode.postMessage({
@@ -370,13 +373,18 @@
         name: layoutName
       });
     }
-  };
+  }
 
-  window.loadLayout = function() {
+  function loadLayout() {
     vscode.postMessage({
       command: 'loadLayout'
     });
-  };
+  }
+  
+  // Export to window for backward compatibility
+  window.resetLayout = resetLayout;
+  window.saveLayout = saveLayout;
+  window.loadLayout = loadLayout;
 
   // Tool selection
   document.addEventListener('click', (event) => {
