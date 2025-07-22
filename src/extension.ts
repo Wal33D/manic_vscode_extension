@@ -41,6 +41,8 @@ import { ScriptSnippetsProvider } from './views/scriptSnippetsProvider';
 import { ValidationProvider } from './views/validationProvider';
 import { DashboardProvider } from './views/dashboardProvider';
 import { StatusBarManager } from './statusBar/statusBarManager';
+import { CommandPaletteProvider } from './commands/commandPaletteProvider';
+import { CommandTipsProvider } from './commands/commandTipsProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -393,6 +395,43 @@ script{
       statusBarManager.updateActiveDocument(editor?.document);
     })
   );
+
+  // Initialize Command Palette System
+  const commandPalette = CommandPaletteProvider.getInstance(context);
+  commandPalette.initializeDefaultCommands();
+
+  // Initialize Command Search (for future use)
+  // const commandSearch = new CommandSearchProvider(commandPalette);
+
+  // Initialize Command Tips
+  const commandTips = new CommandTipsProvider(context);
+
+  // Register enhanced command palette command
+  const showEnhancedCommandPaletteCmd = vscode.commands.registerCommand(
+    'manicMiners.showEnhancedCommandPalette',
+    () => {
+      commandPalette.showCommandPalette();
+    }
+  );
+  context.subscriptions.push(showEnhancedCommandPaletteCmd);
+
+  // Register command tips command
+  const showCommandTipsCmd = vscode.commands.registerCommand(
+    'manicMiners.showCommandTips',
+    async () => {
+      const tip = await commandTips.getContextualTip();
+      if (tip) {
+        await commandTips.showTip(tip);
+      }
+    }
+  );
+  context.subscriptions.push(showCommandTipsCmd);
+
+  // Show daily tip on startup
+  const dailyTip = commandTips.getDailyTip();
+  setTimeout(() => {
+    commandTips.showTipInStatusBar(dailyTip);
+  }, 5000);
 
   // Update status bar when document changes
   context.subscriptions.push(

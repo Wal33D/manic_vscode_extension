@@ -83,6 +83,18 @@
         "icon": "$(dashboard)"
       },
       {
+        "command": "manicMiners.showEnhancedCommandPalette",
+        "title": "Show Enhanced Command Palette",
+        "category": "Manic Miners",
+        "icon": "$(list-unordered)"
+      },
+      {
+        "command": "manicMiners.showCommandTips",
+        "title": "Show Command Tips",
+        "category": "Manic Miners",
+        "icon": "$(lightbulb)"
+      },
+      {
         "command": "manicMiners.newFile",
         "title": "Create New Map",
         "category": "Manic Miners",
@@ -473,6 +485,12 @@
       ]
     },
     "keybindings": [
+      {
+        "command": "manicMiners.showEnhancedCommandPalette",
+        "key": "ctrl+shift+m",
+        "mac": "cmd+shift+m",
+        "when": "editorLangId == manicminers"
+      },
       {
         "command": "manicMiners.undo",
         "key": "ctrl+alt+z",
