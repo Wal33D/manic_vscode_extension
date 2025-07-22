@@ -28,9 +28,7 @@ describe('Package.json Validation', () => {
 
   describe('Menu Commands', () => {
     it('should have all menu commands defined in commands section', () => {
-      const definedCommands = new Set(
-        packageJson.contributes.commands.map(cmd => cmd.command)
-      );
+      const definedCommands = new Set(packageJson.contributes.commands.map(cmd => cmd.command));
 
       const menuCommands = new Set<string>();
 
@@ -66,9 +64,7 @@ describe('Package.json Validation', () => {
     });
 
     it('should have all commands used in menus have proper metadata', () => {
-      const commands = new Map(
-        packageJson.contributes.commands.map(cmd => [cmd.command, cmd])
-      );
+      const commands = new Map(packageJson.contributes.commands.map(cmd => [cmd.command, cmd]));
 
       const menuCommands = new Set<string>();
 
@@ -135,7 +131,10 @@ describe('Package.json Validation', () => {
       const invalidCommands: string[] = [];
 
       packageJson.contributes.commands.forEach(cmd => {
-        if (cmd.command.startsWith('manicMiners.') && !/^manicMiners\.[a-zA-Z][a-zA-Z0-9]*$/.test(cmd.command)) {
+        if (
+          cmd.command.startsWith('manicMiners.') &&
+          !/^manicMiners\.[a-zA-Z][a-zA-Z0-9]*$/.test(cmd.command)
+        ) {
           invalidCommands.push(cmd.command);
         }
       });
@@ -155,9 +154,7 @@ describe('Package.json Validation', () => {
         return;
       }
 
-      const definedCommands = new Set(
-        packageJson.contributes.commands.map(cmd => cmd.command)
-      );
+      const definedCommands = new Set(packageJson.contributes.commands.map(cmd => cmd.command));
 
       const undefinedCommands: string[] = [];
 
