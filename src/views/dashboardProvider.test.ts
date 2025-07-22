@@ -121,9 +121,9 @@ describe('DashboardProvider', () => {
       // Simulate openInMapEditor message
       await messageHandler({ command: 'openInMapEditor' });
 
+      // Check that map editor command is executed
       expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
-        'manicMiners.openInTabbedEditor',
-        vscode.Uri.file('/test/map.dat')
+        'manicMiners.openMapEditor'
       );
     });
   });
