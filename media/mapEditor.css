@@ -1736,3 +1736,30 @@ body {
   background: #4e4e4e;
   border-color: #666;
 }
+
+/* Animation features */
+.palette-tile.animatable {
+  position: relative;
+  border: 2px solid #4ec9b0;
+}
+
+.animation-indicator {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  font-size: 10px;
+  background: rgba(78, 201, 176, 0.9);
+  border-radius: 2px;
+  padding: 0 2px;
+  line-height: 1;
+}
+
+#animationToggleBtn.active {
+  background: #4ec9b0;
+  color: #1e1e1e;
+  border-color: #3db89f;
+}
+
+#animationStatus {
+  transition: color 0.3s ease;
+}

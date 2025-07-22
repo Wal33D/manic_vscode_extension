@@ -45,6 +45,10 @@
   // Layer state
   let currentLayer = mapLayers.find(l => l.id === currentLayerId) || mapLayers[0];
   
+  // Animation state
+  let animationEnabled = false;
+  let animationManager = null;
+  
   // UI Elements
   const progressOverlay = document.getElementById('progressOverlay');
   const progressText = document.getElementById('progressText');
@@ -64,6 +68,189 @@
   
   const BASE_TILE_SIZE = 20;
   const TILE_SIZE = BASE_TILE_SIZE;
+  
+  // Tile Animation Manager implementation
+  class TileAnimationManager {
+    constructor(onUpdate) {
+      this.animations = new Map();
+      this.animationFrame = null;
+      this.lastUpdate = 0;
+      this.onUpdate = onUpdate;
+      this.animatedTileDefinitions = this.createAnimatedTileDefinitions();
+    }
+    
+    createAnimatedTileDefinitions() {
+      return new Map([
+        // Lava animations (tiles 6-10 are all lava variations)
+        [6, {
+          id: 'lava_flow',
+          name: 'Lava Flow',
+          frames: [
+            { tileId: 6, duration: 500 },
+            { tileId: 7, duration: 500 },
+            { tileId: 8, duration: 500 },
+            { tileId: 9, duration: 500 },
+            { tileId: 10, duration: 500 },
+          ],
+          loop: true
+        }],
+        // Water animations (tiles 11-16 are water variations)
+        [11, {
+          id: 'water_flow',
+          name: 'Water Flow',
+          frames: [
+            { tileId: 11, duration: 600 },
+            { tileId: 12, duration: 600 },
+            { tileId: 13, duration: 600 },
+            { tileId: 14, duration: 600 },
+            { tileId: 15, duration: 600 },
+            { tileId: 16, duration: 600 },
+          ],
+          loop: true
+        }],
+        // Crystal glow animation (tiles 42-45 are crystal variations)
+        [42, {
+          id: 'crystal_glow',
+          name: 'Crystal Glow',
+          frames: [
+            { tileId: 42, duration: 1000 },
+            { tileId: 43, duration: 1000 },
+            { tileId: 44, duration: 1000 },
+            { tileId: 45, duration: 1000 },
+          ],
+          loop: true
+        }],
+        // Recharge seam pulse
+        [50, {
+          id: 'recharge_pulse',
+          name: 'Recharge Pulse',
+          frames: [
+            { tileId: 50, duration: 800 },
+            { tileId: 51, duration: 400 },
+            { tileId: 52, duration: 400 },
+            { tileId: 51, duration: 400 },
+          ],
+          loop: true
+        }],
+      ]);
+    }
+    
+    startAnimations(tiles) {
+      this.stopAnimations();
+      
+      // Find all animated tiles in the map
+      for (let row = 0; row < tiles.length; row++) {
+        for (let col = 0; col < tiles[row].length; col++) {
+          const tileId = tiles[row][col];
+          const animation = this.animatedTileDefinitions.get(tileId);
+          
+          if (animation) {
+            // Check if this tile is part of an animation sequence
+            const baseAnimation = this.findBaseAnimation(tileId);
+            if (baseAnimation) {
+              if (!this.animations.has(baseAnimation.baseId)) {
+                this.animations.set(baseAnimation.baseId, {
+                  animation: baseAnimation.animation,
+                  currentFrame: baseAnimation.currentFrame,
+                  elapsedTime: 0,
+                });
+              }
+            }
+          }
+        }
+      }
+      
+      // Start the animation loop if we have animations
+      if (this.animations.size > 0) {
+        this.lastUpdate = performance.now();
+        this.animate();
+      }
+    }
+    
+    stopAnimations() {
+      if (this.animationFrame) {
+        cancelAnimationFrame(this.animationFrame);
+        this.animationFrame = null;
+      }
+      this.animations.clear();
+    }
+    
+    getCurrentTileId(originalTileId) {
+      // Find which animation this tile belongs to
+      const baseAnimation = this.findBaseAnimation(originalTileId);
+      if (!baseAnimation) {
+        return originalTileId;
+      }
+      
+      const state = this.animations.get(baseAnimation.baseId);
+      if (!state) {
+        return originalTileId;
+      }
+      
+      return state.animation.frames[state.currentFrame].tileId;
+    }
+    
+    animate() {
+      const now = performance.now();
+      const deltaTime = now - this.lastUpdate;
+      this.lastUpdate = now;
+      
+      let needsUpdate = false;
+      
+      // Update all animations
+      for (const [, state] of this.animations) {
+        state.elapsedTime += deltaTime;
+        
+        const currentFrameDuration = state.animation.frames[state.currentFrame].duration;
+        
+        if (state.elapsedTime >= currentFrameDuration) {
+          // Move to next frame
+          state.elapsedTime -= currentFrameDuration;
+          state.currentFrame++;
+          
+          if (state.currentFrame >= state.animation.frames.length) {
+            if (state.animation.loop) {
+              state.currentFrame = 0;
+            } else {
+              state.currentFrame = state.animation.frames.length - 1;
+            }
+          }
+          
+          needsUpdate = true;
+        }
+      }
+      
+      // Notify about updates
+      if (needsUpdate) {
+        this.onUpdate();
+      }
+      
+      // Continue animation loop
+      this.animationFrame = requestAnimationFrame(() => this.animate());
+    }
+    
+    findBaseAnimation(tileId) {
+      // Check if this tile is directly animated
+      const directAnimation = this.animatedTileDefinitions.get(tileId);
+      if (directAnimation) {
+        return { baseId: tileId, animation: directAnimation, currentFrame: 0 };
+      }
+      
+      // Check if this tile is part of an animation sequence
+      for (const [baseId, animation] of this.animatedTileDefinitions) {
+        const frameIndex = animation.frames.findIndex(f => f.tileId === tileId);
+        if (frameIndex !== -1) {
+          return { baseId, animation, currentFrame: frameIndex };
+        }
+      }
+      
+      return null;
+    }
+    
+    isAnimating() {
+      return this.animationFrame !== null;
+    }
+  }
   
   // Initialize canvas
   function initCanvas() {
@@ -193,8 +380,12 @@
       // Draw layer tiles
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
-          const tileId = layer.tiles[row][col];
+          let tileId = layer.tiles[row][col];
           if (tileId !== 0) { // 0 = transparent
+            // Use animated tile ID if animations are enabled
+            if (animationEnabled && animationManager) {
+              tileId = animationManager.getCurrentTileId(tileId);
+            }
             drawTile(col * TILE_SIZE, row * TILE_SIZE, tileId);
           }
         }
@@ -1722,6 +1913,11 @@
   updateLayersList();
   updateCopyPasteButtons();
   
+  // Request animatable tiles list
+  vscode.postMessage({
+    type: 'getAnimatableTiles'
+  });
+  
   // Handle messages from extension
   window.addEventListener('message', event => {
     const message = event.data;
@@ -1758,8 +1954,34 @@
       case 'validationResult':
         handleValidationResult(message.result);
         break;
+      case 'animationToggled':
+        // Animation state confirmed by extension
+        break;
+      case 'animatableTiles':
+        // Update palette to highlight animatable tiles
+        highlightAnimatableTiles(message.tiles);
+        break;
     }
   });
+  
+  // Highlight animatable tiles in palette
+  function highlightAnimatableTiles(animatableTileIds) {
+    const paletteTiles = document.querySelectorAll('.palette-tile');
+    paletteTiles.forEach(tile => {
+      const tileId = parseInt(tile.dataset.tileId);
+      if (animatableTileIds.includes(tileId)) {
+        tile.classList.add('animatable');
+        // Add animation indicator
+        if (!tile.querySelector('.animation-indicator')) {
+          const indicator = document.createElement('span');
+          indicator.className = 'animation-indicator';
+          indicator.textContent = '🎬';
+          indicator.title = 'This tile supports animation';
+          tile.appendChild(indicator);
+        }
+      }
+    });
+  }
   
   // Validation functions
   function runValidation() {
@@ -2003,6 +2225,60 @@
   // Template button
   document.getElementById('templateBtn').addEventListener('click', () => {
     showTemplateGallery();
+  });
+  
+  // Animation toggle button
+  document.getElementById('animationToggleBtn').addEventListener('click', () => {
+    animationEnabled = !animationEnabled;
+    const btn = document.getElementById('animationToggleBtn');
+    const status = document.getElementById('animationStatus');
+    
+    if (animationEnabled) {
+      btn.classList.add('active');
+      status.textContent = 'On';
+      status.style.color = '#4ec9b0';
+      
+      // Initialize animation manager if not already created
+      if (!animationManager) {
+        animationManager = new TileAnimationManager(() => {
+          drawMap();
+        });
+      }
+      
+      // Start animations with all layers' tiles
+      const allTiles = [];
+      for (let row = 0; row < rows; row++) {
+        allTiles[row] = [];
+        for (let col = 0; col < cols; col++) {
+          // Get tile from base layer or first layer with a tile at this position
+          let tileId = 0;
+          for (const layer of mapLayers) {
+            if (layer.visible && layer.tiles[row] && layer.tiles[row][col] && layer.tiles[row][col] !== 0) {
+              tileId = layer.tiles[row][col];
+              break;
+            }
+          }
+          allTiles[row][col] = tileId;
+        }
+      }
+      
+      animationManager.startAnimations(allTiles);
+    } else {
+      btn.classList.remove('active');
+      status.textContent = 'Off';
+      status.style.color = '#999';
+      
+      if (animationManager) {
+        animationManager.stopAnimations();
+      }
+    }
+    
+    vscode.postMessage({
+      type: 'toggleAnimation',
+      enabled: animationEnabled
+    });
+    
+    showStatus(animationEnabled ? 'Tile animations enabled' : 'Tile animations disabled');
   });
   
   // Close template gallery
