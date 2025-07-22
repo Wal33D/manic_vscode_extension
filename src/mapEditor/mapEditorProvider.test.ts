@@ -24,23 +24,23 @@ describe('MapEditorProvider', () => {
 
     mockDocument = {
       uri: vscode.Uri.parse('file:///test.dat'),
-      getText: jest.fn().mockReturnValue(`[info]
+      getText: jest.fn().mockReturnValue(`info{
 rowcount:10
 colcount:10
-
-[tiles]
+}
+tiles{
 1,1,1,1,1,1,1,1,1,1
-1,0,0,0,0,0,0,0,0,1
-1,0,0,0,0,0,0,0,0,1
-1,0,0,0,0,0,0,0,0,1
-1,0,0,0,0,0,0,0,0,1
-1,0,0,0,0,0,0,0,0,1
-1,0,0,0,0,0,0,0,0,1
-1,0,0,0,0,0,0,0,0,1
-1,0,0,0,0,0,0,0,0,1
 1,1,1,1,1,1,1,1,1,1
-
-[height]
+1,1,1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1,1,1
+1,1,1,1,1,1,1,1,1,1
+}
+height{
 10,10,10,10,10,10,10,10,10,10
 10,10,10,10,10,10,10,10,10,10
 10,10,10,10,10,10,10,10,10,10
@@ -51,7 +51,7 @@ colcount:10
 10,10,10,10,10,10,10,10,10,10
 10,10,10,10,10,10,10,10,10,10
 10,10,10,10,10,10,10,10,10,10
-`),
+}`),
       lineCount: 20,
     } as any;
 
@@ -89,16 +89,16 @@ colcount:10
     });
 
     it('should handle oversized maps', async () => {
-      mockDocument.getText = jest.fn().mockReturnValue(`[info]
+      mockDocument.getText = jest.fn().mockReturnValue(`info{
 rowcount:1000
 colcount:1000
-
-[tiles]
+}
+tiles{
 1,1,1
-
-[height]
+}
+height{
 10,10,10
-`);
+}`);
 
       await provider.resolveCustomTextEditor(mockDocument, mockWebviewPanel, {} as any);
 
@@ -139,6 +139,7 @@ colcount:1000
 
       expect(mockWebview.postMessage).toHaveBeenCalledWith({
         type: 'copyComplete',
+        selection: { startRow: 1, startCol: 1, endRow: 2, endCol: 2 },
       });
     });
 
