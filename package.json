@@ -350,14 +350,14 @@
         "icon": "$(code)"
       },
       {
-        "command": "manicMiners.showFloatingPanels",
-        "title": "Show Floating Panels",
+        "command": "manicMiners.showWorkspace",
+        "title": "Show Workspace",
         "category": "Manic Miners",
         "icon": "$(layout)"
       },
       {
-        "command": "manicMiners.resetFloatingPanels",
-        "title": "Reset Floating Panels Layout",
+        "command": "manicMiners.resetWorkspace",
+        "title": "Reset Workspace Layout",
         "category": "Manic Miners",
         "icon": "$(refresh)"
       },
@@ -502,10 +502,10 @@
         },
         {
           "type": "webview",
-          "id": "manicMiners.floatingPanels",
-          "name": "Floating Panels",
+          "id": "manicMiners.workspace",
+          "name": "Workspace",
           "icon": "$(layout)",
-          "contextualTitle": "Manic Miners Floating Panels"
+          "contextualTitle": "Manic Miners Workspace"
         }
       ]
     },

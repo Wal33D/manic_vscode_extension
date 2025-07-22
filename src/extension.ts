@@ -45,7 +45,6 @@ import { CommandPaletteProvider } from './commands/commandPaletteProvider';
 import { CommandTipsProvider } from './commands/commandTipsProvider';
 import { KeyboardShortcutManager } from './keyboard/keyboardShortcuts';
 import { KeyboardShortcutsPanel } from './keyboard/keyboardShortcutsPanel';
-import { FloatingPanelProvider } from './panels/floatingPanelProvider';
 import { registerContextMenuCommands } from './contextMenus/contextMenuCommands';
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -450,28 +449,30 @@ script{
   );
   context.subscriptions.push(showKeyboardShortcutsCmd);
 
-  // Register Floating Panels Provider
-  const floatingPanelProvider = new FloatingPanelProvider(context.extensionUri, context);
+  // Register Workspace Provider (replaces floating panels)
+  const { WorkspaceProvider } = await import('./workspace/workspaceProvider.js');
+  const workspaceProvider = new WorkspaceProvider(context.extensionUri, context);
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(FloatingPanelProvider.viewType, floatingPanelProvider)
+    vscode.window.registerWebviewViewProvider(WorkspaceProvider.viewType, workspaceProvider)
   );
 
-  // Register floating panels commands
-  const showFloatingPanelsCmd = vscode.commands.registerCommand(
-    'manicMiners.showFloatingPanels',
-    () => {
-      vscode.commands.executeCommand('manicMiners.floatingPanels.focus');
-    }
-  );
-  context.subscriptions.push(showFloatingPanelsCmd);
+  // Register workspace commands
+  const showWorkspaceCmd = vscode.commands.registerCommand('manicMiners.showWorkspace', () => {
+    vscode.commands.executeCommand('manicMiners.workspace.focus');
+  });
+  context.subscriptions.push(showWorkspaceCmd);
 
-  const resetFloatingPanelsCmd = vscode.commands.registerCommand(
-    'manicMiners.resetFloatingPanels',
-    () => {
-      floatingPanelProvider.resetLayout();
-    }
-  );
-  context.subscriptions.push(resetFloatingPanelsCmd);
+  const resetWorkspaceCmd = vscode.commands.registerCommand('manicMiners.resetWorkspace', () => {
+    vscode.window
+      .showWarningMessage('Reset workspace to default layout?', 'Yes', 'No')
+      .then(answer => {
+        if (answer === 'Yes') {
+          workspaceProvider.dispose();
+          vscode.commands.executeCommand('manicMiners.workspace.focus');
+        }
+      });
+  });
+  context.subscriptions.push(resetWorkspaceCmd);
 
   // Register tool selection command
   const selectToolCmd = vscode.commands.registerCommand(

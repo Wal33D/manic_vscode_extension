@@ -1,0 +1,592 @@
+/* Manic Miners Unified Workspace Styles */
+
+:root {
+  /* VS Code Theme Variables */
+  --workspace-bg: var(--vscode-editor-background);
+  --panel-bg: var(--vscode-sideBar-background);
+  --panel-border: var(--vscode-panel-border);
+  --header-bg: var(--vscode-titleBar-activeBackground);
+  --text-primary: var(--vscode-foreground);
+  --text-secondary: var(--vscode-descriptionForeground);
+  --accent: var(--vscode-button-background);
+  --accent-hover: var(--vscode-button-hoverBackground);
+  --focus-border: var(--vscode-focusBorder);
+  
+  /* Workspace Dimensions */
+  --header-height: 48px;
+  --status-height: 24px;
+  --dock-min-width: 200px;
+  --dock-min-height: 150px;
+  --panel-header-height: 32px;
+  --resize-handle-size: 4px;
+  
+  /* Visual Effects */
+  --panel-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --panel-radius: 6px;
+  --transition-speed: 0.2s;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--text-primary);
+  background: var(--workspace-bg);
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Workspace Container */
+#workspace-container {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+}
+
+/* Workspace Header */
+#workspace-header {
+  height: var(--header-height);
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  flex-shrink: 0;
+}
+
+.workspace-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.workspace-title h1 {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.workspace-title .icon {
+  font-size: 20px;
+}
+
+/* Layout Controls */
+.workspace-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.layout-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.layout-btn,
+.control-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-primary);
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  position: relative;
+}
+
+.layout-btn:hover,
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.layout-btn.active {
+  background: var(--accent);
+  color: white;
+}
+
+.separator {
+  width: 1px;
+  height: 24px;
+  background: var(--panel-border);
+  margin: 0 8px;
+}
+
+/* Tooltips */
+[data-tooltip] {
+  position: relative;
+}
+
+[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--vscode-editorWidget-background);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-speed);
+  margin-bottom: 4px;
+  z-index: 1000;
+}
+
+[data-tooltip]:hover::after {
+  opacity: 1;
+}
+
+/* Main Workspace Area */
+#workspace-main {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Dock Zones */
+.dock-zone {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--transition-speed);
+  position: relative;
+}
+
+.dock-zone.vertical {
+  min-width: var(--dock-min-width);
+  height: 100%;
+}
+
+.dock-zone.horizontal {
+  width: 100%;
+  min-height: var(--dock-min-height);
+}
+
+.dock-zone.collapsed {
+  min-width: 32px;
+  min-height: 32px;
+}
+
+.dock-zone.collapsed .dock-content {
+  display: none;
+}
+
+.dock-header {
+  background: var(--header-bg);
+  padding: 4px;
+  display: flex;
+  justify-content: center;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.dock-toggle {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px;
+  font-size: 12px;
+  transition: color var(--transition-speed);
+}
+
+.dock-toggle:hover {
+  color: var(--text-primary);
+}
+
+.dock-content {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Dock Zone Positions */
+#dock-left {
+  border-right: 1px solid var(--panel-border);
+}
+
+#dock-right {
+  border-left: 1px solid var(--panel-border);
+}
+
+#dock-top {
+  border-bottom: 1px solid var(--panel-border);
+}
+
+#dock-bottom {
+  border-top: 1px solid var(--panel-border);
+}
+
+/* Center Workspace */
+#workspace-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#workspace-content {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  background: var(--workspace-bg);
+}
+
+/* Welcome Message */
+.welcome-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  max-width: 600px;
+  padding: 40px;
+}
+
+.welcome-message h2 {
+  font-size: 24px;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.welcome-message p {
+  color: var(--text-secondary);
+  margin-bottom: 24px;
+}
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.action-btn {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--transition-speed);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.action-btn:hover {
+  background: var(--accent);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: var(--panel-shadow);
+}
+
+.action-btn .icon {
+  font-size: 24px;
+}
+
+/* Workspace Panels */
+.workspace-panel {
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  box-shadow: var(--panel-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: absolute;
+  min-width: 200px;
+  min-height: 100px;
+}
+
+.workspace-panel.docked {
+  position: relative;
+  width: 100% !important;
+  height: 100% !important;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.workspace-panel.maximized {
+  width: 100% !important;
+  height: 100% !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 100;
+}
+
+/* Panel Header */
+.panel-header {
+  height: var(--panel-header-height);
+  background: var(--header-bg);
+  border-bottom: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  cursor: move;
+  user-select: none;
+}
+
+.workspace-panel.docked .panel-header {
+  cursor: default;
+}
+
+.panel-icon {
+  font-size: 16px;
+  margin-right: 8px;
+}
+
+.panel-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.panel-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.panel-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 4px 6px;
+  font-size: 12px;
+  border-radius: 3px;
+  transition: all var(--transition-speed);
+}
+
+.panel-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+/* Panel Tabs */
+.panel-tabs {
+  display: flex;
+  background: var(--panel-bg);
+  border-bottom: 1px solid var(--panel-border);
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.panel-tab {
+  padding: 8px 16px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--transition-speed);
+  white-space: nowrap;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.panel-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
+.panel-tab.active {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent);
+}
+
+/* Panel Content */
+.panel-content {
+  flex: 1;
+  overflow: auto;
+  padding: 12px;
+}
+
+.workspace-panel.collapsed .panel-content {
+  display: none;
+}
+
+/* Panel Resize Handle */
+.panel-resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  background: transparent;
+}
+
+.workspace-panel.docked .panel-resize-handle {
+  display: none;
+}
+
+.panel-resize-handle::after {
+  content: '';
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 0 0 8px 8px;
+  border-color: transparent transparent var(--text-secondary) transparent;
+  opacity: 0.5;
+}
+
+/* Status Bar */
+#workspace-status {
+  height: var(--status-height);
+  background: var(--header-bg);
+  border-top: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.status-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-secondary);
+}
+
+.status-item .icon {
+  font-size: 14px;
+}
+
+.status-item .label {
+  color: var(--text-secondary);
+}
+
+.status-item .value {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+/* Splitter */
+.splitter {
+  background: var(--panel-border);
+  position: relative;
+  user-select: none;
+}
+
+.splitter:hover {
+  background: var(--focus-border);
+}
+
+.splitter.vertical {
+  width: var(--resize-handle-size);
+  cursor: col-resize;
+}
+
+.splitter.horizontal {
+  height: var(--resize-handle-size);
+  cursor: row-resize;
+}
+
+/* Loading State */
+.loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--panel-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Glassmorphism Effects */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.workspace-panel {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+  
+  .dock-zone.vertical {
+    min-width: 150px;
+  }
+}
+
+/* Dark Theme Adjustments */
+@media (prefers-color-scheme: dark) {
+  .workspace-panel {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
