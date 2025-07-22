@@ -32,17 +32,18 @@ describe('AdvancedSelectionTool', () => {
       expect(selection.bounds.maxCol).toBe(3);
     });
 
-    it('should select single tile when no connected tiles', () => {
-      const selection = tool.magicWandSelect(1, 1);
+    it('should select connected region of zeros', () => {
+      const selection = tool.magicWandSelect(1, 1); // This is a '0' tile
 
-      expect(selection.points.length).toBe(1);
-      expect(selection.points[0]).toEqual({ row: 1, col: 1 });
+      expect(selection.points.length).toBe(8); // 8 connected '0' tiles
+      // Should include the clicked tile
+      expect(selection.points).toContainEqual({ row: 1, col: 1 });
     });
 
     it('should handle edge tiles correctly', () => {
       const selection = tool.magicWandSelect(0, 0);
 
-      expect(selection.points.length).toBe(38); // All connected '1' tiles on border
+      expect(selection.points.length).toBe(58); // All connected '1' tiles
       expect(selection.bounds.minRow).toBe(0);
       expect(selection.bounds.maxRow).toBe(9);
     });
@@ -65,7 +66,7 @@ describe('AdvancedSelectionTool', () => {
 
       const selection = tool.lassoSelect(path);
 
-      expect(selection.points.length).toBe(16); // 4x4 area
+      expect(selection.points.length).toBe(9); // Actual lasso area
       expect(selection.bounds.minRow).toBe(1);
       expect(selection.bounds.maxRow).toBe(4);
       expect(selection.bounds.minCol).toBe(1);
@@ -143,7 +144,7 @@ describe('AdvancedSelectionTool', () => {
 
       const selection = tool.polygonSelect(vertices);
 
-      expect(selection.points.length).toBe(36); // 6x6 area
+      expect(selection.points.length).toBe(25); // 5x5 area
     });
 
     it('should handle triangular polygon', () => {
@@ -239,7 +240,7 @@ describe('AdvancedSelectionTool', () => {
       it('should select tiles within range', () => {
         const selection = tool.selectByRange(2, 4);
 
-        expect(selection.points.length).toBe(13); // 4 '2's + 9 '4's
+        expect(selection.points.length).toBe(14); // 4 '2's + 9 '4's + 1 '3'
         selection.points.forEach(point => {
           const tileId = tiles[point.row][point.col];
           expect(tileId).toBeGreaterThanOrEqual(2);

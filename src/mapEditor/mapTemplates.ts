@@ -171,10 +171,14 @@ export class MapTemplateManager {
 
     // Add paths
     for (let c = 3; c < 17; c++) {
-      map[10][c] = 1; // Horizontal path
+      if (c !== 10) { // Don't overwrite spawn point
+        map[10][c] = 1; // Horizontal path
+      }
     }
     for (let r = 3; r < 17; r++) {
-      map[r][10] = 1; // Vertical path
+      if (r !== 10) { // Don't overwrite spawn point
+        map[r][10] = 1; // Vertical path
+      }
     }
 
     // Add some loose rock for clearing objectives

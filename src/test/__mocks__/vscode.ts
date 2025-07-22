@@ -71,6 +71,9 @@ export class Uri {
   static file(path: string): Uri {
     return new Uri(path);
   }
+  static parse(value: string): Uri {
+    return new Uri(value);
+  }
   static joinPath(base: Uri, ...pathSegments: string[]): Uri {
     const path = [base.fsPath, ...pathSegments].join('/');
     return new Uri(path);
