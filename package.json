@@ -41,7 +41,11 @@
     "Linters"
   ],
   "activationEvents": [
-    "*"
+    "onLanguage:manicminers",
+    "workspaceContains:**/*.dat",
+    "onCommand:manicMiners.showWelcome",
+    "onCommand:manicMiners.showDashboard",
+    "onCommand:manicMiners.newFile"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -827,18 +831,6 @@
         "label": "Manic Miners Dark",
         "uiTheme": "vs-dark",
         "path": "./themes/manic-miners-dark.json"
-      }
-    ],
-    "customEditors": [
-      {
-        "viewType": "manicMiners.mapEditor",
-        "displayName": "Map Editor",
-        "selector": [
-          {
-            "filenamePattern": "*.dat"
-          }
-        ],
-        "priority": "option"
       }
     ]
   },
