@@ -399,7 +399,7 @@ script{
   // Register Maps Explorer Provider
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
   const mapsExplorerProvider = new MapsExplorerProvider(workspaceRoot, context);
-  vscode.window.createTreeView('manicMiners.mapsExplorer', {
+  vscode.window.createTreeView('manicMiners.explorer', {
     treeDataProvider: mapsExplorerProvider,
     showCollapseAll: true,
   });
