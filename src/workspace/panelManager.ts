@@ -14,6 +14,8 @@ export interface PanelState {
   maximized?: boolean;
   tabIndex?: number;
   zIndex?: number;
+  tabGroup?: string; // Group panels into tabs
+  activeTab?: boolean; // Is this the active tab in its group
 }
 
 export interface WorkspaceLayout {
@@ -41,22 +43,8 @@ export class PanelManager {
         visible: false,
         position: 'left',
         size: { width: 200, height: 400 },
-      },
-      {
-        id: 'properties',
-        title: 'Properties',
-        icon: '📋',
-        visible: false,
-        position: 'right',
-        size: { width: 250, height: 300 },
-      },
-      {
-        id: 'layers',
-        title: 'Layers',
-        icon: '📚',
-        visible: false,
-        position: 'right',
-        size: { width: 250, height: 200 },
+        tabGroup: 'leftTools',
+        activeTab: true,
       },
       {
         id: 'scriptPatterns',
@@ -65,6 +53,58 @@ export class PanelManager {
         visible: false,
         position: 'left',
         size: { width: 250, height: 400 },
+        tabGroup: 'leftTools',
+        activeTab: false,
+      },
+      {
+        id: 'history',
+        title: 'History',
+        icon: '🕐',
+        visible: false,
+        position: 'left',
+        size: { width: 200, height: 300 },
+        tabGroup: 'leftTools',
+        activeTab: false,
+      },
+      {
+        id: 'properties',
+        title: 'Properties',
+        icon: '📋',
+        visible: false,
+        position: 'right',
+        size: { width: 250, height: 300 },
+        tabGroup: 'rightInspector',
+        activeTab: true,
+      },
+      {
+        id: 'layers',
+        title: 'Layers',
+        icon: '📚',
+        visible: false,
+        position: 'right',
+        size: { width: 250, height: 200 },
+        tabGroup: 'rightInspector',
+        activeTab: false,
+      },
+      {
+        id: 'tilePalette',
+        title: 'Tile Palette',
+        icon: '🎨',
+        visible: false,
+        position: 'right',
+        size: { width: 240, height: 320 },
+        tabGroup: 'rightInspector',
+        activeTab: false,
+      },
+      {
+        id: 'statistics',
+        title: 'Statistics',
+        icon: '📊',
+        visible: false,
+        position: 'right',
+        size: { width: 300, height: 400 },
+        tabGroup: 'rightInspector',
+        activeTab: false,
       },
       {
         id: 'validation',
@@ -75,36 +115,12 @@ export class PanelManager {
         size: { width: '100%', height: 200 },
       },
       {
-        id: 'statistics',
-        title: 'Statistics',
-        icon: '📊',
-        visible: false,
-        position: 'right',
-        size: { width: 300, height: 400 },
-      },
-      {
         id: 'heatmap',
         title: 'Heat Map',
         icon: '🔥',
         visible: false,
         position: 'center',
         size: { width: '100%', height: '100%' },
-      },
-      {
-        id: 'history',
-        title: 'History',
-        icon: '🕐',
-        visible: false,
-        position: 'left',
-        size: { width: 200, height: 300 },
-      },
-      {
-        id: 'tilePalette',
-        title: 'Tile Palette',
-        icon: '🎨',
-        visible: false,
-        position: 'right',
-        size: { width: 240, height: 320 },
       },
     ];
 
@@ -150,8 +166,13 @@ export class PanelManager {
     const panel = this.panels.get(id);
     if (panel && !panel.visible) {
       panel.visible = true;
-      this._onPanelChange.fire(panel);
-      this.savePanelStates();
+      // If panel is part of a tab group, ensure it's the active tab
+      if (panel.tabGroup) {
+        this.setActiveTab(id);
+      } else {
+        this._onPanelChange.fire(panel);
+        this.savePanelStates();
+      }
     }
   }
 
@@ -260,6 +281,50 @@ export class PanelManager {
 
   public getPanelsByPosition(position: PanelState['position']): PanelState[] {
     return Array.from(this.panels.values()).filter(p => p.visible && p.position === position);
+  }
+
+  public setActiveTab(panelId: string) {
+    const panel = this.panels.get(panelId);
+    if (panel && panel.tabGroup) {
+      // Deactivate other tabs in the same group
+      this.panels.forEach(p => {
+        if (p.tabGroup === panel.tabGroup && p.id !== panelId) {
+          p.activeTab = false;
+        }
+      });
+      // Activate this tab
+      panel.activeTab = true;
+      panel.visible = true;
+      this._onPanelChange.fire(panel);
+      this.savePanelStates();
+    }
+  }
+
+  public getTabGroups(): Map<string, PanelState[]> {
+    const groups = new Map<string, PanelState[]>();
+    this.panels.forEach(panel => {
+      if (panel.tabGroup) {
+        const group = groups.get(panel.tabGroup) || [];
+        group.push(panel);
+        groups.set(panel.tabGroup, group);
+      }
+    });
+    return groups;
+  }
+
+  public createTabGroup(panelIds: string[], groupName: string) {
+    let firstPanel = true;
+    panelIds.forEach(id => {
+      const panel = this.panels.get(id);
+      if (panel) {
+        panel.tabGroup = groupName;
+        panel.activeTab = firstPanel;
+        panel.visible = firstPanel;
+        firstPanel = false;
+      }
+    });
+    this._onPanelChange.fire({} as PanelState);
+    this.savePanelStates();
   }
 
   public dispose() {

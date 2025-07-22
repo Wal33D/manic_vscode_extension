@@ -65,6 +65,249 @@
     
     // Window resize
     window.addEventListener('resize', handleWindowResize);
+    
+    // Event delegation for dynamic content
+    document.addEventListener('click', handleDelegatedClick);
+    document.addEventListener('change', handleDelegatedChange);
+    document.addEventListener('input', handleDelegatedInput);
+  }
+  
+  // Delegated event handlers for dynamic content
+  function handleDelegatedClick(e) {
+    const target = e.target;
+    
+    // Tool buttons
+    if (target.closest('.tool-btn')) {
+      const btn = target.closest('.tool-btn');
+      const tool = btn.getAttribute('data-tool');
+      selectTool(tool);
+      // Update active state
+      document.querySelectorAll('.tool-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+    
+    // Tile selection
+    if (target.closest('.tile-item')) {
+      const tile = target.closest('.tile-item');
+      const tileId = tile.getAttribute('data-tile-id');
+      selectTile(tileId);
+      // Update selected state
+      document.querySelectorAll('.tile-item').forEach(t => t.classList.remove('selected'));
+      tile.classList.add('selected');
+    }
+    
+    // Layer visibility toggle
+    if (target.classList.contains('layer-visibility')) {
+      const layer = target.closest('.layer-item');
+      const checkbox = layer.querySelector('input[type="checkbox"]');
+      checkbox.checked = !checkbox.checked;
+      toggleLayer(layer);
+    }
+    
+    // Pattern insert
+    if (target.classList.contains('pattern-insert')) {
+      const pattern = target.closest('.pattern-item').getAttribute('data-pattern');
+      insertPattern(pattern);
+    }
+    
+    // Pattern category
+    if (target.classList.contains('category-btn')) {
+      document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+      target.classList.add('active');
+      filterPatterns(target.textContent.toLowerCase());
+    }
+    
+    // Validation actions
+    if (target.textContent === 'Run Full Validation') {
+      runValidation();
+    }
+    
+    if (target.textContent === 'Auto-fix Issues') {
+      autoFixIssues();
+    }
+    
+    // History actions
+    if (target.closest('.history-btn')) {
+      const action = target.getAttribute('title');
+      if (action === 'Undo') {
+        vscode.postMessage({ type: 'history', command: 'undo' });
+      } else if (action === 'Redo') {
+        vscode.postMessage({ type: 'history', command: 'redo' });
+      } else if (action === 'Clear') {
+        vscode.postMessage({ type: 'history', command: 'clear' });
+      }
+    }
+    
+    // History item click
+    if (target.closest('.history-item')) {
+      const item = target.closest('.history-item');
+      restoreHistoryState(item);
+    }
+  }
+  
+  function handleDelegatedChange(e) {
+    const target = e.target;
+    
+    // Property changes
+    if (target.id === 'tileType') {
+      updateProperty('tileType', target.value);
+    }
+    
+    if (target.id === 'building') {
+      updateProperty('building', target.value);
+    }
+    
+    // Layer checkbox
+    if (target.type === 'checkbox' && target.closest('.layer-item')) {
+      const layer = target.closest('.layer-item');
+      toggleLayer(layer);
+    }
+    
+    // Validation rules
+    if (target.type === 'checkbox' && target.closest('.validation-rule')) {
+      updateValidationRules();
+    }
+  }
+  
+  function handleDelegatedInput(e) {
+    const target = e.target;
+    
+    // Height slider
+    if (target.id === 'height') {
+      const value = target.value;
+      document.getElementById('heightValue').textContent = value;
+      updateProperty('height', value);
+    }
+    
+    // Search inputs
+    if (target.classList.contains('search-input')) {
+      const container = target.closest('.tile-palette-container, .script-patterns-container');
+      if (container) {
+        filterContent(container, target.value);
+      }
+    }
+  }
+  
+  // Helper functions for panel interactions
+  function selectTool(tool) {
+    vscode.postMessage({
+      type: 'tool',
+      command: 'selectTool',
+      tool: tool
+    });
+    
+    // Update status bar
+    updateStatusBarItem('currentTool', tool);
+  }
+  
+  function selectTile(tileId) {
+    vscode.postMessage({
+      type: 'tool',
+      command: 'selectTile',
+      tileId: parseInt(tileId)
+    });
+    
+    // Update status bar
+    updateStatusBarItem('selectedTile', `Tile ${tileId}`);
+  }
+  
+  function toggleLayer(layerElement) {
+    const layerName = layerElement.querySelector('.layer-name').textContent;
+    const isVisible = layerElement.querySelector('input[type="checkbox"]').checked;
+    
+    vscode.postMessage({
+      type: 'tool',
+      command: 'toggleLayer',
+      layer: layerName,
+      visible: isVisible
+    });
+  }
+  
+  function insertPattern(patternType) {
+    vscode.postMessage({
+      type: 'tool',
+      command: 'insertPattern',
+      pattern: patternType
+    });
+  }
+  
+  function updateProperty(property, value) {
+    vscode.postMessage({
+      type: 'tool',
+      command: 'updateProperty',
+      args: { property, value }
+    });
+  }
+  
+  function runValidation() {
+    vscode.postMessage({
+      type: 'tool',
+      command: 'executeAction',
+      action: 'manicMiners.runValidation'
+    });
+  }
+  
+  function autoFixIssues() {
+    vscode.postMessage({
+      type: 'tool',
+      command: 'executeAction',
+      action: 'manicMiners.fixCommonIssues'
+    });
+  }
+  
+  function filterPatterns(category) {
+    const items = document.querySelectorAll('.pattern-item');
+    items.forEach(item => {
+      if (category === 'all' || item.getAttribute('data-category') === category) {
+        item.style.display = 'flex';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
+  
+  function filterContent(container, searchTerm) {
+    const items = container.querySelectorAll('.tile-item, .pattern-item');
+    const term = searchTerm.toLowerCase();
+    
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      if (text.includes(term)) {
+        item.style.display = '';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  }
+  
+  function updateStatusBarItem(id, value) {
+    const element = document.querySelector(`#${id} .value`);
+    if (element) {
+      element.textContent = value;
+    }
+  }
+  
+  function restoreHistoryState(historyItem) {
+    const index = Array.from(historyItem.parentElement.children).indexOf(historyItem);
+    vscode.postMessage({
+      type: 'history',
+      command: 'restore',
+      index: index
+    });
+  }
+  
+  function updateValidationRules() {
+    const rules = {};
+    document.querySelectorAll('.validation-rule input[type="checkbox"]').forEach(checkbox => {
+      const ruleName = checkbox.nextElementSibling.textContent.trim();
+      rules[ruleName] = checkbox.checked;
+    });
+    
+    vscode.postMessage({
+      type: 'validation',
+      command: 'updateRules',
+      rules: rules
+    });
   }
   
   // Layout Management
@@ -131,6 +374,15 @@
     // Set panel attributes
     panelElement.id = `panel-${panelState.id}`;
     panelElement.setAttribute('data-panel-id', panelState.id);
+    
+    // If panel is part of a tab group, add appropriate class
+    if (panelState.tabGroup) {
+      panelElement.classList.add('tabbed-panel');
+      panelElement.setAttribute('data-tab-group', panelState.tabGroup);
+      if (!panelState.activeTab) {
+        panelElement.classList.add('tab-hidden');
+      }
+    }
     
     // Set icon and title
     panel.querySelector('.panel-icon').textContent = panelState.icon;
@@ -333,6 +585,205 @@
     }
     
     return html;
+  }
+  
+  function getScriptPatternsContent() {
+    return `
+      <div class="script-patterns-container">
+        <div class="pattern-search">
+          <input type="text" placeholder="Search patterns..." class="search-input">
+        </div>
+        <div class="pattern-categories">
+          <button class="category-btn active">All</button>
+          <button class="category-btn">Events</button>
+          <button class="category-btn">Logic</button>
+          <button class="category-btn">Actions</button>
+        </div>
+        <div class="pattern-list">
+          <div class="pattern-item" data-pattern="timer">
+            <span class="pattern-icon">⏱️</span>
+            <div class="pattern-details">
+              <span class="pattern-name">Timer Pattern</span>
+              <span class="pattern-desc">Add timed events to your map</span>
+            </div>
+            <button class="pattern-insert">Insert</button>
+          </div>
+          <div class="pattern-item" data-pattern="loop">
+            <span class="pattern-icon">🔄</span>
+            <div class="pattern-details">
+              <span class="pattern-name">Loop Pattern</span>
+              <span class="pattern-desc">Create repeating actions</span>
+            </div>
+            <button class="pattern-insert">Insert</button>
+          </div>
+          <div class="pattern-item" data-pattern="objective">
+            <span class="pattern-icon">🎯</span>
+            <div class="pattern-details">
+              <span class="pattern-name">Objective Pattern</span>
+              <span class="pattern-desc">Define map objectives</span>
+            </div>
+            <button class="pattern-insert">Insert</button>
+          </div>
+          <div class="pattern-item" data-pattern="trigger">
+            <span class="pattern-icon">⚡</span>
+            <div class="pattern-details">
+              <span class="pattern-name">Trigger Pattern</span>
+              <span class="pattern-desc">Set up event triggers</span>
+            </div>
+            <button class="pattern-insert">Insert</button>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  function getValidationContent() {
+    return `
+      <div class="validation-container">
+        <div class="validation-header">
+          <h3>Map Validation</h3>
+          <button class="refresh-btn" title="Refresh">🔄</button>
+        </div>
+        <div class="validation-summary">
+          <div class="validation-stat">
+            <span class="stat-icon error">❌</span>
+            <span class="stat-count">0</span>
+            <span class="stat-label">Errors</span>
+          </div>
+          <div class="validation-stat">
+            <span class="stat-icon warning">⚠️</span>
+            <span class="stat-count">2</span>
+            <span class="stat-label">Warnings</span>
+          </div>
+          <div class="validation-stat">
+            <span class="stat-icon info">ℹ️</span>
+            <span class="stat-count">5</span>
+            <span class="stat-label">Info</span>
+          </div>
+        </div>
+        <div class="validation-options">
+          <h4>Validation Rules</h4>
+          <label class="validation-rule">
+            <input type="checkbox" checked>
+            <span>Check tile boundaries</span>
+          </label>
+          <label class="validation-rule">
+            <input type="checkbox" checked>
+            <span>Validate objectives</span>
+          </label>
+          <label class="validation-rule">
+            <input type="checkbox" checked>
+            <span>Verify resources</span>
+          </label>
+          <label class="validation-rule">
+            <input type="checkbox">
+            <span>Check script syntax</span>
+          </label>
+        </div>
+        <div class="validation-actions">
+          <button class="action-btn primary">Run Full Validation</button>
+          <button class="action-btn">Auto-fix Issues</button>
+        </div>
+      </div>
+    `;
+  }
+  
+  function getStatisticsContent() {
+    return `
+      <div class="statistics-container">
+        <h3>Map Statistics</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon">📐</div>
+            <div class="stat-info">
+              <span class="stat-value">10x10</span>
+              <span class="stat-label">Map Size</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🎨</div>
+            <div class="stat-info">
+              <span class="stat-value">100</span>
+              <span class="stat-label">Total Tiles</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">💎</div>
+            <div class="stat-info">
+              <span class="stat-value">15</span>
+              <span class="stat-label">Crystals</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon">🏢</div>
+            <div class="stat-info">
+              <span class="stat-value">3</span>
+              <span class="stat-label">Buildings</span>
+            </div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <h4>Tile Distribution</h4>
+          <div class="mini-chart">
+            <div class="chart-bar" style="height: 60%; background: #8b4513;" title="Dirt: 60%"></div>
+            <div class="chart-bar" style="height: 30%; background: #666;" title="Rock: 30%"></div>
+            <div class="chart-bar" style="height: 10%; background: #2a2a2a;" title="Empty: 10%"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+  
+  function getHistoryContent() {
+    return `
+      <div class="history-container">
+        <div class="history-header">
+          <h3>Edit History</h3>
+          <div class="history-controls">
+            <button class="history-btn" title="Undo">↶</button>
+            <button class="history-btn" title="Redo">↷</button>
+            <button class="history-btn" title="Clear">🗑️</button>
+          </div>
+        </div>
+        <div class="history-timeline">
+          <div class="history-item current">
+            <span class="history-icon">🖌️</span>
+            <div class="history-details">
+              <span class="history-action">Placed tile at (5,5)</span>
+              <span class="history-time">Just now</span>
+            </div>
+          </div>
+          <div class="history-item">
+            <span class="history-icon">🏢</span>
+            <div class="history-details">
+              <span class="history-action">Added Tool Store</span>
+              <span class="history-time">2 min ago</span>
+            </div>
+          </div>
+          <div class="history-item">
+            <span class="history-icon">📏</span>
+            <div class="history-details">
+              <span class="history-action">Modified terrain height</span>
+              <span class="history-time">5 min ago</span>
+            </div>
+          </div>
+          <div class="history-item">
+            <span class="history-icon">🎨</span>
+            <div class="history-details">
+              <span class="history-action">Fill area with dirt</span>
+              <span class="history-time">10 min ago</span>
+            </div>
+          </div>
+          <div class="history-item">
+            <span class="history-icon">💎</span>
+            <div class="history-details">
+              <span class="history-action">Placed crystals</span>
+              <span class="history-time">15 min ago</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
   }
   
   // Panel Actions
@@ -569,8 +1020,37 @@
       dockZones.center.innerHTML = document.querySelector('.welcome-message').outerHTML;
     }
     
-    // Create and place panels
-    visiblePanels.forEach(panelState => {
+    // Group panels by tab groups and position
+    const tabGroups = new Map();
+    const regularPanels = [];
+    
+    panels.forEach(panelState => {
+      if (panelState.tabGroup) {
+        const key = `${panelState.position}-${panelState.tabGroup}`;
+        if (!tabGroups.has(key)) {
+          tabGroups.set(key, {
+            position: panelState.position,
+            groupName: panelState.tabGroup,
+            panels: []
+          });
+        }
+        tabGroups.get(key).panels.push(panelState);
+      } else if (panelState.visible) {
+        regularPanels.push(panelState);
+      }
+    });
+    
+    // Create tab containers for grouped panels
+    tabGroups.forEach(group => {
+      const tabContainer = createTabContainer(group);
+      const zone = dockZones[group.position] || dockZones.center;
+      if (zone && tabContainer) {
+        zone.appendChild(tabContainer);
+      }
+    });
+    
+    // Create and place regular panels
+    regularPanels.forEach(panelState => {
       const panel = createPanel(panelState);
       if (panel) {
         const zone = dockZones[panelState.position] || dockZones.center;
@@ -582,6 +1062,76 @@
     
     // Update status bar
     updateStatusBar();
+  }
+  
+  // Create a container for tabbed panels
+  function createTabContainer(group) {
+    const container = document.createElement('div');
+    container.className = 'tab-container';
+    container.setAttribute('data-tab-group', group.groupName);
+    
+    // Create tab header
+    const tabHeader = document.createElement('div');
+    tabHeader.className = 'tab-header';
+    
+    // Create tabs
+    group.panels.forEach(panelState => {
+      const tab = document.createElement('button');
+      tab.className = 'tab-button';
+      if (panelState.activeTab) {
+        tab.classList.add('active');
+      }
+      tab.setAttribute('data-panel-id', panelState.id);
+      tab.innerHTML = `
+        <span class="tab-icon">${panelState.icon}</span>
+        <span class="tab-title">${panelState.title}</span>
+        <button class="tab-close" data-panel-id="${panelState.id}">×</button>
+      `;
+      
+      // Tab click handler
+      tab.addEventListener('click', (e) => {
+        if (!e.target.classList.contains('tab-close')) {
+          switchTab(panelState.id);
+        }
+      });
+      
+      // Tab close handler
+      const closeBtn = tab.querySelector('.tab-close');
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closePanel(panelState.id);
+      });
+      
+      tabHeader.appendChild(tab);
+    });
+    
+    // Add tab header to container
+    container.appendChild(tabHeader);
+    
+    // Create panel content area
+    const contentArea = document.createElement('div');
+    contentArea.className = 'tab-content-area';
+    
+    // Add all panels in the group
+    group.panels.forEach(panelState => {
+      const panel = createPanel(panelState);
+      if (panel) {
+        contentArea.appendChild(panel);
+      }
+    });
+    
+    container.appendChild(contentArea);
+    
+    return container;
+  }
+  
+  // Switch between tabs
+  function switchTab(panelId) {
+    vscode.postMessage({
+      type: 'panel',
+      command: 'setActiveTab',
+      panelId: panelId
+    });
   }
   
   function updateStatusBar() {

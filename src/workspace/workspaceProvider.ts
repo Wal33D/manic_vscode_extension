@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { PanelManager } from './panelManager';
+import { PanelManager, PanelState } from './panelManager';
 import { LayoutManager } from './layoutManager';
 
 /**
@@ -71,31 +71,50 @@ export class WorkspaceProvider implements vscode.WebviewViewProvider {
   private async handlePanelMessage(message: {
     command: string;
     panelId?: string;
-    position?: string;
+    position?: string | { x?: number; y?: number };
     size?: { width: number | string; height: number | string };
     collapsed?: boolean;
   }) {
     switch (message.command) {
       case 'toggle':
-        this.panelManager.togglePanel(message.panelId);
+        if (message.panelId) {
+          this.panelManager.togglePanel(message.panelId);
+        }
         break;
       case 'dock':
-        this.panelManager.dockPanel(message.panelId, message.position);
+        if (message.panelId && typeof message.position === 'string') {
+          this.panelManager.dockPanel(message.panelId, message.position as PanelState['position']);
+        }
         break;
       case 'resize':
-        this.panelManager.resizePanel(message.panelId, message.size);
+        if (message.panelId && message.size) {
+          this.panelManager.resizePanel(message.panelId, message.size);
+        }
         break;
       case 'move':
-        this.panelManager.movePanel(message.panelId, message.position);
+        if (message.panelId && typeof message.position === 'object') {
+          this.panelManager.movePanel(message.panelId, message.position);
+        }
         break;
       case 'collapse':
-        this.panelManager.collapsePanel(message.panelId, message.collapsed);
+        if (message.panelId && message.collapsed !== undefined) {
+          this.panelManager.collapsePanel(message.panelId, message.collapsed);
+        }
         break;
       case 'close':
-        this.panelManager.closePanel(message.panelId);
+        if (message.panelId) {
+          this.panelManager.closePanel(message.panelId);
+        }
         break;
       case 'focus':
-        this.panelManager.focusPanel(message.panelId);
+        if (message.panelId) {
+          this.panelManager.focusPanel(message.panelId);
+        }
+        break;
+      case 'setActiveTab':
+        if (message.panelId) {
+          this.panelManager.setActiveTab(message.panelId);
+        }
         break;
     }
   }
@@ -103,22 +122,30 @@ export class WorkspaceProvider implements vscode.WebviewViewProvider {
   private async handleLayoutMessage(message: { command: string; name?: string; preset?: string }) {
     switch (message.command) {
       case 'save':
-        await this.layoutManager.saveLayout(message.name, this.panelManager.getPanelStates());
-        vscode.window.showInformationMessage(`Layout '${message.name}' saved`);
+        if (message.name) {
+          await this.layoutManager.saveLayout(message.name, this.panelManager.getPanelStates());
+          vscode.window.showInformationMessage(`Layout '${message.name}' saved`);
+        }
         break;
       case 'load': {
-        const layout = await this.layoutManager.loadLayout(message.name);
-        if (layout) {
-          this.panelManager.applyLayout(layout);
-          vscode.window.showInformationMessage(`Layout '${message.name}' loaded`);
+        if (message.name) {
+          const layout = await this.layoutManager.loadLayout(message.name);
+          if (layout) {
+            this.panelManager.applyLayout(layout);
+            vscode.window.showInformationMessage(`Layout '${message.name}' loaded`);
+          }
         }
         break;
       }
       case 'delete':
-        await this.layoutManager.deleteLayout(message.name);
+        if (message.name) {
+          await this.layoutManager.deleteLayout(message.name);
+        }
         break;
       case 'preset':
-        this.applyPresetLayout(message.preset);
+        if (message.preset) {
+          this.applyPresetLayout(message.preset);
+        }
         break;
     }
   }
@@ -133,13 +160,19 @@ export class WorkspaceProvider implements vscode.WebviewViewProvider {
     // Forward tool messages to appropriate commands
     switch (message.command) {
       case 'selectTile':
-        vscode.commands.executeCommand('manicMiners.selectTile', message.tileId);
+        if (message.tileId !== undefined) {
+          vscode.commands.executeCommand('manicMiners.selectTile', message.tileId);
+        }
         break;
       case 'selectTool':
-        vscode.commands.executeCommand('manicMiners.selectTool', message.tool);
+        if (message.tool) {
+          vscode.commands.executeCommand('manicMiners.selectTool', message.tool);
+        }
         break;
       case 'executeAction':
-        vscode.commands.executeCommand(message.action, message.args);
+        if (message.action) {
+          vscode.commands.executeCommand(message.action, message.args);
+        }
         break;
     }
   }
