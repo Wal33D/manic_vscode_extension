@@ -348,6 +348,33 @@
         "title": "Switch to Text Editor",
         "category": "Manic Miners",
         "icon": "$(code)"
+      },
+      {
+        "command": "manicMiners.showFloatingPanels",
+        "title": "Show Floating Panels",
+        "category": "Manic Miners",
+        "icon": "$(layout)"
+      },
+      {
+        "command": "manicMiners.resetFloatingPanels",
+        "title": "Reset Floating Panels Layout",
+        "category": "Manic Miners",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "manicMiners.selectTool",
+        "title": "Select Tool",
+        "category": "Manic Miners"
+      },
+      {
+        "command": "manicMiners.updateProperty",
+        "title": "Update Property",
+        "category": "Manic Miners"
+      },
+      {
+        "command": "manicMiners.toggleLayer",
+        "title": "Toggle Layer",
+        "category": "Manic Miners"
       }
     ],
     "hoverProviders": [
@@ -431,6 +458,13 @@
           "name": "3D Terrain",
           "icon": "$(map-filled)",
           "contextualTitle": "Manic Miners 3D Terrain Preview"
+        },
+        {
+          "type": "webview",
+          "id": "manicMiners.floatingPanels",
+          "name": "Floating Panels",
+          "icon": "$(layout)",
+          "contextualTitle": "Manic Miners Floating Panels"
         }
       ]
     },
@@ -666,6 +700,12 @@
         "command": "manicMiners.showKeyboardShortcuts",
         "key": "ctrl+k ctrl+s",
         "mac": "cmd+k cmd+s",
+        "when": "manicMiners.extensionActive"
+      },
+      {
+        "command": "manicMiners.showFloatingPanels",
+        "key": "ctrl+k ctrl+p",
+        "mac": "cmd+k cmd+p",
         "when": "manicMiners.extensionActive"
       }
     ],
