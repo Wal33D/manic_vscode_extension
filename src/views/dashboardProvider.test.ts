@@ -122,9 +122,7 @@ describe('DashboardProvider', () => {
       await messageHandler({ command: 'openInMapEditor' });
 
       // Check that map editor command is executed
-      expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
-        'manicMiners.openMapEditor'
-      );
+      expect(vscode.commands.executeCommand).toHaveBeenCalledWith('manicMiners.openMapEditor');
     });
   });
 
