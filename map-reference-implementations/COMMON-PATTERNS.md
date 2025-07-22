@@ -1,6 +1,12 @@
 # Common Patterns and Gotchas for Manic Miners Map Manipulation
 
-This document contains common patterns, best practices, and gotchas that apply across all map manipulation tools.
+This document contains common patterns, best practices, and gotchas that apply across all map manipulation tools, including the VSCode extension.
+
+## Table of Contents
+- [Common Patterns](#common-patterns)
+- [Common Gotchas](#common-gotchas)
+- [VSCode Extension Patterns](#vscode-extension-patterns)
+- [Best Practices Summary](#best-practices-summary)
 
 ## Common Patterns
 
@@ -381,6 +387,152 @@ Valid doesn't mean playable:
 // Always check both:
 const formatValid = map.validate();
 const playable = checkPlayability(map); // Custom logic needed
+```
+
+## VSCode Extension Patterns
+
+### 1. Webview Communication Pattern
+Used in the map editor for UI updates:
+
+```typescript
+// Host -> Webview
+panel.webview.postMessage({
+  command: 'updateTiles',
+  tiles: tileData,
+  selection: currentSelection
+});
+
+// Webview -> Host
+vscode.postMessage({
+  command: 'tileClicked',
+  position: { row: 10, col: 15 }
+});
+```
+
+### 2. Validation Diagnostic Pattern
+Report errors in the editor:
+
+```typescript
+function updateDiagnostics(
+  document: vscode.TextDocument,
+  collection: vscode.DiagnosticCollection
+) {
+  const diagnostics: vscode.Diagnostic[] = [];
+  const validation = validateDatFile(document.getText());
+  
+  for (const error of validation.errors) {
+    const range = new vscode.Range(
+      error.line - 1, error.column,
+      error.line - 1, error.column + 10
+    );
+    
+    diagnostics.push(new vscode.Diagnostic(
+      range,
+      error.message,
+      vscode.DiagnosticSeverity.Error
+    ));
+  }
+  
+  collection.set(document.uri, diagnostics);
+}
+```
+
+### 3. Auto-Fix Provider Pattern
+Provide quick fixes for common issues:
+
+```typescript
+class MapAutoFixProvider implements vscode.CodeActionProvider {
+  provideCodeActions(
+    document: vscode.TextDocument,
+    range: vscode.Range,
+    context: vscode.CodeActionContext
+  ): vscode.CodeAction[] {
+    const actions: vscode.CodeAction[] = [];
+    
+    for (const diagnostic of context.diagnostics) {
+      if (diagnostic.message.includes('Missing section')) {
+        const fix = new vscode.CodeAction(
+          'Add missing section',
+          vscode.CodeActionKind.QuickFix
+        );
+        fix.edit = new vscode.WorkspaceEdit();
+        // Add the missing section
+        actions.push(fix);
+      }
+    }
+    
+    return actions;
+  }
+}
+```
+
+### 4. Performance Optimization Pattern
+For large maps in the editor:
+
+```typescript
+class RenderOptimizer {
+  private renderQueue: RenderTask[] = [];
+  private isRendering = false;
+  
+  queueRender(task: RenderTask) {
+    this.renderQueue.push(task);
+    if (!this.isRendering) {
+      this.processQueue();
+    }
+  }
+  
+  private async processQueue() {
+    this.isRendering = true;
+    
+    while (this.renderQueue.length > 0) {
+      // Batch similar operations
+      const batch = this.renderQueue.splice(0, 10);
+      await this.renderBatch(batch);
+      
+      // Yield to prevent blocking
+      await new Promise(resolve => setTimeout(resolve, 0));
+    }
+    
+    this.isRendering = false;
+  }
+}
+```
+
+### 5. Undo/Redo Pattern
+Track edit history:
+
+```typescript
+class EditHistory<T> {
+  private history: T[] = [];
+  private currentIndex = -1;
+  
+  push(state: T) {
+    // Remove any states after current
+    this.history = this.history.slice(0, this.currentIndex + 1);
+    this.history.push(state);
+    this.currentIndex++;
+    
+    // Limit history size
+    if (this.history.length > 100) {
+      this.history.shift();
+      this.currentIndex--;
+    }
+  }
+  
+  undo(): T | undefined {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+      return this.history[this.currentIndex];
+    }
+  }
+  
+  redo(): T | undefined {
+    if (this.currentIndex < this.history.length - 1) {
+      this.currentIndex++;
+      return this.history[this.currentIndex];
+    }
+  }
+}
 ```
 
 ## Best Practices Summary

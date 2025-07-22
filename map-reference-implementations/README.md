@@ -1,6 +1,6 @@
 # Manic Miners Map Reference Implementations
 
-This directory contains three reference implementations for working with Manic Miners map files (`.dat` format). These codebases serve as examples and documentation for understanding the map file format and various operations that can be performed on map data.
+This directory contains reference implementations and tools for working with Manic Miners map files (`.dat` format). These codebases serve as examples and documentation for understanding the map file format and various operations that can be performed on map data.
 
 ## Overview
 
@@ -8,9 +8,11 @@ This directory contains three reference implementations for working with Manic M
 
 ```
 map-reference-implementations/
-├── map-generator/      # Procedural map generation tool
+├── groundhog-main/     # Advanced procedural map generator (NEW)
+├── map-generator/      # Original procedural map generation tool
 ├── map-parser/         # Comprehensive map file parser
-└── map-visualizer/     # Map visualization and analysis tools
+├── map-visualizer/     # Map visualization and analysis tools
+└── COMMON-PATTERNS.md  # Essential patterns and pitfalls
 ```
 
 ## 🎯 Purpose
@@ -25,7 +27,30 @@ These reference implementations are maintained as examples for:
 
 ## 📚 Components
 
-### 1. Map Generator (`map-generator/`)
+### 1. GroundHog Map Generator (`groundhog-main/`) 🆕
+An advanced procedural map generator with sophisticated algorithms and web UI.
+
+**Key Features:**
+- Advanced cave generation with realistic terrain
+- Sophisticated objective placement and balancing
+- Built-in validation to ensure winnable maps
+- Web-based UI with real-time preview
+- Extensive customization parameters
+- Event scripting and briefing generation
+- Multiple biome support with biome-specific features
+
+**Technologies:** TypeScript, React, Vite, Vitest
+
+**Usage:**
+```bash
+cd groundhog-main
+yarn install
+yarn dev  # Runs at localhost:5173
+```
+
+[Full Documentation →](./groundhog-main/README.md)
+
+### 2. Original Map Generator (`map-generator/`)
 A TypeScript/React application that procedurally generates Manic Miners maps.
 
 **Key Features:**
@@ -126,23 +151,28 @@ height{
 
 | ID | Type | Description | Properties |
 |----|------|-------------|------------|
-| 0 | GROUND | Walkable floor | Can build |
-| 1 | SOLID_ROCK | Basic wall | Drillable |
-| 2 | HARD_ROCK | Reinforced wall | Slow drilling |
-| 3 | LOOSE_ROCK | Unstable wall | May collapse |
-| 4 | DIRT | Soft material | Fast drilling |
-| 5 | ORE_SEAM | Ore deposit | Yields 1-5 ore |
-| 6 | CRYSTAL_SEAM | Energy crystal | Yields 1 crystal |
-| 7 | RECHARGE_SEAM | Recharge point | Heals units |
-| 8 | LAVA | Molten rock | Instant death |
-| 9 | WATER | Deep water | Impassable |
-| 10 | EROSION | Spreading lava | Expands slowly |
-| 11 | SLUGHOLE | Monster spawn | Enemies emerge |
-| 12 | RUBBLE | Debris pile | Must clear |
-| 13 | REINFORCED | Steel wall | Unbreakable |
-| 14 | POWER_PATH | Power cable | Conducts energy |
-| 25 | CAVERN_FLOOR | Natural cave | Pre-excavated |
-| 30 | SOLID_BORDER | Map edge | Cannot pass |
+| 1 | GROUND | Walkable floor | Can build |
+| 2-5 | RUBBLE_1-4 | Debris piles | Levels 1-4, must clear |
+| 6 | LAVA | Molten rock | Instant death |
+| 8 | SOLID_ROCK | Basic wall | Medium drilling |
+| 9 | HARD_ROCK | Harder wall | Slow drilling |
+| 10 | LOOSE_ROCK | Soft wall | Fast drilling |
+| 11 | WATER | Deep water | Impassable |
+| 12 | SLUGHOLE | Monster spawn | Enemies emerge |
+| 13 | EROSION | Spreading lava | Expands over time |
+| 14-25 | POWER_PATH | Power cable variants | Conducts energy |
+| 26 | DIRT | Soft material | Very fast drilling |
+| 29 | UNDISCOVERED_CAVERN | Hidden cave | Reveals when drilled |
+| 30 | CAVERN_FLOOR | Natural cave | Pre-excavated |
+| 34 | RECHARGE_SEAM | Energy seam | Heals units |
+| 35-45 | CRYSTAL_SEAM | Crystal deposits | Yield levels |
+| 42-45 | CRYSTAL_SEAM_HIGH | High yield crystals | 3-5 crystals |
+| 46-49 | ORE_SEAM | Ore deposits | Various yields |
+| 48-55 | ORE_SEAM_HIGH | High yield ore | 3-5 ore |
+| 56-62 | REINFORCED_ROCK | Reinforced walls | Very slow drilling |
+| 63 | SOLID_ROCK | Unbreakable | Cannot drill |
+| 64-100 | REINFORCED_VARIANTS | Various reinforced | Different hardness |
+| 101+ | SPECIAL_TILES | Building foundations | Pre-placed structures |
 
 ### Coordinate System
 
@@ -182,6 +212,55 @@ tiles{
   30,1,1,1,1,1,1,1,1,30,
   30,30,30,30,30,30,30,30,30,30,
 }
+```
+
+## 🚀 VSCode Extension Integration
+
+While these are reference implementations, the VSCode extension incorporates many concepts from these tools:
+
+### Current Extension Features
+
+1. **Visual Map Editor**
+   - Tile painting with brush sizes
+   - Auto-tiling system
+   - Layer support with opacity
+   - Undo/redo functionality
+   - Real-time validation
+   - Minimap navigation
+
+2. **Map Analysis Tools**
+   - Accessibility validation
+   - Resource distribution heatmaps
+   - Path finding visualization
+   - Statistical analysis
+   - Performance optimization
+
+3. **Enhanced Editing**
+   - IntelliSense for all sections
+   - Quick actions and fixes
+   - Snippet support
+   - Keyboard shortcuts
+   - Command palette integration
+
+4. **Validation & Testing**
+   - Comprehensive error checking
+   - Auto-fix suggestions
+   - Playability analysis
+   - Golden file testing
+
+### Extension Architecture
+
+The VSCode extension uses concepts from these reference implementations:
+
+```typescript
+// From map-parser: Structured data handling
+import { DatFile, TileGrid } from '../types/datFileTypes';
+
+// From map-visualizer: Rendering logic
+import { MapRenderer } from '../mapEditor/mapRenderer';
+
+// From map-generator: Validation patterns
+import { MapAccessibilityValidator } from '../validation/mapAccessibilityValidator';
 ```
 
 ## 🔧 Common Use Cases
@@ -298,11 +377,26 @@ const tile = map.tiles[y][x]; // If using raw arrays
 #### Gotcha: Tile ID Validation
 ```typescript
 // ⚠️ Not all tile IDs are sequential
-// Valid IDs: 0-14, 16-18, 25, 30 (gaps exist!)
+// The extension now supports 165+ tile types!
 
 function isValidTileId(id: number): boolean {
-  const validIds = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,17,18,25,30];
-  return validIds.includes(id);
+  // Basic terrain tiles: 1-63
+  if (id >= 1 && id <= 63) return true;
+  
+  // Reinforced variants: 64-100
+  if (id >= 64 && id <= 100) return true;
+  
+  // Special tiles: 101-165
+  if (id >= 101 && id <= 165) return true;
+  
+  return false;
+}
+
+// Better approach - use the tile definition system
+import { getTileInfo } from './tileDefinitions';
+const tileInfo = getTileInfo(id);
+if (tileInfo) {
+  // Valid tile with metadata
 }
 ```
 
@@ -431,11 +525,101 @@ When adding new reference implementations:
 - Keep README under 1000 lines
 - Update this main README when adding tools
 
+## 🎮 Advanced Features
+
+### Script Generation (GroundHog)
+GroundHog can generate sophisticated event scripts:
+
+```typescript
+// Example: Dynamic difficulty adjustment
+script{
+  event:onInit
+  command:setVar difficulty 1
+  
+  event:onTimer 300
+  command:if crystals > 50
+  command:setVar difficulty 2
+  command:spawnCreature slug 10 10
+  
+  event:onBuildingComplete
+  command:showMessage "Well done!"
+}
+```
+
+### Map Templates (Extension)
+The extension provides template support:
+
+```typescript
+// Save current selection as template
+const template = {
+  name: "Crystal Cave",
+  tiles: selectedTiles,
+  resources: selectedResources,
+  tags: ["cave", "crystals", "medium"]
+};
+```
+
+### Accessibility Analysis
+Both the extension and reference implementations include pathfinding:
+
+```typescript
+// Check if objective is reachable
+const validator = new MapAccessibilityValidator();
+const result = validator.validate(datFile);
+if (!result.isValid) {
+  console.error("Unreachable objectives:", result.errors);
+}
+```
+
+## 📊 Performance Considerations
+
+### Map Size Limits
+- Small (< 40x40): Instant processing
+- Medium (40-100): < 1 second
+- Large (100-200): 1-5 seconds  
+- Huge (200+): May require optimization
+
+### Memory Usage
+```typescript
+// Estimate memory for large maps
+const estimateMemory = (width: number, height: number) => {
+  const tiles = width * height * 4; // 4 bytes per tile
+  const rendering = width * height * 16 * 16 * 4; // Canvas pixels
+  const overhead = (tiles + rendering) * 0.3; // Data structures
+  return tiles + rendering + overhead;
+};
+```
+
+## 🔄 Recent Updates
+
+### VSCode Extension (v0.3.0+)
+- 165+ tile types with full metadata
+- Professional UI with dashboard
+- Map editor with layers and animation
+- Comprehensive validation system
+- Performance optimizations for large maps
+- Command palette integration
+- Keyboard shortcuts system
+
+### GroundHog Integration
+- Advanced procedural generation algorithms
+- Sophisticated objective balancing
+- Event scripting support
+- Web-based preview interface
+
 ## 📖 Additional Resources
 
 - [Common Patterns and Gotchas](./COMMON-PATTERNS.md) - Essential patterns and pitfalls to avoid
-- [Map Format Specification](#-map-file-format) - Detailed format documentation
+- [Map Format Specification](#-map-file-format) - Detailed format documentation  
+- [GroundHog Documentation](./groundhog-main/README.md) - Advanced generation
+- [Extension Commands Reference](../README.md#commands) - All available commands
 - Component-specific documentation in each subdirectory
+
+## 🤝 Community
+
+- [Manic Miners Discord](https://discord.gg/manicminers) - Active community
+- [GitHub Issues](https://github.com/Wal33D/vscode-manic-miners/issues) - Bug reports
+- [GroundHog Web App](https://charredutensil.github.io/groundhog/) - Try it online
 
 ---
 
