@@ -54,11 +54,11 @@ export class FloatingPanelManager {
       title: 'Tools',
       icon: '🛠️',
       content: this.getToolsContent(),
-      position: { x: 0, y: 100, docked: 'left' },
+      position: { x: 20, y: 60, docked: 'float' },
       size: { width: 200, height: 400, minWidth: 150, minHeight: 300 },
       collapsed: false,
       pinned: true,
-      visible: false,
+      visible: true,
     });
 
     // Properties Panel
@@ -67,11 +67,11 @@ export class FloatingPanelManager {
       title: 'Properties',
       icon: '📋',
       content: this.getPropertiesContent(),
-      position: { x: 0, y: 100, docked: 'right' },
+      position: { x: 240, y: 60, docked: 'float' },
       size: { width: 250, height: 300, minWidth: 200, minHeight: 200 },
       collapsed: false,
       pinned: true,
-      visible: false,
+      visible: true,
     });
 
     // Layers Panel
@@ -80,11 +80,11 @@ export class FloatingPanelManager {
       title: 'Layers',
       icon: '📚',
       content: this.getLayersContent(),
-      position: { x: 0, y: 420, docked: 'right' },
+      position: { x: 500, y: 60, docked: 'float' },
       size: { width: 250, height: 200, minWidth: 200, minHeight: 150 },
       collapsed: false,
       pinned: true,
-      visible: false,
+      visible: true,
     });
 
     // History Panel
@@ -93,11 +93,11 @@ export class FloatingPanelManager {
       title: 'History',
       icon: '🕐',
       content: this.getHistoryContent(),
-      position: { x: 300, y: 100, docked: 'float' },
+      position: { x: 20, y: 400, docked: 'float' },
       size: { width: 200, height: 300, minWidth: 150, minHeight: 200 },
       collapsed: false,
       pinned: false,
-      visible: false,
+      visible: true,
     });
 
     // Color Picker Panel
@@ -106,11 +106,11 @@ export class FloatingPanelManager {
       title: 'Color Picker',
       icon: '🎨',
       content: this.getColorPickerContent(),
-      position: { x: 520, y: 100, docked: 'float' },
+      position: { x: 240, y: 400, docked: 'float' },
       size: { width: 240, height: 280, minWidth: 200, minHeight: 250 },
       collapsed: false,
       pinned: false,
-      visible: false,
+      visible: true,
     });
   }
 
@@ -372,25 +372,27 @@ export class FloatingPanelManager {
 
     return `
       <div class="floating-panel ${dockedClass} ${collapsedClass}" 
-           id="panel-${panel.id}"
+           data-panel-id="${panel.id}"
            style="${this.getPanelStyle(panel)}">
-        <div class="panel-header" onmousedown="startDrag('${panel.id}', event)">
+        <div class="panel-header">
           <span class="panel-icon">${panel.icon}</span>
           <span class="panel-title">${panel.title}</span>
           <div class="panel-controls">
-            <button class="panel-btn" onclick="toggleCollapse('${panel.id}')">${
-              panel.collapsed ? '⬆️' : '⬇️'
-            }</button>
-            <button class="panel-btn" onclick="togglePin('${panel.id}')">${
-              panel.pinned ? '📌' : '📍'
-            }</button>
-            <button class="panel-btn" onclick="closePanel('${panel.id}')">❌</button>
+            <button class="panel-btn" data-action="collapse" title="${panel.collapsed ? 'Expand' : 'Collapse'}">
+              <span class="panel-btn-icon">${panel.collapsed ? '▼' : '▲'}</span>
+            </button>
+            <button class="panel-btn" data-action="pin" title="${panel.pinned ? 'Unpin' : 'Pin'}">
+              <span class="panel-btn-icon">${panel.pinned ? '📌' : '📍'}</span>
+            </button>
+            <button class="panel-btn" data-action="close" title="Close">
+              <span class="panel-btn-icon">×</span>
+            </button>
           </div>
         </div>
         <div class="panel-content" style="display: ${panel.collapsed ? 'none' : 'block'}">
           ${panel.content}
         </div>
-        <div class="panel-resize-handle" onmousedown="startResize('${panel.id}', event)"></div>
+        <div class="panel-resize-handle"></div>
       </div>
     `;
   }

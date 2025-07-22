@@ -139,51 +139,47 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
         <!-- Main workspace -->
         <div class="workspace-content">
           <div class="toolbar">
-            <div class="toolbar-dropdown">
-              <button class="toolbar-button" title="Tools">🛠️ Tools</button>
-              <div class="dropdown-menu" id="dropdown-tools">
-                <button data-action="selectTool" data-value="brush">🖌️ Brush</button>
-                <button data-action="selectTool" data-value="eraser">🧹 Eraser</button>
-                <button data-action="selectTool" data-value="fill">🪣 Fill</button>
-                <button data-action="selectTool" data-value="pick">💧 Pick</button>
-                <button data-action="selectTool" data-value="line">📏 Line</button>
-                <button data-action="selectTool" data-value="rect">⬛ Rectangle</button>
-                <button data-action="selectTool" data-value="circle">⭕ Circle</button>
-                <button data-action="selectTool" data-value="select">✂️ Select</button>
-              </div>
+            <div class="toolbar-section">
+              <button class="toolbar-action-btn panel-toggle" data-action="togglePanel" data-panel="tools" title="Toggle Tools Panel">
+                <span class="btn-icon">🛠️</span>
+                <span class="btn-text">Tools</span>
+              </button>
+              <button class="toolbar-action-btn panel-toggle" data-action="togglePanel" data-panel="layers" title="Toggle Layers Panel">
+                <span class="btn-icon">📚</span>
+                <span class="btn-text">Layers</span>
+              </button>
+              <button class="toolbar-action-btn panel-toggle" data-action="togglePanel" data-panel="properties" title="Toggle Properties Panel">
+                <span class="btn-icon">📋</span>
+                <span class="btn-text">Properties</span>
+              </button>
+              <button class="toolbar-action-btn panel-toggle" data-action="togglePanel" data-panel="history" title="Toggle History Panel">
+                <span class="btn-icon">🕐</span>
+                <span class="btn-text">History</span>
+              </button>
+              <button class="toolbar-action-btn panel-toggle" data-action="togglePanel" data-panel="colorPicker" title="Toggle Color Picker">
+                <span class="btn-icon">🎨</span>
+                <span class="btn-text">Colors</span>
+              </button>
             </div>
-            <div class="toolbar-dropdown">
-              <button class="toolbar-button" title="Layers">📚 Layers</button>
-              <div class="dropdown-menu" id="dropdown-layers">
-                <button data-action="toggleLayer" data-value="tiles">🗺️ Tiles</button>
-                <button data-action="toggleLayer" data-value="height">📏 Height</button>
-                <button data-action="toggleLayer" data-value="resources">💎 Resources</button>
-                <button data-action="toggleLayer" data-value="buildings">🏢 Buildings</button>
-                <button data-action="toggleLayer" data-value="vehicles">🚗 Vehicles</button>
-              </div>
-            </div>
-            <button class="toolbar-action-btn" data-action="showPanel" data-panel="properties" title="Properties">
-              <span class="btn-icon">📋</span>
-              <span class="btn-text">Properties</span>
-            </button>
-            <button class="toolbar-action-btn" data-action="showPanel" data-panel="history" title="History">
-              <span class="btn-icon">🕐</span>
-              <span class="btn-text">History</span>
-            </button>
-            <button class="toolbar-action-btn" data-action="showPanel" data-panel="colorPicker" title="Color Picker">
-              <span class="btn-icon">🎨</span>
-              <span class="btn-text">Color Picker</span>
-            </button>
             <span class="separator"></span>
-            <button class="toolbar-action-btn" data-action="resetLayout" title="Reset Layout">
-              <span class="btn-icon">🔄</span>
-            </button>
-            <button class="toolbar-action-btn" data-action="saveLayout" title="Save Layout">
-              <span class="btn-icon">💾</span>
-            </button>
-            <button class="toolbar-action-btn" data-action="loadLayout" title="Load Layout">
-              <span class="btn-icon">📁</span>
-            </button>
+            <div class="toolbar-section">
+              <button class="toolbar-action-btn" data-action="showAllPanels" title="Show All Panels">
+                <span class="btn-icon">👁️</span>
+              </button>
+              <button class="toolbar-action-btn" data-action="hideAllPanels" title="Hide All Panels">
+                <span class="btn-icon">🚫</span>
+              </button>
+              <span class="separator"></span>
+              <button class="toolbar-action-btn" data-action="resetLayout" title="Reset Layout">
+                <span class="btn-icon">🔄</span>
+              </button>
+              <button class="toolbar-action-btn" data-action="saveLayout" title="Save Layout">
+                <span class="btn-icon">💾</span>
+              </button>
+              <button class="toolbar-action-btn" data-action="loadLayout" title="Load Layout">
+                <span class="btn-icon">📁</span>
+              </button>
+            </div>
           </div>
 
           <!-- Floating panels container -->

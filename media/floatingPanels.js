@@ -24,45 +24,23 @@
   function handleDocumentClick(e) {
     const target = e.target;
     
-    // Handle dropdown toggles
-    const dropdownBtn = target.closest('.toolbar-dropdown .toolbar-button');
-    if (dropdownBtn) {
-      e.stopPropagation();
-      const dropdown = dropdownBtn.closest('.toolbar-dropdown');
-      const menu = dropdown.querySelector('.dropdown-menu');
-      toggleDropdown(menu);
-      return;
-    }
-    
-    // Handle dropdown menu items
-    const dropdownItem = target.closest('.dropdown-menu button');
-    if (dropdownItem) {
-      e.stopPropagation();
-      const action = dropdownItem.getAttribute('data-action');
-      const value = dropdownItem.getAttribute('data-value');
-      
-      if (action === 'selectTool') {
-        selectTool(value);
-      } else if (action === 'toggleLayer') {
-        toggleLayer(value);
-      }
-      
-      closeAllDropdowns();
-      return;
-    }
-    
-    // Close dropdowns when clicking outside
-    if (!target.closest('.toolbar-dropdown')) {
-      closeAllDropdowns();
-    }
-    
     // Handle toolbar action buttons
     const actionBtn = target.closest('.toolbar-action-btn');
     if (actionBtn) {
       const action = actionBtn.getAttribute('data-action');
-      if (action === 'showPanel') {
+      
+      if (action === 'togglePanel') {
         const panelId = actionBtn.getAttribute('data-panel');
-        showPanel(panelId);
+        togglePanelVisibility(panelId);
+        // Update button state
+        const panel = window.panelsData.get(panelId);
+        if (panel) {
+          actionBtn.classList.toggle('active', panel.visible);
+        }
+      } else if (action === 'showAllPanels') {
+        showAllPanels();
+      } else if (action === 'hideAllPanels') {
+        hideAllPanels();
       } else if (action === 'resetLayout') {
         resetLayout();
       } else if (action === 'saveLayout') {
@@ -85,6 +63,28 @@
           togglePin(panelId);
         } else if (action === 'close') {
           closePanel(panelId);
+        }
+      }
+    }
+    
+    // Handle tool selection from within panels
+    const toolBtn = target.closest('.tool-button');
+    if (toolBtn) {
+      const tool = toolBtn.getAttribute('data-tool');
+      selectTool(tool);
+    }
+    
+    // Handle layer item clicks
+    const layerItem = target.closest('.layer-item');
+    if (layerItem && !target.closest('.layer-visibility')) {
+      const checkbox = layerItem.querySelector('input[type="checkbox"]');
+      if (checkbox) {
+        checkbox.checked = !checkbox.checked;
+        const layerSpan = layerItem.querySelector('span');
+        if (layerSpan) {
+          const layerText = layerSpan.textContent;
+          const layerName = layerText.replace(/[^\w\s]/gi, '').trim().toLowerCase();
+          toggleLayer(layerName);
         }
       }
     }
@@ -112,7 +112,29 @@
     }
   }
   
-  // Tool selection from dropdown
+  // Toggle panel visibility
+  function togglePanelVisibility(panelId) {
+    vscode.postMessage({
+      command: 'togglePanel',
+      panelId: panelId
+    });
+  }
+  
+  // Show all panels
+  function showAllPanels() {
+    ['tools', 'layers', 'properties', 'history', 'colorPicker'].forEach(panelId => {
+      showPanel(panelId);
+    });
+  }
+  
+  // Hide all panels
+  function hideAllPanels() {
+    ['tools', 'layers', 'properties', 'history', 'colorPicker'].forEach(panelId => {
+      closePanel(panelId);
+    });
+  }
+  
+  // Tool selection
   function selectTool(tool) {
     // Send tool selection message
     vscode.postMessage({
@@ -122,40 +144,27 @@
     
     // Update UI to show selected tool
     document.querySelectorAll('.tool-button').forEach(btn => {
-      btn.classList.remove('active');
+      btn.classList.toggle('active', btn.getAttribute('data-tool') === tool);
     });
-    
-    // Optionally show the tools panel
-    showPanel('tools');
   }
   
-  // Layer toggle from dropdown
+  // Layer toggle
   function toggleLayer(layer) {
     vscode.postMessage({
       command: 'layerToggled',
       layer: layer
     });
-    
-    // Optionally show the layers panel
-    showPanel('layers');
   }
   
-  function toggleDropdown(menu) {
-    if (menu.classList.contains('show')) {
-      menu.classList.remove('show');
-      activeDropdown = null;
-    } else {
-      closeAllDropdowns();
-      menu.classList.add('show');
-      activeDropdown = menu;
-    }
-  }
-  
-  function closeAllDropdowns() {
-    document.querySelectorAll('.dropdown-menu').forEach(menu => {
-      menu.classList.remove('show');
+  // Update toolbar toggle buttons state
+  function updateToolbarState() {
+    document.querySelectorAll('.panel-toggle').forEach(btn => {
+      const panelId = btn.getAttribute('data-panel');
+      const panel = window.panelsData.get(panelId);
+      if (panel) {
+        btn.classList.toggle('active', panel.visible);
+      }
     });
-    activeDropdown = null;
   }
   
   // Keep window functions for backward compatibility
@@ -409,12 +418,17 @@
     const layerVisibility = event.target.closest('.layer-visibility');
     if (layerVisibility) {
       const layerItem = layerVisibility.closest('.layer-item');
-      const layerName = layerItem.querySelector('span').textContent;
-      
-      vscode.postMessage({
-        command: 'layerToggled',
-        layer: layerName
-      });
+      const layerSpan = layerItem.querySelector('span');
+      if (layerSpan) {
+        // Extract layer name without emoji
+        const layerText = layerSpan.textContent;
+        const layerName = layerText.replace(/[^\w\s]/gi, '').trim().toLowerCase();
+        
+        vscode.postMessage({
+          command: 'layerToggled',
+          layer: layerName
+        });
+      }
     }
     
     // Tile color selection
@@ -495,6 +509,9 @@
     if (workspace) {
       workspace.innerHTML = renderPanels(panelsData);
     }
+    
+    // Update toolbar button states
+    updateToolbarState();
   }
 
   function renderPanels(panelsData) {
@@ -603,9 +620,13 @@
 
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeEventHandlers);
+    document.addEventListener('DOMContentLoaded', () => {
+      initializeEventHandlers();
+      updateToolbarState();
+    });
   } else {
     initializeEventHandlers();
+    updateToolbarState();
   }
   console.log('Floating panels initialized');
 })();

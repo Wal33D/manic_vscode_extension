@@ -221,24 +221,6 @@ body {
   padding: 6px 8px;
 }
 
-.toolbar button {
-  background: transparent;
-  border: none;
-  padding: 4px 8px;
-  cursor: pointer;
-  font-size: 18px;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-
-.toolbar button:hover {
-  background: var(--vscode-toolbar-hoverBackground);
-}
-
-.toolbar-button.active {
-  background: var(--vscode-toolbar-activeBackground);
-}
-
 .toolbar .separator {
   width: 1px;
   height: 24px;
@@ -250,97 +232,33 @@ body {
   margin: 0 8px;
 }
 
-/* Dropdown Menus */
-.toolbar-dropdown {
+/* Toolbar sections */
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Panel toggle buttons */
+.panel-toggle {
   position: relative;
 }
 
-.toolbar-button {
-  background: transparent;
-  border: none;
-  color: var(--vscode-foreground);
-  padding: 5px 10px;
-  cursor: pointer;
-  font-size: 13px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.panel-toggle.active {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border-color: transparent;
 }
 
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  background: rgba(40, 40, 40, 0.95);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.2),
-    0 2px 8px rgba(0, 0, 0, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  min-width: 180px;
-  padding: 6px;
-  z-index: 1000;
-  display: none;
-}
-
-.dropdown-menu.show {
-  display: block;
-  animation: dropdownShow 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-}
-
-@keyframes dropdownShow {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.dropdown-menu button {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  text-align: left;
-  padding: 8px 12px;
-  background: transparent;
-  border: none;
-  border-radius: 6px;
-  color: var(--vscode-foreground);
-  cursor: pointer;
-  font-size: 13px;
-  transition: all 0.15s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.dropdown-menu button::before {
+.panel-toggle.active::after {
   content: '';
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.dropdown-menu button:hover {
-  background: rgba(255, 255, 255, 0.08);
-  transform: translateX(2px);
-}
-
-.dropdown-menu button:hover::before {
-  opacity: 1;
-}
-
-.dropdown-menu button:active {
-  transform: translateX(0);
-  background: rgba(255, 255, 255, 0.12);
+  bottom: -1px;
+  left: 10%;
+  right: 10%;
+  height: 2px;
+  background: var(--vscode-focusBorder);
+  border-radius: 1px;
 }
 
 /* Floating Panels Workspace */
