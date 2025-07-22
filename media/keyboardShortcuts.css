@@ -1,0 +1,365 @@
+/* Keyboard Shortcuts Panel Styles */
+:root {
+  --bg-primary: var(--vscode-editor-background);
+  --bg-secondary: var(--vscode-sideBar-background);
+  --bg-hover: var(--vscode-list-hoverBackground);
+  --border: var(--vscode-widget-border);
+  --text-primary: var(--vscode-foreground);
+  --text-secondary: var(--vscode-descriptionForeground);
+  --accent: var(--vscode-button-background);
+  --accent-hover: var(--vscode-button-hoverBackground);
+  --danger: #f48771;
+  --success: #4ec9b0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--text-primary);
+  background: var(--bg-primary);
+  margin: 0;
+  padding: 0;
+  line-height: 1.6;
+}
+
+.shortcuts-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.action-button {
+  padding: 8px 16px;
+  background: var(--accent);
+  color: var(--vscode-button-foreground);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+.action-button:hover {
+  background: var(--accent-hover);
+}
+
+.action-button.danger {
+  background: var(--danger);
+}
+
+.action-button.danger:hover {
+  background: #e04634;
+}
+
+/* Search */
+.search-container {
+  margin-bottom: 20px;
+}
+
+#searchInput {
+  width: 100%;
+  padding: 12px 20px;
+  font-size: 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-primary);
+  outline: none;
+}
+
+#searchInput:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Categories */
+.category-section {
+  margin-bottom: 40px;
+}
+
+.category-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Shortcuts Grid */
+.shortcuts-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.shortcut-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 20px;
+  padding: 16px 20px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.shortcut-item:hover {
+  background: var(--bg-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.shortcut-item.hidden {
+  display: none;
+}
+
+.shortcut-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shortcut-description {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.shortcut-command {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-family: var(--vscode-editor-font-family);
+}
+
+.shortcut-key {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Keyboard Keys */
+kbd {
+  display: inline-block;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: var(--vscode-editor-font-family);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+/* Shortcut Actions */
+.shortcut-actions {
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.shortcut-item:hover .shortcut-actions {
+  opacity: 1;
+}
+
+.icon-button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  transform: scale(1.1);
+}
+
+/* Tips Section */
+.tips-section {
+  margin-top: 60px;
+  padding: 24px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.tips-section h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tips-section ul {
+  margin: 0;
+  padding-left: 24px;
+  list-style: disc;
+}
+
+.tips-section li {
+  margin-bottom: 8px;
+  line-height: 1.8;
+}
+
+/* Edit Modal */
+.edit-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  min-width: 400px;
+}
+
+.edit-modal h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.edit-modal input {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+}
+
+.edit-modal .actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .shortcuts-container {
+    padding: 16px;
+  }
+
+  header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .shortcut-item {
+    grid-template-columns: 1fr auto;
+  }
+
+  .shortcut-actions {
+    display: none;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.shortcut-item {
+  animation: fadeIn 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.shortcut-item:nth-child(1) { animation-delay: 0.05s; }
+.shortcut-item:nth-child(2) { animation-delay: 0.1s; }
+.shortcut-item:nth-child(3) { animation-delay: 0.15s; }
+.shortcut-item:nth-child(4) { animation-delay: 0.2s; }
+.shortcut-item:nth-child(5) { animation-delay: 0.25s; }
+
+/* Platform-specific styles */
+.platform-hint {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+/* Conflict indicator */
+.conflict-indicator {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: var(--danger);
+  border-radius: 50%;
+  margin-left: 8px;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(244, 135, 113, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(244, 135, 113, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(244, 135, 113, 0);
+  }
+}
