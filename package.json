@@ -392,6 +392,30 @@
         "title": "Quick Fill",
         "category": "Manic Miners",
         "icon": "$(symbol-color)"
+      },
+      {
+        "command": "manicMiners.openMap",
+        "title": "Open Map",
+        "category": "Manic Miners",
+        "icon": "$(file)"
+      },
+      {
+        "command": "manicMiners.selectTile",
+        "title": "Select Tile",
+        "category": "Manic Miners",
+        "icon": "$(selection)"
+      },
+      {
+        "command": "manicMiners.insertScriptSnippet",
+        "title": "Insert Script Snippet",
+        "category": "Manic Miners",
+        "icon": "$(code)"
+      },
+      {
+        "command": "manicMiners.showQuickActions",
+        "title": "Show Quick Actions",
+        "category": "Manic Miners",
+        "icon": "$(lightbulb)"
       }
     ],
     "hoverProviders": [
