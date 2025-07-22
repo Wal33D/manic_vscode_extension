@@ -375,6 +375,23 @@
         "command": "manicMiners.toggleLayer",
         "title": "Toggle Layer",
         "category": "Manic Miners"
+      },
+      {
+        "command": "manicMiners.showContextMenu",
+        "title": "Show Context Menu",
+        "category": "Manic Miners",
+        "icon": "$(menu)"
+      },
+      {
+        "command": "manicMiners.showTileContextMenu",
+        "title": "Show Tile Context Menu",
+        "category": "Manic Miners"
+      },
+      {
+        "command": "manicMiners.quickFill",
+        "title": "Quick Fill",
+        "category": "Manic Miners",
+        "icon": "$(symbol-color)"
       }
     ],
     "hoverProviders": [
@@ -521,6 +538,66 @@
           "when": "resourceExtname == .dat",
           "command": "manicMiners.generateLevel",
           "group": "1_generate"
+        }
+      ],
+      "editor/context": [
+        {
+          "when": "resourceExtname == .dat && editorTextFocus",
+          "command": "manicMiners.showContextMenu",
+          "group": "navigation@1"
+        },
+        {
+          "when": "resourceExtname == .dat && editorTextFocus",
+          "command": "manicMiners.fillAreaEnhanced",
+          "group": "1_modification@1"
+        },
+        {
+          "when": "resourceExtname == .dat && editorTextFocus",
+          "command": "manicMiners.replaceAllEnhanced",
+          "group": "1_modification@2"
+        },
+        {
+          "when": "resourceExtname == .dat && editorTextFocus",
+          "command": "manicMiners.insertTemplate",
+          "group": "2_insert@1"
+        },
+        {
+          "when": "resourceExtname == .dat && editorTextFocus",
+          "command": "manicMiners.insertScriptPattern",
+          "group": "2_insert@2"
+        },
+        {
+          "when": "resourceExtname == .dat && editorTextFocus",
+          "command": "manicMiners.runValidation",
+          "group": "3_analysis@1"
+        },
+        {
+          "when": "resourceExtname == .dat && editorTextFocus",
+          "command": "manicMiners.analyzeTilePatterns",
+          "group": "3_analysis@2"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "manicMiners.openMap",
+          "when": "view == manicMiners.explorer && viewItem == mapFile",
+          "group": "navigation"
+        },
+        {
+          "command": "manicMiners.selectTile",
+          "when": "view == manicMiners.tilePalette && viewItem == tile",
+          "group": "inline"
+        },
+        {
+          "command": "manicMiners.insertScriptSnippet",
+          "when": "view == manicMiners.scriptSnippets && viewItem == snippet",
+          "group": "inline"
+        }
+      ],
+      "webview/context": [
+        {
+          "command": "manicMiners.showTileContextMenu",
+          "when": "webviewId == 'manicMiners.mapEditor'"
         }
       ]
     },
@@ -707,6 +784,12 @@
         "key": "ctrl+k ctrl+p",
         "mac": "cmd+k cmd+p",
         "when": "manicMiners.extensionActive"
+      },
+      {
+        "command": "manicMiners.showContextMenu",
+        "key": "shift+f10",
+        "mac": "shift+f10",
+        "when": "editorTextFocus && editorLangId == manicminers"
       }
     ],
     "snippets": [

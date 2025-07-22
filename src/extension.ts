@@ -46,6 +46,7 @@ import { CommandTipsProvider } from './commands/commandTipsProvider';
 import { KeyboardShortcutManager } from './keyboard/keyboardShortcuts';
 import { KeyboardShortcutsPanel } from './keyboard/keyboardShortcutsPanel';
 import { FloatingPanelProvider } from './panels/floatingPanelProvider';
+import { registerContextMenuCommands } from './contextMenus/contextMenuCommands';
 
 export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -509,6 +510,9 @@ script{
     }
   );
   context.subscriptions.push(toggleLayerCmd);
+
+  // Register context menu commands
+  registerContextMenuCommands(context);
 
   // Set extension active context
   vscode.commands.executeCommand('setContext', 'manicMiners.extensionActive', true);
