@@ -77,6 +77,12 @@
         "icon": "$(home)"
       },
       {
+        "command": "manicMiners.showDashboard",
+        "title": "Show Dashboard",
+        "category": "Manic Miners",
+        "icon": "$(dashboard)"
+      },
+      {
         "command": "manicMiners.newFile",
         "title": "Create New Map",
         "category": "Manic Miners",
@@ -342,6 +348,13 @@
     },
     "views": {
       "manic-miners": [
+        {
+          "type": "webview",
+          "id": "manicMiners.dashboard",
+          "name": "Dashboard",
+          "icon": "$(dashboard)",
+          "contextualTitle": "Manic Miners Dashboard"
+        },
         {
           "id": "manicMiners.explorer",
           "name": "Maps Explorer",

@@ -1,0 +1,418 @@
+/* Dashboard Styles */
+:root {
+  --dashboard-bg: var(--vscode-sideBar-background);
+  --card-bg: var(--vscode-editor-background);
+  --card-border: var(--vscode-widget-border);
+  --text-primary: var(--vscode-foreground);
+  --text-secondary: var(--vscode-descriptionForeground);
+  --accent: var(--vscode-button-background);
+  --accent-hover: var(--vscode-button-hoverBackground);
+  --success: #4ec9b0;
+  --warning: #dcdcaa;
+  --error: #f48771;
+  --info: #569cd6;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--text-primary);
+  background: var(--dashboard-bg);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+.dashboard-container {
+  padding: 16px;
+  max-width: 100%;
+}
+
+h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Current Map Section */
+.current-map-section {
+  margin-bottom: 24px;
+}
+
+.current-map-info {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.current-map-info .no-map {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 20px 0;
+}
+
+.map-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.map-name {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.map-stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.map-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.map-stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.map-stat-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.difficulty-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.difficulty-easy {
+  background: var(--success);
+  color: #fff;
+}
+
+.difficulty-medium {
+  background: var(--warning);
+  color: #000;
+}
+
+.difficulty-hard {
+  background: var(--error);
+  color: #fff;
+}
+
+.difficulty-extreme {
+  background: #8b0000;
+  color: #fff;
+}
+
+/* Quick Actions */
+.quick-actions-section {
+  margin-bottom: 24px;
+}
+
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.action-button {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-primary);
+}
+
+.action-button:hover:not(:disabled) {
+  background: var(--accent);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-button .icon {
+  font-size: 20px;
+}
+
+.action-button span:last-child {
+  font-size: 11px;
+  font-weight: 500;
+}
+
+/* Statistics Overview */
+.stats-overview {
+  margin-bottom: 24px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.stat-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 16px;
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+/* Recent Maps */
+.recent-maps-section {
+  margin-bottom: 24px;
+}
+
+.recent-maps-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recent-map-item {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recent-map-item:hover {
+  background: var(--accent);
+  transform: translateX(4px);
+}
+
+.recent-map-name {
+  flex: 1;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.recent-map-time {
+  font-size: 10px;
+  color: var(--text-secondary);
+}
+
+.no-recent {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* Analysis Section */
+.analysis-section {
+  margin-bottom: 24px;
+}
+
+.analysis-content {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.analysis-item {
+  margin-bottom: 12px;
+}
+
+.analysis-item:last-child {
+  margin-bottom: 0;
+}
+
+.analysis-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.analysis-value {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.analysis-issues {
+  list-style: none;
+  padding-left: 16px;
+}
+
+.analysis-issues li {
+  position: relative;
+  padding-left: 16px;
+  margin-bottom: 4px;
+  font-size: 12px;
+}
+
+.analysis-issues li::before {
+  content: '⚠️';
+  position: absolute;
+  left: 0;
+}
+
+/* Help Section */
+.help-section {
+  margin-bottom: 24px;
+}
+
+.help-links {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.help-links a {
+  color: var(--vscode-textLink-foreground);
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+  font-size: 12px;
+}
+
+.help-links a:hover {
+  background: var(--card-bg);
+  text-decoration: underline;
+}
+
+/* Progress Bars */
+.progress-bar {
+  height: 4px;
+  background: var(--card-border);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+
+/* Tooltips */
+.tooltip {
+  position: relative;
+  cursor: help;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--vscode-editorWidget-background);
+  color: var(--text-primary);
+  padding: 4px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.current-map-info,
+.action-button,
+.stat-item,
+.recent-map-item {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.spinner {
+  width: 24px;
+  height: 24px;
+  border: 3px solid var(--card-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive */
+@media (max-width: 300px) {
+  .quick-actions-grid,
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
