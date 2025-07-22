@@ -45,6 +45,7 @@ import { CommandPaletteProvider } from './commands/commandPaletteProvider';
 import { CommandTipsProvider } from './commands/commandTipsProvider';
 import { KeyboardShortcutManager } from './keyboard/keyboardShortcuts';
 import { KeyboardShortcutsPanel } from './keyboard/keyboardShortcutsPanel';
+import { FloatingPanelProvider } from './panels/floatingPanelProvider';
 
 export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -447,6 +448,67 @@ script{
     }
   );
   context.subscriptions.push(showKeyboardShortcutsCmd);
+
+  // Register Floating Panels Provider
+  const floatingPanelProvider = new FloatingPanelProvider(context.extensionUri, context);
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider(FloatingPanelProvider.viewType, floatingPanelProvider)
+  );
+
+  // Register floating panels commands
+  const showFloatingPanelsCmd = vscode.commands.registerCommand(
+    'manicMiners.showFloatingPanels',
+    () => {
+      vscode.commands.executeCommand('manicMiners.floatingPanels.focus');
+    }
+  );
+  context.subscriptions.push(showFloatingPanelsCmd);
+
+  const resetFloatingPanelsCmd = vscode.commands.registerCommand(
+    'manicMiners.resetFloatingPanels',
+    () => {
+      floatingPanelProvider.resetLayout();
+    }
+  );
+  context.subscriptions.push(resetFloatingPanelsCmd);
+
+  // Register tool selection command
+  const selectToolCmd = vscode.commands.registerCommand(
+    'manicMiners.selectTool',
+    (tool: string) => {
+      // Update selected tool in tile palette
+      vscode.commands.executeCommand('manicMiners.updateStatusBar', {
+        selectedTile: `Tool: ${tool}`,
+      });
+    }
+  );
+  context.subscriptions.push(selectToolCmd);
+
+  // Register property update command
+  const updatePropertyCmd = vscode.commands.registerCommand(
+    'manicMiners.updateProperty',
+    (data: { property: string; value: string | number }) => {
+      // Handle property updates
+      if (data.property === 'tileType') {
+        tilePaletteProvider.setSelectedTile(Number(data.value));
+      }
+      // Update status bar with property info
+      vscode.commands.executeCommand('manicMiners.updateStatusBar', {
+        selectedTile: `${data.property}: ${data.value}`,
+      });
+    }
+  );
+  context.subscriptions.push(updatePropertyCmd);
+
+  // Register layer toggle command
+  const toggleLayerCmd = vscode.commands.registerCommand(
+    'manicMiners.toggleLayer',
+    (layer: string) => {
+      // Toggle layer visibility
+      vscode.window.showInformationMessage(`Toggled layer: ${layer}`);
+    }
+  );
+  context.subscriptions.push(toggleLayerCmd);
 
   // Set extension active context
   vscode.commands.executeCommand('setContext', 'manicMiners.extensionActive', true);
