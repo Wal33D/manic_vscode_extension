@@ -478,10 +478,10 @@ script{
   const selectToolCmd = vscode.commands.registerCommand(
     'manicMiners.selectTool',
     (tool: string) => {
-      // Update selected tool in tile palette
-      vscode.commands.executeCommand('manicMiners.updateStatusBar', {
-        selectedTile: `Tool: ${tool}`,
-      });
+      // Update selected tool in workspace
+      statusBarManager.updateStatusBarItem({ selectedTile: `Tool: ${tool}` });
+      // Show notification for demo
+      vscode.window.showInformationMessage(`Selected tool: ${tool}`);
     }
   );
   context.subscriptions.push(selectToolCmd);
