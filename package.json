@@ -95,6 +95,12 @@
         "icon": "$(lightbulb)"
       },
       {
+        "command": "manicMiners.showKeyboardShortcuts",
+        "title": "Show Keyboard Shortcuts",
+        "category": "Manic Miners",
+        "icon": "$(keyboard)"
+      },
+      {
         "command": "manicMiners.newFile",
         "title": "Create New Map",
         "category": "Manic Miners",
@@ -538,6 +544,129 @@
         "key": "ctrl+alt+up",
         "mac": "cmd+alt+up",
         "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.showMapPreview",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.openMapEditor",
+        "key": "ctrl+k v",
+        "mac": "cmd+k v",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.switchToTextEditor",
+        "key": "f2",
+        "when": "manicMiners.mapEditorFocus"
+      },
+      {
+        "command": "manicMiners.showDashboard",
+        "key": "ctrl+k ctrl+d",
+        "mac": "cmd+k cmd+d"
+      },
+      {
+        "command": "manicMiners.newFile",
+        "key": "ctrl+shift+n",
+        "mac": "cmd+shift+n",
+        "when": "manicMiners.extensionActive"
+      },
+      {
+        "command": "manicMiners.insertTemplate",
+        "key": "ctrl+shift+t",
+        "mac": "cmd+shift+t",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.fillAreaEnhanced",
+        "key": "ctrl+shift+f",
+        "mac": "cmd+shift+f",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.replaceAllEnhanced",
+        "key": "ctrl+shift+h",
+        "mac": "cmd+shift+h",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.insertScriptPattern",
+        "key": "ctrl+shift+i",
+        "mac": "cmd+shift+i",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.openObjectiveBuilder",
+        "key": "ctrl+shift+o",
+        "mac": "cmd+shift+o",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.runValidation",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.fixCommonIssues",
+        "key": "ctrl+shift+f1",
+        "mac": "cmd+shift+f1",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.showHeatMap",
+        "key": "ctrl+alt+g",
+        "mac": "cmd+alt+g",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.show3DTerrain",
+        "key": "ctrl+alt+3",
+        "mac": "cmd+alt+3",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.showSmartSuggestions",
+        "key": "ctrl+alt+s",
+        "mac": "cmd+alt+s",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.generateLevel",
+        "key": "ctrl+g",
+        "mac": "cmd+g",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.createVersion",
+        "key": "ctrl+alt+v",
+        "mac": "cmd+alt+v",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.compareVersions",
+        "key": "ctrl+alt+d",
+        "mac": "cmd+alt+d",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.showQuickActions",
+        "key": "ctrl+.",
+        "mac": "cmd+.",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.showCommandTips",
+        "key": "f1",
+        "when": "editorTextFocus && editorLangId == manicminers"
+      },
+      {
+        "command": "manicMiners.showKeyboardShortcuts",
+        "key": "ctrl+k ctrl+s",
+        "mac": "cmd+k cmd+s",
+        "when": "manicMiners.extensionActive"
       }
     ],
     "snippets": [

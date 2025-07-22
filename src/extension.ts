@@ -43,6 +43,8 @@ import { DashboardProvider } from './views/dashboardProvider';
 import { StatusBarManager } from './statusBar/statusBarManager';
 import { CommandPaletteProvider } from './commands/commandPaletteProvider';
 import { CommandTipsProvider } from './commands/commandTipsProvider';
+import { KeyboardShortcutManager } from './keyboard/keyboardShortcuts';
+import { KeyboardShortcutsPanel } from './keyboard/keyboardShortcutsPanel';
 
 export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -432,6 +434,22 @@ script{
   setTimeout(() => {
     commandTips.showTipInStatusBar(dailyTip);
   }, 5000);
+
+  // Initialize Keyboard Shortcuts Manager
+  const keyboardShortcutManager = new KeyboardShortcutManager(context);
+  keyboardShortcutManager.initializeDefaultShortcuts();
+
+  // Register keyboard shortcuts panel command
+  const showKeyboardShortcutsCmd = vscode.commands.registerCommand(
+    'manicMiners.showKeyboardShortcuts',
+    () => {
+      KeyboardShortcutsPanel.createOrShow(context.extensionUri, keyboardShortcutManager);
+    }
+  );
+  context.subscriptions.push(showKeyboardShortcutsCmd);
+
+  // Set extension active context
+  vscode.commands.executeCommand('setContext', 'manicMiners.extensionActive', true);
 
   // Update status bar when document changes
   context.subscriptions.push(
