@@ -305,7 +305,7 @@ export class DashboardProvider implements vscode.WebviewViewProvider {
     );
 
     // Export provider for other extensions to use
-    (context as { dashboardProvider?: DashboardProvider }).dashboardProvider = provider;
+    // Note: Context object is sealed, cannot add properties to it
 
     return disposable;
   }
