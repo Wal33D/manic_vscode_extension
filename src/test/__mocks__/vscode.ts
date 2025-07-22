@@ -286,17 +286,17 @@ export class TreeItem {
   public resourceUri?: Uri;
   public tooltip?: string | MarkdownString;
 
-  constructor(
-    label: string,
-    collapsibleState?: TreeItemCollapsibleState
-  ) {
+  constructor(label: string, collapsibleState?: TreeItemCollapsibleState) {
     this.label = label;
     this.collapsibleState = collapsibleState;
   }
 }
 
 export class ThemeIcon {
-  constructor(public id: string, public color?: any) {}
+  constructor(
+    public id: string,
+    public color?: any
+  ) {}
 }
 
 export class EventEmitter<T> {
