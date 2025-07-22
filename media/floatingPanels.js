@@ -12,43 +12,59 @@
   });
 
   // Panel visibility management
-  let hoverTimeout = null;
   let activeDropdown = null;
   
-  // Dropdown menu management
-  window.showDropdown = function(menuId) {
-    clearTimeout(hoverTimeout);
-    const dropdown = document.getElementById(`dropdown-${menuId}`);
-    if (dropdown) {
-      // Hide other dropdowns
-      if (activeDropdown && activeDropdown !== dropdown) {
-        activeDropdown.style.display = 'none';
+  // Initialize dropdown functionality after DOM is ready
+  function initializeDropdowns() {
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.toolbar-dropdown')) {
+        closeAllDropdowns();
       }
-      dropdown.style.display = 'block';
-      activeDropdown = dropdown;
-    }
-  };
+    });
+    
+    // Handle toolbar dropdown clicks
+    document.querySelectorAll('.toolbar-dropdown').forEach(dropdown => {
+      const button = dropdown.querySelector('.toolbar-button');
+      const menu = dropdown.querySelector('.dropdown-menu');
+      
+      if (button && menu) {
+        button.addEventListener('click', (e) => {
+          e.stopPropagation();
+          toggleDropdown(menu);
+        });
+      }
+    });
+    
+    // Handle dropdown menu item clicks
+    document.querySelectorAll('.dropdown-menu button').forEach(button => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeAllDropdowns();
+      });
+    });
+  }
   
-  window.hideDropdown = function(menuId) {
-    hoverTimeout = setTimeout(() => {
-      const dropdown = document.getElementById(`dropdown-${menuId}`);
-      if (dropdown) {
-        dropdown.style.display = 'none';
-        if (activeDropdown === dropdown) {
-          activeDropdown = null;
-        }
-      }
-    }, 200); // Small delay to allow moving to dropdown menu
-  };
+  function toggleDropdown(menu) {
+    if (menu.classList.contains('show')) {
+      menu.classList.remove('show');
+      activeDropdown = null;
+    } else {
+      closeAllDropdowns();
+      menu.classList.add('show');
+      activeDropdown = menu;
+    }
+  }
+  
+  function closeAllDropdowns() {
+    document.querySelectorAll('.dropdown-menu').forEach(menu => {
+      menu.classList.remove('show');
+    });
+    activeDropdown = null;
+  }
   
   // Tool selection from dropdown
   window.selectTool = function(tool) {
-    // Hide dropdown
-    if (activeDropdown) {
-      activeDropdown.style.display = 'none';
-      activeDropdown = null;
-    }
-    
     // Send tool selection message
     vscode.postMessage({
       command: 'toolSelected',
@@ -59,20 +75,20 @@
     document.querySelectorAll('.tool-button').forEach(btn => {
       btn.classList.remove('active');
     });
+    
+    // Optionally show the tools panel
+    showPanel('tools');
   };
   
   // Layer toggle from dropdown
   window.toggleLayer = function(layer) {
-    // Hide dropdown
-    if (activeDropdown) {
-      activeDropdown.style.display = 'none';
-      activeDropdown = null;
-    }
-    
     vscode.postMessage({
       command: 'layerToggled',
       layer: layer
     });
+    
+    // Optionally show the layers panel
+    showPanel('layers');
   };
   
   window.showPanel = function(panelId) {
@@ -500,6 +516,11 @@
     visiblePanels[currentIndex].focus();
   }
 
-  // Initialize
+  // Initialize when DOM is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeDropdowns);
+  } else {
+    initializeDropdowns();
+  }
   console.log('Floating panels initialized');
 })();

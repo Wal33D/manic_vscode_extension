@@ -130,9 +130,9 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
         <!-- Main workspace -->
         <div class="workspace-content">
           <div class="toolbar">
-            <div class="toolbar-dropdown" onmouseenter="showDropdown('tools')" onmouseleave="hideDropdown('tools')">
+            <div class="toolbar-dropdown">
               <button class="toolbar-button" title="Tools">🛠️ Tools</button>
-              <div class="dropdown-menu" id="dropdown-tools" style="display: none;">
+              <div class="dropdown-menu" id="dropdown-tools">
                 <button onclick="selectTool('brush')">🖌️ Brush</button>
                 <button onclick="selectTool('eraser')">🧹 Eraser</button>
                 <button onclick="selectTool('fill')">🪣 Fill</button>
@@ -143,9 +143,9 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
                 <button onclick="selectTool('select')">✂️ Select</button>
               </div>
             </div>
-            <div class="toolbar-dropdown" onmouseenter="showDropdown('layers')" onmouseleave="hideDropdown('layers')">
+            <div class="toolbar-dropdown">
               <button class="toolbar-button" title="Layers">📚 Layers</button>
-              <div class="dropdown-menu" id="dropdown-layers" style="display: none;">
+              <div class="dropdown-menu" id="dropdown-layers">
                 <button onclick="toggleLayer('tiles')">🗺️ Tiles</button>
                 <button onclick="toggleLayer('height')">📏 Height</button>
                 <button onclick="toggleLayer('resources')">💎 Resources</button>

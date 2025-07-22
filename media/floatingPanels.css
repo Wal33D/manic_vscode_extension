@@ -117,6 +117,10 @@ body {
   background: var(--vscode-toolbar-hoverBackground);
 }
 
+.toolbar-button.active {
+  background: var(--vscode-toolbar-activeBackground);
+}
+
 .toolbar .separator {
   width: 1px;
   height: 20px;
@@ -152,6 +156,7 @@ body {
   min-width: 150px;
   padding: 4px 0;
   z-index: 1000;
+  display: none;
 }
 
 .dropdown-menu button {
@@ -170,9 +175,9 @@ body {
   background: var(--vscode-list-hoverBackground);
 }
 
-/* Keep dropdown open when hovering over it */
-.toolbar-dropdown:hover .dropdown-menu {
-  display: block !important;
+/* Dropdown menu states */
+.dropdown-menu.show {
+  display: block;
 }
 
 /* Floating Panels Workspace */
