@@ -130,9 +130,30 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
         <!-- Main workspace -->
         <div class="workspace-content">
           <div class="toolbar">
-            <button onclick="showPanel('tools')" title="Tools">🛠️</button>
+            <div class="toolbar-dropdown" onmouseenter="showDropdown('tools')" onmouseleave="hideDropdown('tools')">
+              <button class="toolbar-button" title="Tools">🛠️ Tools</button>
+              <div class="dropdown-menu" id="dropdown-tools" style="display: none;">
+                <button onclick="selectTool('brush')">🖌️ Brush</button>
+                <button onclick="selectTool('eraser')">🧹 Eraser</button>
+                <button onclick="selectTool('fill')">🪣 Fill</button>
+                <button onclick="selectTool('pick')">💧 Pick</button>
+                <button onclick="selectTool('line')">📏 Line</button>
+                <button onclick="selectTool('rect')">⬛ Rectangle</button>
+                <button onclick="selectTool('circle')">⭕ Circle</button>
+                <button onclick="selectTool('select')">✂️ Select</button>
+              </div>
+            </div>
+            <div class="toolbar-dropdown" onmouseenter="showDropdown('layers')" onmouseleave="hideDropdown('layers')">
+              <button class="toolbar-button" title="Layers">📚 Layers</button>
+              <div class="dropdown-menu" id="dropdown-layers" style="display: none;">
+                <button onclick="toggleLayer('tiles')">🗺️ Tiles</button>
+                <button onclick="toggleLayer('height')">📏 Height</button>
+                <button onclick="toggleLayer('resources')">💎 Resources</button>
+                <button onclick="toggleLayer('buildings')">🏢 Buildings</button>
+                <button onclick="toggleLayer('vehicles')">🚗 Vehicles</button>
+              </div>
+            </div>
             <button onclick="showPanel('properties')" title="Properties">📋</button>
-            <button onclick="showPanel('layers')" title="Layers">📚</button>
             <button onclick="showPanel('history')" title="History">🕐</button>
             <button onclick="showPanel('colorPicker')" title="Color Picker">🎨</button>
             <span class="separator"></span>

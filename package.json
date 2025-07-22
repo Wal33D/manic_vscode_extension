@@ -41,11 +41,7 @@
     "Linters"
   ],
   "activationEvents": [
-    "onLanguage:manicminers",
-    "workspaceContains:**/*.dat",
-    "onCommand:manicMiners.showWelcome",
-    "onCommand:manicMiners.showDashboard",
-    "onCommand:manicMiners.newFile"
+    "workspaceContains:**/*.dat"
   ],
   "main": "./out/extension.js",
   "contributes": {

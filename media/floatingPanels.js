@@ -12,6 +12,69 @@
   });
 
   // Panel visibility management
+  let hoverTimeout = null;
+  let activeDropdown = null;
+  
+  // Dropdown menu management
+  window.showDropdown = function(menuId) {
+    clearTimeout(hoverTimeout);
+    const dropdown = document.getElementById(`dropdown-${menuId}`);
+    if (dropdown) {
+      // Hide other dropdowns
+      if (activeDropdown && activeDropdown !== dropdown) {
+        activeDropdown.style.display = 'none';
+      }
+      dropdown.style.display = 'block';
+      activeDropdown = dropdown;
+    }
+  };
+  
+  window.hideDropdown = function(menuId) {
+    hoverTimeout = setTimeout(() => {
+      const dropdown = document.getElementById(`dropdown-${menuId}`);
+      if (dropdown) {
+        dropdown.style.display = 'none';
+        if (activeDropdown === dropdown) {
+          activeDropdown = null;
+        }
+      }
+    }, 200); // Small delay to allow moving to dropdown menu
+  };
+  
+  // Tool selection from dropdown
+  window.selectTool = function(tool) {
+    // Hide dropdown
+    if (activeDropdown) {
+      activeDropdown.style.display = 'none';
+      activeDropdown = null;
+    }
+    
+    // Send tool selection message
+    vscode.postMessage({
+      command: 'toolSelected',
+      tool: tool
+    });
+    
+    // Update UI to show selected tool
+    document.querySelectorAll('.tool-button').forEach(btn => {
+      btn.classList.remove('active');
+    });
+  };
+  
+  // Layer toggle from dropdown
+  window.toggleLayer = function(layer) {
+    // Hide dropdown
+    if (activeDropdown) {
+      activeDropdown.style.display = 'none';
+      activeDropdown = null;
+    }
+    
+    vscode.postMessage({
+      command: 'layerToggled',
+      layer: layer
+    });
+  };
+  
   window.showPanel = function(panelId) {
     vscode.postMessage({
       command: 'togglePanel',
