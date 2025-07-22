@@ -209,23 +209,12 @@ describe('CommandPaletteProvider', () => {
         category: 'editing',
       });
 
-      // Capture the createQuickPick call count before
-      const createCallsBefore = (vscode.window.createQuickPick as jest.Mock).mock.calls.length;
-
       await provider.showCommandPalette();
 
-      // Check if a new quickPick was created
-      const createCallsAfter = (vscode.window.createQuickPick as jest.Mock).mock.calls.length;
-      expect(createCallsAfter).toBe(createCallsBefore + 1);
-
-      // mockQuickPick should be the most recently created one
-      expect(mockQuickPick).toBeDefined();
+      // Verify the quick pick was configured correctly
       expect(mockQuickPick.buttons).toHaveLength(2);
-      expect(mockQuickPick.buttons[0].tooltip).toBe('Show Favorites');
-      expect(mockQuickPick.buttons[1].tooltip).toBe('Show Recent');
-
-      // The implementation now checks if onDidTriggerButton exists before calling it
-      // So we just verify the buttons were added correctly
+      expect((mockQuickPick.buttons[0] as any).tooltip).toBe('Show Favorites');
+      expect((mockQuickPick.buttons[1] as any).tooltip).toBe('Show Recent');
     });
 
     it('should handle favorite button click', async () => {

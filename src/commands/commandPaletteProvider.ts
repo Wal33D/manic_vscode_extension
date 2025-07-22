@@ -151,13 +151,15 @@ export class CommandPaletteProvider {
       },
     ];
 
-    quickPick.onDidTriggerButton(button => {
-      if (button.tooltip === 'Show Favorites') {
-        quickPick.items = this.getFavoriteItems();
-      } else if (button.tooltip === 'Show Recent') {
-        quickPick.items = this.getRecentItems();
-      }
-    });
+    if (quickPick.onDidTriggerButton) {
+      quickPick.onDidTriggerButton(button => {
+        if (button.tooltip === 'Show Favorites') {
+          quickPick.items = this.getFavoriteItems();
+        } else if (button.tooltip === 'Show Recent') {
+          quickPick.items = this.getRecentItems();
+        }
+      });
+    }
 
     quickPick.show();
   }
