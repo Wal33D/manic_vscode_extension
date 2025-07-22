@@ -410,6 +410,12 @@
         "title": "Insert Script Snippet",
         "category": "Manic Miners",
         "icon": "$(code)"
+      },
+      {
+        "command": "manicMiners.showQuickActions",
+        "title": "Show Quick Actions",
+        "category": "Manic Miners",
+        "icon": "$(lightbulb)"
       }
     ],
     "hoverProviders": [
