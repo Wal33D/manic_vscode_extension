@@ -7,6 +7,7 @@ import { AutoTiler, supportsAutoTiling } from './autoTiling';
 import { MapEditorValidator } from './mapEditorValidator';
 import { MapTemplateManager, MapTemplate } from './mapTemplates';
 import { AdvancedSelectionTool, SelectionMode, SelectionRegion } from './advancedSelection';
+import { ANIMATABLE_TILES } from './tileAnimation';
 
 export interface PaintTool {
   type:
@@ -226,6 +227,15 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             message.operation,
             message.selection
           );
+          break;
+        case 'toggleAnimation':
+          await this.handleToggleAnimation(webviewPanel.webview, message.enabled);
+          break;
+        case 'getAnimatableTiles':
+          webviewPanel.webview.postMessage({
+            type: 'animatableTiles',
+            tiles: ANIMATABLE_TILES,
+          });
           break;
       }
     });
@@ -1051,6 +1061,11 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
             <button id="templateBtn" title="Map Templates (T)">📋 Templates</button>
           </div>
           
+          <div class="tool-group">
+            <button id="animationToggleBtn" title="Toggle Tile Animations">🎬 Animation</button>
+            <span id="animationStatus" style="margin-left: 8px; font-size: 12px; color: #999;">Off</span>
+          </div>
+          
           <div class="coordinates">
             <span id="coords">Row: -, Col: -</span>
           </div>
@@ -1122,6 +1137,7 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
         let savedPatterns = ${JSON.stringify(patterns)};
         let mapLayers = ${JSON.stringify(layers)};
         let currentLayerId = 'base';
+        const animatableTiles = ${JSON.stringify(ANIMATABLE_TILES)};
       </script>
       
       <!-- Template Gallery -->
@@ -1481,6 +1497,24 @@ export class MapEditorProvider implements vscode.CustomTextEditorProvider {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       vscode.window.showErrorMessage(`Selection modification error: ${errorMessage}`);
+    }
+  }
+
+  private async handleToggleAnimation(webview: vscode.Webview, enabled: boolean): Promise<void> {
+    try {
+      webview.postMessage({
+        type: 'animationToggled',
+        enabled: enabled,
+      });
+
+      if (enabled) {
+        vscode.window.showInformationMessage('Tile animations enabled');
+      } else {
+        vscode.window.showInformationMessage('Tile animations disabled');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      vscode.window.showErrorMessage(`Error toggling animations: ${errorMessage}`);
     }
   }
 
