@@ -341,6 +341,47 @@ export class AutoTiler {
 
     return changes;
   }
+
+  /**
+   * Get auto-tiled positions for multiple tile placements
+   */
+  public getAutoTiledPositions(
+    positions: Array<{ row: number; col: number; tileId: number }>
+  ): Array<{ row: number; col: number; tileId: number }> {
+    const results: Array<{ row: number; col: number; tileId: number }> = [];
+
+    // Apply tiles temporarily
+    const originalTiles: Array<{ row: number; col: number; tileId: number }> = [];
+    for (const pos of positions) {
+      if (pos.row >= 0 && pos.row < this.rows && pos.col >= 0 && pos.col < this.cols) {
+        originalTiles.push({
+          row: pos.row,
+          col: pos.col,
+          tileId: this.tiles[pos.row][pos.col],
+        });
+        this.tiles[pos.row][pos.col] = pos.tileId;
+      }
+    }
+
+    // Calculate auto-tiling for each position
+    for (const pos of positions) {
+      if (pos.row >= 0 && pos.row < this.rows && pos.col >= 0 && pos.col < this.cols) {
+        const autoTileId = this.getAutoTile(pos.row, pos.col, pos.tileId);
+        results.push({
+          row: pos.row,
+          col: pos.col,
+          tileId: autoTileId,
+        });
+      }
+    }
+
+    // Restore original tiles
+    for (const tile of originalTiles) {
+      this.tiles[tile.row][tile.col] = tile.tileId;
+    }
+
+    return results;
+  }
 }
 
 /**

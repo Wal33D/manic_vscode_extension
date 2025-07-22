@@ -46,7 +46,7 @@ colcount:10
     mockWebview = {
       postMessage: jest.fn().mockResolvedValue(true),
       html: '',
-      asWebviewUri: jest.fn((uri) => uri),
+      asWebviewUri: jest.fn(uri => uri),
       onDidReceiveMessage: jest.fn(),
     } as any;
 
@@ -96,7 +96,7 @@ colcount:1000
 
     beforeEach(async () => {
       // Capture the message handler
-      mockWebview.onDidReceiveMessage = jest.fn((handler) => {
+      (mockWebview as any).onDidReceiveMessage = jest.fn((handler: any) => {
         messageHandler = handler;
         return { dispose: jest.fn() };
       });
@@ -155,15 +155,15 @@ colcount:1000
 
   describe('Custom editor capabilities', () => {
     it('should provide correct view type', () => {
-      expect(MapEditorProvider.viewType).toBe('manicMiners.mapEditor');
+      expect((MapEditorProvider as any).viewType).toBe('manicMiners.mapEditor');
     });
 
     it('should handle document save', async () => {
       const applyEditSpy = jest.spyOn(vscode.workspace, 'applyEdit').mockResolvedValue(true);
-      
+
       // Simulate a paint operation to trigger document change
       const messageHandler = jest.fn();
-      mockWebview.onDidReceiveMessage = jest.fn((handler) => {
+      (mockWebview as any).onDidReceiveMessage = jest.fn((handler: any) => {
         messageHandler.mockImplementation(handler);
         return { dispose: jest.fn() };
       });

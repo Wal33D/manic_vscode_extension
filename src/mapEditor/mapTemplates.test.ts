@@ -10,9 +10,9 @@ describe('MapTemplateManager', () => {
   describe('Built-in templates', () => {
     it('should have all built-in templates registered', () => {
       const templates = MapTemplateManager.getAllTemplates();
-      
+
       expect(templates.length).toBeGreaterThanOrEqual(5);
-      
+
       // Check for each expected template
       expect(MapTemplateManager.getTemplate('tutorial-basic')).toBeDefined();
       expect(MapTemplateManager.getTemplate('combat-arena')).toBeDefined();
@@ -23,7 +23,7 @@ describe('MapTemplateManager', () => {
 
     it('should have correct properties for tutorial template', () => {
       const tutorial = MapTemplateManager.getTemplate('tutorial-basic');
-      
+
       expect(tutorial).toBeDefined();
       expect(tutorial!.name).toBe('Basic Tutorial');
       expect(tutorial!.category).toBe(TemplateCategory.TUTORIAL);
@@ -35,12 +35,12 @@ describe('MapTemplateManager', () => {
 
     it('should generate valid tile arrays', () => {
       const templates = MapTemplateManager.getAllTemplates();
-      
+
       templates.forEach(template => {
         expect(template.tiles).toBeDefined();
         expect(template.tiles.length).toBe(template.size.rows);
         expect(template.tiles[0].length).toBe(template.size.cols);
-        
+
         // Check all tiles are valid numbers
         template.tiles.forEach(row => {
           row.forEach(tile => {
@@ -54,7 +54,9 @@ describe('MapTemplateManager', () => {
 
   describe('Template filtering', () => {
     it('should filter templates by category', () => {
-      const tutorialTemplates = MapTemplateManager.getTemplatesByCategory(TemplateCategory.TUTORIAL);
+      const tutorialTemplates = MapTemplateManager.getTemplatesByCategory(
+        TemplateCategory.TUTORIAL
+      );
       expect(tutorialTemplates.length).toBeGreaterThanOrEqual(1);
       expect(tutorialTemplates.every(t => t.category === TemplateCategory.TUTORIAL)).toBe(true);
 
@@ -71,9 +73,11 @@ describe('MapTemplateManager', () => {
 
   describe('Custom template management', () => {
     it('should create custom template with correct properties', () => {
-      const tiles = Array(10).fill(null).map(() => Array(10).fill(1));
+      const tiles = Array(10)
+        .fill(null)
+        .map(() => Array(10).fill(1));
       const objectives = ['Test objective 1', 'Test objective 2'];
-      
+
       const template = MapTemplateManager.createCustomTemplate(
         'My Test Map',
         'A test map for unit tests',
@@ -94,8 +98,10 @@ describe('MapTemplateManager', () => {
     });
 
     it('should add custom template to manager', () => {
-      const tiles = Array(5).fill(null).map(() => Array(5).fill(1));
-      
+      const tiles = Array(5)
+        .fill(null)
+        .map(() => Array(5).fill(1));
+
       const template = MapTemplateManager.createCustomTemplate(
         'Small Map',
         'A small test map',
@@ -128,7 +134,9 @@ describe('MapTemplateManager', () => {
         category: TemplateCategory.CUSTOM,
         difficulty: 'intermediate',
         size: { rows: 5, cols: 5 },
-        tiles: Array(5).fill(null).map(() => Array(5).fill(1)),
+        tiles: Array(5)
+          .fill(null)
+          .map(() => Array(5).fill(1)),
       };
 
       const json = JSON.stringify(templateData);
@@ -156,7 +164,7 @@ describe('MapTemplateManager', () => {
     it('should generate tutorial map with spawn point', () => {
       const tutorial = MapTemplateManager.getTemplate('tutorial-basic');
       const tiles = tutorial!.tiles;
-      
+
       // Find Tool Store (101)
       let foundSpawn = false;
       for (let r = 0; r < tiles.length; r++) {
@@ -167,7 +175,7 @@ describe('MapTemplateManager', () => {
           }
         }
       }
-      
+
       expect(foundSpawn).toBe(true);
     });
 
@@ -176,10 +184,10 @@ describe('MapTemplateManager', () => {
       const tiles = arena!.tiles;
       const centerR = Math.floor(tiles.length / 2);
       const centerC = Math.floor(tiles[0].length / 2);
-      
+
       // Center should be walkable
       expect(tiles[centerR][centerC]).toBe(101); // Tool Store
-      
+
       // Corners should be solid
       expect(tiles[0][0]).toBe(40); // Solid rock
       expect(tiles[0][tiles[0].length - 1]).toBe(40);
@@ -190,40 +198,40 @@ describe('MapTemplateManager', () => {
     it('should generate puzzle chamber with connected rooms', () => {
       const puzzle = MapTemplateManager.getTemplate('puzzle-chamber');
       const tiles = puzzle!.tiles;
-      
+
       // Check for chambers (ground tiles)
       let chamberCount = 0;
       const chambers = [
-        { r: 5, c: 5 },   // Top-left
-        { r: 5, c: 15 },  // Top-right
-        { r: 15, c: 5 },  // Bottom-left
+        { r: 5, c: 5 }, // Top-left
+        { r: 5, c: 15 }, // Top-right
+        { r: 15, c: 5 }, // Bottom-left
         { r: 15, c: 15 }, // Bottom-right
         { r: 10, c: 10 }, // Center
       ];
-      
+
       chambers.forEach(chamber => {
         if (tiles[chamber.r][chamber.c] === 1) {
           chamberCount++;
         }
       });
-      
+
       expect(chamberCount).toBeGreaterThanOrEqual(4); // At least 4 chambers should exist
     });
 
     it('should generate resource rush with multiple resource types', () => {
       const rush = MapTemplateManager.getTemplate('resource-rush');
       const tiles = rush!.tiles;
-      
+
       let crystalCount = 0;
       let oreCount = 0;
-      
+
       tiles.forEach(row => {
         row.forEach(tile => {
           if (tile >= 42 && tile <= 45) crystalCount++;
           if (tile >= 46 && tile <= 49) oreCount++;
         });
       });
-      
+
       expect(crystalCount).toBeGreaterThan(0);
       expect(oreCount).toBeGreaterThan(0);
     });
@@ -231,7 +239,7 @@ describe('MapTemplateManager', () => {
     it('should generate exploration cavern with varied terrain', () => {
       const cavern = MapTemplateManager.getTemplate('exploration-cavern');
       const tiles = cavern!.tiles;
-      
+
       // Count different tile types
       const tileCounts = new Map<number, number>();
       tiles.forEach(row => {
@@ -239,7 +247,7 @@ describe('MapTemplateManager', () => {
           tileCounts.set(tile, (tileCounts.get(tile) || 0) + 1);
         });
       });
-      
+
       // Should have at least ground, rock, and possibly water
       expect(tileCounts.size).toBeGreaterThanOrEqual(2);
       expect(tileCounts.get(1) || 0).toBeGreaterThan(0); // Ground

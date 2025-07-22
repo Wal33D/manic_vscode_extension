@@ -2309,6 +2309,432 @@
         render();
         showStatus('Template loaded successfully');
         break;
+      case 'selectionResult':
+        handleAdvancedSelection(message.selection);
+        break;
+      case 'selectionModified':
+        handleModifiedSelection(message.selection);
+        break;
     }
   });
+  
+  // Advanced selection state
+  let lassoPath = [];
+  let polygonVertices = [];
+  let isDrawingLasso = false;
+  let isDrawingPolygon = false;
+  let advancedSelection = null;
+  
+  // Handle advanced selection result
+  function handleAdvancedSelection(selectionData) {
+    advancedSelection = selectionData;
+    selection = {
+      startRow: selectionData.bounds.minRow,
+      startCol: selectionData.bounds.minCol,
+      endRow: selectionData.bounds.maxRow,
+      endCol: selectionData.bounds.maxCol,
+      points: selectionData.points
+    };
+    
+    // Enable selection tools
+    document.getElementById('copyBtn').disabled = false;
+    document.getElementById('deleteBtn').disabled = false;
+    document.getElementById('moveBtn').disabled = false;
+    document.getElementById('selectionOptions').style.display = 'flex';
+    
+    render();
+    showStatus(`Selected ${selectionData.points.length} tiles`);
+  }
+  
+  // Handle modified selection
+  function handleModifiedSelection(selectionData) {
+    handleAdvancedSelection(selectionData);
+  }
+  
+  // Advanced selection tool handlers
+  function startMagicWand(row, col) {
+    vscode.postMessage({
+      type: 'advancedSelect',
+      mode: 'magic_wand',
+      params: {
+        row: row,
+        col: col,
+        tolerance: 0
+      }
+    });
+  }
+  
+  function startLasso() {
+    isDrawingLasso = true;
+    lassoPath = [];
+    canvas.style.cursor = 'crosshair';
+  }
+  
+  function addLassoPoint(row, col) {
+    lassoPath.push({ row, col });
+    drawLassoPath();
+  }
+  
+  function completeLasso() {
+    if (lassoPath.length >= 3) {
+      vscode.postMessage({
+        type: 'advancedSelect',
+        mode: 'lasso',
+        params: { path: lassoPath }
+      });
+    }
+    isDrawingLasso = false;
+    lassoPath = [];
+    canvas.style.cursor = 'default';
+  }
+  
+  function drawLassoPath() {
+    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    if (lassoPath.length > 0) {
+      overlayCtx.strokeStyle = '#4ec9b0';
+      overlayCtx.lineWidth = 2;
+      overlayCtx.setLineDash([5, 5]);
+      overlayCtx.beginPath();
+      overlayCtx.moveTo(lassoPath[0].col * TILE_SIZE + TILE_SIZE/2, lassoPath[0].row * TILE_SIZE + TILE_SIZE/2);
+      
+      for (let i = 1; i < lassoPath.length; i++) {
+        overlayCtx.lineTo(lassoPath[i].col * TILE_SIZE + TILE_SIZE/2, lassoPath[i].row * TILE_SIZE + TILE_SIZE/2);
+      }
+      
+      overlayCtx.stroke();
+      overlayCtx.setLineDash([]);
+    }
+  }
+  
+  function startEllipse() {
+    // Similar to rectangle selection
+    currentTool = 'ellipse_select';
+  }
+  
+  function drawEllipseSelection(startRow, startCol, endRow, endCol) {
+    const centerRow = (startRow + endRow) / 2;
+    const centerCol = (startCol + endCol) / 2;
+    const radiusRows = Math.abs(endRow - startRow) / 2;
+    const radiusCols = Math.abs(endCol - startCol) / 2;
+    
+    vscode.postMessage({
+      type: 'advancedSelect',
+      mode: 'ellipse',
+      params: {
+        centerRow: centerRow,
+        centerCol: centerCol,
+        radiusRows: radiusRows,
+        radiusCols: radiusCols
+      }
+    });
+  }
+  
+  function startPolygon() {
+    isDrawingPolygon = true;
+    polygonVertices = [];
+    canvas.style.cursor = 'crosshair';
+  }
+  
+  function addPolygonVertex(row, col) {
+    polygonVertices.push({ row, col });
+    drawPolygonPath();
+  }
+  
+  function completePolygon() {
+    if (polygonVertices.length >= 3) {
+      vscode.postMessage({
+        type: 'advancedSelect',
+        mode: 'polygon',
+        params: { vertices: polygonVertices }
+      });
+    }
+    isDrawingPolygon = false;
+    polygonVertices = [];
+    canvas.style.cursor = 'default';
+  }
+  
+  function drawPolygonPath() {
+    overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+    if (polygonVertices.length > 0) {
+      overlayCtx.strokeStyle = '#4ec9b0';
+      overlayCtx.lineWidth = 2;
+      overlayCtx.beginPath();
+      overlayCtx.moveTo(polygonVertices[0].col * TILE_SIZE + TILE_SIZE/2, polygonVertices[0].row * TILE_SIZE + TILE_SIZE/2);
+      
+      for (let i = 1; i < polygonVertices.length; i++) {
+        overlayCtx.lineTo(polygonVertices[i].col * TILE_SIZE + TILE_SIZE/2, polygonVertices[i].row * TILE_SIZE + TILE_SIZE/2);
+      }
+      
+      // Close path preview
+      overlayCtx.setLineDash([5, 5]);
+      overlayCtx.lineTo(polygonVertices[0].col * TILE_SIZE + TILE_SIZE/2, polygonVertices[0].row * TILE_SIZE + TILE_SIZE/2);
+      overlayCtx.stroke();
+      overlayCtx.setLineDash([]);
+      
+      // Draw vertices
+      overlayCtx.fillStyle = '#4ec9b0';
+      polygonVertices.forEach(v => {
+        overlayCtx.fillRect(v.col * TILE_SIZE + TILE_SIZE/2 - 2, v.row * TILE_SIZE + TILE_SIZE/2 - 2, 4, 4);
+      });
+    }
+  }
+  
+  // Selection modification functions
+  function expandSelection() {
+    if (selection) {
+      vscode.postMessage({
+        type: 'modifySelection',
+        operation: 'expand',
+        selection: advancedSelection || {
+          points: getSelectionPoints(),
+          bounds: {
+            minRow: Math.min(selection.startRow, selection.endRow),
+            maxRow: Math.max(selection.startRow, selection.endRow),
+            minCol: Math.min(selection.startCol, selection.endCol),
+            maxCol: Math.max(selection.startCol, selection.endCol)
+          }
+        }
+      });
+    }
+  }
+  
+  function contractSelection() {
+    if (selection) {
+      vscode.postMessage({
+        type: 'modifySelection',
+        operation: 'contract',
+        selection: advancedSelection || {
+          points: getSelectionPoints(),
+          bounds: {
+            minRow: Math.min(selection.startRow, selection.endRow),
+            maxRow: Math.max(selection.startRow, selection.endRow),
+            minCol: Math.min(selection.startCol, selection.endCol),
+            maxCol: Math.max(selection.startCol, selection.endCol)
+          }
+        }
+      });
+    }
+  }
+  
+  function invertSelection() {
+    if (selection) {
+      vscode.postMessage({
+        type: 'modifySelection',
+        operation: 'invert',
+        selection: advancedSelection || {
+          points: getSelectionPoints(),
+          bounds: {
+            minRow: Math.min(selection.startRow, selection.endRow),
+            maxRow: Math.max(selection.startRow, selection.endRow),
+            minCol: Math.min(selection.startCol, selection.endCol),
+            maxCol: Math.max(selection.startCol, selection.endCol)
+          }
+        }
+      });
+    }
+  }
+  
+  function selectAll() {
+    const points = [];
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        points.push({ row: r, col: c });
+      }
+    }
+    
+    handleAdvancedSelection({
+      points: points,
+      bounds: {
+        minRow: 0,
+        maxRow: rows - 1,
+        minCol: 0,
+        maxCol: cols - 1
+      }
+    });
+  }
+  
+  function selectByTileType() {
+    const tileType = getTileAt(Math.floor(rows/2), Math.floor(cols/2)); // Use center tile as example
+    const input = prompt(`Select all tiles of type (current: ${tileType}):`);
+    
+    if (input && !isNaN(parseInt(input))) {
+      vscode.postMessage({
+        type: 'modifySelection',
+        operation: 'selectByType',
+        selection: { tileType: parseInt(input) }
+      });
+    }
+  }
+  
+  function getSelectionPoints() {
+    const points = [];
+    const minRow = Math.min(selection.startRow, selection.endRow);
+    const maxRow = Math.max(selection.startRow, selection.endRow);
+    const minCol = Math.min(selection.startCol, selection.endCol);
+    const maxCol = Math.max(selection.startCol, selection.endCol);
+    
+    for (let r = minRow; r <= maxRow; r++) {
+      for (let c = minCol; c <= maxCol; c++) {
+        points.push({ row: r, col: c });
+      }
+    }
+    
+    return points;
+  }
+  
+  // Update mouse handlers for advanced selection tools
+  const originalMouseDown = canvas.onmousedown;
+  canvas.onmousedown = function(e) {
+    const pos = getCanvasPosition(e);
+    
+    if (currentTool === 'magic_wand') {
+      startMagicWand(pos.row, pos.col);
+    } else if (currentTool === 'lasso') {
+      if (!isDrawingLasso) {
+        startLasso();
+      }
+      addLassoPoint(pos.row, pos.col);
+    } else if (currentTool === 'polygon') {
+      if (!isDrawingPolygon) {
+        startPolygon();
+      }
+      addPolygonVertex(pos.row, pos.col);
+    } else if (currentTool === 'ellipse') {
+      startPos = pos;
+      isDrawing = true;
+    } else {
+      originalMouseDown.call(this, e);
+    }
+  };
+  
+  const originalMouseMove = canvas.onmousemove;
+  canvas.onmousemove = function(e) {
+    const pos = getCanvasPosition(e);
+    
+    if (isDrawingLasso) {
+      addLassoPoint(pos.row, pos.col);
+    } else if (currentTool === 'ellipse' && isDrawing && startPos) {
+      // Draw ellipse preview
+      overlayCtx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+      overlayCtx.strokeStyle = '#4ec9b0';
+      overlayCtx.lineWidth = 2;
+      
+      const centerX = ((startPos.col + pos.col) / 2) * TILE_SIZE + TILE_SIZE/2;
+      const centerY = ((startPos.row + pos.row) / 2) * TILE_SIZE + TILE_SIZE/2;
+      const radiusX = Math.abs(pos.col - startPos.col) * TILE_SIZE / 2;
+      const radiusY = Math.abs(pos.row - startPos.row) * TILE_SIZE / 2;
+      
+      overlayCtx.beginPath();
+      overlayCtx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+      overlayCtx.stroke();
+    } else {
+      originalMouseMove.call(this, e);
+    }
+  };
+  
+  const originalMouseUp = canvas.onmouseup;
+  canvas.onmouseup = function(e) {
+    const pos = getCanvasPosition(e);
+    
+    if (currentTool === 'ellipse' && isDrawing && startPos) {
+      drawEllipseSelection(startPos.row, startPos.col, pos.row, pos.col);
+      isDrawing = false;
+      startPos = null;
+    } else {
+      originalMouseUp.call(this, e);
+    }
+  };
+  
+  // Add double-click handler for completing shapes
+  canvas.ondblclick = function(e) {
+    if (isDrawingLasso) {
+      completeLasso();
+    } else if (isDrawingPolygon) {
+      completePolygon();
+    }
+  };
+  
+  // Add keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.key === 'w' || e.key === 'W') {
+      selectTool('magic_wand');
+    } else if (e.key === 'o' || e.key === 'O') {
+      selectTool('lasso');
+    } else if (e.key === 'e' || e.key === 'E') {
+      selectTool('ellipse');
+    } else if (e.key === 'g' || e.key === 'G') {
+      selectTool('polygon');
+    } else if (e.ctrlKey && e.key === 'a') {
+      e.preventDefault();
+      selectAll();
+    } else if (e.key === 'Escape') {
+      if (isDrawingLasso) {
+        completeLasso();
+      } else if (isDrawingPolygon) {
+        completePolygon();
+      }
+    }
+  });
+  
+  // Add button event listeners
+  document.getElementById('expandSelectionBtn').addEventListener('click', expandSelection);
+  document.getElementById('contractSelectionBtn').addEventListener('click', contractSelection);
+  document.getElementById('invertSelectionBtn').addEventListener('click', invertSelection);
+  document.getElementById('selectAllBtn').addEventListener('click', selectAll);
+  document.getElementById('selectByTypeBtn').addEventListener('click', selectByTileType);
+  
+  // Update selectTool function to handle advanced tools
+  const originalSelectTool = window.selectTool;
+  window.selectTool = function(tool) {
+    // Show/hide selection options based on tool
+    const selectionTools = ['select', 'magic_wand', 'lasso', 'ellipse', 'polygon'];
+    document.getElementById('selectionOptions').style.display = 
+      selectionTools.includes(tool) && selection ? 'flex' : 'none';
+    
+    // Reset drawing states
+    if (isDrawingLasso) completeLasso();
+    if (isDrawingPolygon) completePolygon();
+    
+    originalSelectTool(tool);
+  };
+  
+  // Update drawSelection to handle advanced selections
+  const originalDrawSelection = window.drawSelection;
+  window.drawSelection = function() {
+    if (advancedSelection && advancedSelection.points) {
+      // Draw advanced selection with individual points
+      ctx.save();
+      ctx.globalAlpha = 0.3;
+      ctx.fillStyle = '#4ec9b0';
+      
+      advancedSelection.points.forEach(point => {
+        ctx.fillRect(
+          point.col * TILE_SIZE,
+          point.row * TILE_SIZE,
+          TILE_SIZE,
+          TILE_SIZE
+        );
+      });
+      
+      ctx.restore();
+      
+      // Draw selection outline
+      ctx.strokeStyle = '#4ec9b0';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      
+      // Simple bounding box for now
+      const bounds = advancedSelection.bounds;
+      ctx.strokeRect(
+        bounds.minCol * TILE_SIZE,
+        bounds.minRow * TILE_SIZE,
+        (bounds.maxCol - bounds.minCol + 1) * TILE_SIZE,
+        (bounds.maxRow - bounds.minRow + 1) * TILE_SIZE
+      );
+      
+      ctx.setLineDash([]);
+    } else if (originalDrawSelection) {
+      originalDrawSelection();
+    }
+  };
 })();

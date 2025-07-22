@@ -36,6 +36,26 @@ There are two ways to open the map editor:
 - Pick a tile from the map to use as current paint color
 - Automatically switches back to paint tool after picking
 
+### 🪄 Magic Wand Tool
+- Select all connected tiles of the same type
+- Click on any tile to select all connected similar tiles
+- Great for selecting regions quickly
+
+### 🔲 Lasso Tool  
+- Freehand selection tool
+- Click and drag to draw selection outline
+- Double-click or press Escape to complete selection
+
+### ⭕ Ellipse Selection
+- Create elliptical selections
+- Click and drag to define ellipse bounds
+- Useful for selecting circular areas
+
+### 🔺 Polygon Selection
+- Create polygonal selections with multiple vertices
+- Click to add vertices
+- Double-click or press Escape to complete polygon
+
 ## Controls
 
 ### Mouse Controls
@@ -52,6 +72,10 @@ There are two ways to open the map editor:
 - **S**: Switch to Select tool
 - **T**: Switch to Stamp tool
 - **A**: Toggle Auto-Tiling
+- **W**: Switch to Magic Wand tool
+- **O**: Switch to Lasso tool
+- **E**: Switch to Ellipse selection
+- **G**: Switch to Polygon selection
 - **[**: Decrease brush size
 - **]**: Increase brush size
 - **Ctrl+Z** (Cmd+Z on Mac): Undo
@@ -146,6 +170,14 @@ To switch back to the text editor:
 - **Paste**: Press `Ctrl+V` and click where to paste
 - **Move**: Select a region and press `M` to move it
 - **Delete**: Select a region and press `Delete` to clear it
+
+### 🎯 Advanced Selection Options
+- **Expand Selection**: Grow selection by one tile in all directions
+- **Contract Selection**: Shrink selection by one tile
+- **Invert Selection**: Select everything except current selection
+- **Select All**: Press `Ctrl+A` to select entire map
+- **Select by Type**: Select all tiles of a specific type
+- **Combine Selections**: Add, subtract, or intersect multiple selections
 
 ### 🔍 Zoom and Pan
 - **Zoom In/Out**: Use `+`/`-` keys or mouse wheel with Ctrl
@@ -273,9 +305,8 @@ Start with pre-made map layouts that you can customize.
 - **V**: Validate map
 - **Ctrl+Shift+S**: Save as template
 
-## Still Coming Soon
+## Coming Soon
 
-- Advanced selection tools (magic wand, lasso)
 - Animated tile preview
-- Collaborative editing
+- Collaborative editing  
 - Map scripting integration

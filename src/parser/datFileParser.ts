@@ -671,4 +671,20 @@ export class DatFileParser {
   public getSection(name: string): SectionInfo | undefined {
     return this.sections.get(name);
   }
+
+  /**
+   * Get tiles as a 2D array
+   */
+  public getTileArray(): number[][] | null {
+    const tilesSection = this.getSection('tiles');
+    if (!tilesSection) {
+      return null;
+    }
+
+    try {
+      return this.parseGrid(tilesSection);
+    } catch (error) {
+      return null;
+    }
+  }
 }
