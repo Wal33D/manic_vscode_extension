@@ -388,6 +388,7 @@ export class MapTemplateManager {
 
     // Random walk from each start point
     for (const start of startPoints) {
+      // eslint-disable-next-line prefer-const
       let current = { ...start };
       const steps = 100;
 
