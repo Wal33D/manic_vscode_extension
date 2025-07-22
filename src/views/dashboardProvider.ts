@@ -60,7 +60,13 @@ export class DashboardProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async message => {
       switch (message.command) {
         case 'runCommand':
-          await vscode.commands.executeCommand(message.commandId, message.args);
+          try {
+            await vscode.commands.executeCommand(message.commandId, message.args);
+          } catch (error) {
+            vscode.window.showErrorMessage(
+              `Failed to execute command: ${message.commandId}. ${error}`
+            );
+          }
           break;
         case 'openMap': {
           const uri = vscode.Uri.file(message.path);
@@ -72,10 +78,11 @@ export class DashboardProvider implements vscode.WebviewViewProvider {
           break;
         case 'openInMapEditor':
           if (this.currentMapUri) {
-            await vscode.commands.executeCommand(
-              'manicMiners.openInTabbedEditor',
-              this.currentMapUri
-            );
+            // First open the document
+            const document = await vscode.workspace.openTextDocument(this.currentMapUri);
+            await vscode.window.showTextDocument(document);
+            // Then open it in the map editor
+            await vscode.commands.executeCommand('manicMiners.openMapEditor');
           }
           break;
         case 'analyzeCurrentMap':
@@ -210,15 +217,15 @@ export class DashboardProvider implements vscode.WebviewViewProvider {
         <div class="quick-actions-section">
           <h2>⚡ Quick Actions</h2>
           <div class="quick-actions-grid">
-            <button class="action-button" data-command="manicMiners.newMap">
+            <button class="action-button" data-command="manicMiners.newFile">
               <span class="icon">📄</span>
               <span>New Map</span>
             </button>
-            <button class="action-button" data-command="manicMiners.openInTabbedEditor" id="editMapBtn" disabled>
+            <button class="action-button" data-command="manicMiners.openMapEditor" id="editMapBtn" disabled>
               <span class="icon">✏️</span>
               <span>Edit Map</span>
             </button>
-            <button class="action-button" data-command="manicMiners.validateMap">
+            <button class="action-button" data-command="manicMiners.runValidation">
               <span class="icon">✅</span>
               <span>Validate</span>
             </button>
@@ -226,7 +233,7 @@ export class DashboardProvider implements vscode.WebviewViewProvider {
               <span class="icon">🔥</span>
               <span>Analyze</span>
             </button>
-            <button class="action-button" data-command="manicMiners.showObjectiveBuilder">
+            <button class="action-button" data-command="manicMiners.openObjectiveBuilder">
               <span class="icon">🎯</span>
               <span>Objectives</span>
             </button>
