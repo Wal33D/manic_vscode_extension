@@ -58,7 +58,7 @@ export class FloatingPanelManager {
       size: { width: 200, height: 400, minWidth: 150, minHeight: 300 },
       collapsed: false,
       pinned: true,
-      visible: true,
+      visible: false,
     });
 
     // Properties Panel
@@ -71,7 +71,7 @@ export class FloatingPanelManager {
       size: { width: 250, height: 300, minWidth: 200, minHeight: 200 },
       collapsed: false,
       pinned: true,
-      visible: true,
+      visible: false,
     });
 
     // Layers Panel
@@ -84,7 +84,7 @@ export class FloatingPanelManager {
       size: { width: 250, height: 200, minWidth: 200, minHeight: 150 },
       collapsed: false,
       pinned: true,
-      visible: true,
+      visible: false,
     });
 
     // History Panel

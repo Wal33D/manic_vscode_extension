@@ -153,9 +153,9 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
                 <button onclick="toggleLayer('vehicles')">🚗 Vehicles</button>
               </div>
             </div>
-            <button onclick="showPanel('properties')" title="Properties">📋</button>
-            <button onclick="showPanel('history')" title="History">🕐</button>
-            <button onclick="showPanel('colorPicker')" title="Color Picker">🎨</button>
+            <button onclick="showPanel('properties')" title="Properties">📋 Properties</button>
+            <button onclick="showPanel('history')" title="History">🕐 History</button>
+            <button onclick="showPanel('colorPicker')" title="Color Picker">🎨 Color Picker</button>
             <span class="separator"></span>
             <button onclick="resetLayout()" title="Reset Layout">🔄</button>
             <button onclick="saveLayout()" title="Save Layout">💾</button>
