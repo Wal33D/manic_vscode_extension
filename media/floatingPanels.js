@@ -623,10 +623,22 @@
     document.addEventListener('DOMContentLoaded', () => {
       initializeEventHandlers();
       updateToolbarState();
+      // Initial render of panels if workspace exists
+      const workspace = document.getElementById('workspace');
+      if (workspace && panels.length > 0) {
+        workspace.innerHTML = renderPanels(panels);
+      }
+      console.log('Panels initialized:', Array.from(window.panelsData.values()));
     });
   } else {
     initializeEventHandlers();
     updateToolbarState();
+    // Initial render of panels if workspace exists
+    const workspace = document.getElementById('workspace');
+    if (workspace && panels.length > 0) {
+      workspace.innerHTML = renderPanels(panels);
+    }
+    console.log('Panels initialized:', Array.from(window.panelsData.values()));
   }
-  console.log('Floating panels initialized');
+  console.log('Floating panels script loaded');
 })();
