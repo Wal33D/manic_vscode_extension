@@ -39,6 +39,7 @@ import { MapsExplorerProvider } from './views/mapsExplorerProvider';
 import { TilePaletteProvider } from './views/tilePaletteProvider';
 import { ScriptSnippetsProvider } from './views/scriptSnippetsProvider';
 import { ValidationProvider } from './views/validationProvider';
+import { DashboardProvider } from './views/dashboardProvider';
 import { StatusBarManager } from './statusBar/statusBarManager';
 
 export async function activate(context: vscode.ExtensionContext) {
@@ -372,6 +373,15 @@ script{
     vscode.commands.executeCommand('manicMiners.terrain3D.focus');
   });
   context.subscriptions.push(show3DTerrainCommand);
+
+  // Register Dashboard Provider
+  context.subscriptions.push(DashboardProvider.register(context));
+
+  // Register dashboard command
+  const showDashboardCommand = vscode.commands.registerCommand('manicMiners.showDashboard', () => {
+    vscode.commands.executeCommand('manicMiners.dashboard.focus');
+  });
+  context.subscriptions.push(showDashboardCommand);
 
   // Initialize Status Bar Manager
   const statusBarManager = new StatusBarManager();
