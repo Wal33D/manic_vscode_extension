@@ -477,9 +477,6 @@ script{
         category: 'custom',
       });
     }),
-    vscode.commands.registerCommand('manicMiners.runValidation', () => {
-      vscode.commands.executeCommand('manicMiners.validateMap');
-    }),
     vscode.commands.registerCommand('manicMiners.showMapInfo', () => {
       // Show detailed map info in a quick pick or information message
       const editor = vscode.window.activeTextEditor;
