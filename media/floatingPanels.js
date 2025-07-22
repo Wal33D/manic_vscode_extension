@@ -58,11 +58,11 @@
       if (panel) {
         const panelId = panel.getAttribute('data-panel-id');
         if (action === 'collapse') {
-          toggleCollapse(panelId);
+          window.toggleCollapse(panelId);
         } else if (action === 'pin') {
-          togglePin(panelId);
+          window.togglePin(panelId);
         } else if (action === 'close') {
-          closePanel(panelId);
+          window.closePanel(panelId);
         }
       }
     }
@@ -123,14 +123,23 @@
   // Show all panels
   function showAllPanels() {
     ['tools', 'layers', 'properties', 'history', 'colorPicker'].forEach(panelId => {
-      showPanel(panelId);
+      const panel = window.panelsData.get(panelId);
+      if (panel && !panel.visible) {
+        vscode.postMessage({
+          command: 'togglePanel',
+          panelId: panelId
+        });
+      }
     });
   }
   
   // Hide all panels
   function hideAllPanels() {
     ['tools', 'layers', 'properties', 'history', 'colorPicker'].forEach(panelId => {
-      closePanel(panelId);
+      vscode.postMessage({
+        command: 'closePanel',
+        panelId: panelId
+      });
     });
   }
   
