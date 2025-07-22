@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { FloatingPanelManager } from './floatingPanelManager';
+import { FloatingPanelManager, FloatingPanel } from './floatingPanelManager';
 
 export class FloatingPanelProvider implements vscode.WebviewViewProvider {
   public static readonly viewType = 'manicMiners.floatingPanels';
@@ -8,7 +8,7 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
 
   constructor(
     private readonly _extensionUri: vscode.Uri,
-    context: vscode.ExtensionContext
+    private context: vscode.ExtensionContext
   ) {
     this.panelManager = new FloatingPanelManager(context);
   }
@@ -73,6 +73,15 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
           break;
         case 'layerToggled':
           vscode.commands.executeCommand('manicMiners.toggleLayer', message.layer);
+          break;
+        case 'resetLayout':
+          this.resetLayout();
+          break;
+        case 'saveLayout':
+          this.saveLayout(message.name);
+          break;
+        case 'loadLayout':
+          this.loadLayout();
           break;
       }
     });
@@ -153,13 +162,28 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
                 <button onclick="toggleLayer('vehicles')">🚗 Vehicles</button>
               </div>
             </div>
-            <button onclick="showPanel('properties')" title="Properties">📋 Properties</button>
-            <button onclick="showPanel('history')" title="History">🕐 History</button>
-            <button onclick="showPanel('colorPicker')" title="Color Picker">🎨 Color Picker</button>
+            <button class="toolbar-action-btn" data-action="showPanel" data-panel="properties" title="Properties">
+              <span class="btn-icon">📋</span>
+              <span class="btn-text">Properties</span>
+            </button>
+            <button class="toolbar-action-btn" data-action="showPanel" data-panel="history" title="History">
+              <span class="btn-icon">🕐</span>
+              <span class="btn-text">History</span>
+            </button>
+            <button class="toolbar-action-btn" data-action="showPanel" data-panel="colorPicker" title="Color Picker">
+              <span class="btn-icon">🎨</span>
+              <span class="btn-text">Color Picker</span>
+            </button>
             <span class="separator"></span>
-            <button onclick="resetLayout()" title="Reset Layout">🔄</button>
-            <button onclick="saveLayout()" title="Save Layout">💾</button>
-            <button onclick="loadLayout()" title="Load Layout">📁</button>
+            <button class="toolbar-action-btn" data-action="resetLayout" title="Reset Layout">
+              <span class="btn-icon">🔄</span>
+            </button>
+            <button class="toolbar-action-btn" data-action="saveLayout" title="Save Layout">
+              <span class="btn-icon">💾</span>
+            </button>
+            <button class="toolbar-action-btn" data-action="loadLayout" title="Load Layout">
+              <span class="btn-icon">📁</span>
+            </button>
           </div>
 
           <!-- Floating panels container -->
@@ -208,5 +232,61 @@ export class FloatingPanelProvider implements vscode.WebviewViewProvider {
       }
     });
     this.updateWebview();
+  }
+
+  private saveLayout(name: string) {
+    interface SavedLayout {
+      name: string;
+      panels: FloatingPanel[];
+      timestamp: number;
+    }
+
+    const currentLayout: SavedLayout = {
+      name,
+      panels: this.panelManager.getPanels(),
+      timestamp: Date.now(),
+    };
+
+    const savedLayouts = this.context.globalState.get<SavedLayout[]>('savedLayouts', []);
+    savedLayouts.push(currentLayout);
+    this.context.globalState.update('savedLayouts', savedLayouts);
+
+    vscode.window.showInformationMessage(`Layout '${name}' saved successfully`);
+  }
+
+  private loadLayout() {
+    interface SavedLayout {
+      name: string;
+      panels: FloatingPanel[];
+      timestamp: number;
+    }
+
+    const savedLayouts = this.context.globalState.get<SavedLayout[]>('savedLayouts', []);
+
+    if (savedLayouts.length === 0) {
+      vscode.window.showInformationMessage('No saved layouts found');
+      return;
+    }
+
+    const items = savedLayouts.map(layout => ({
+      label: layout.name,
+      description: new Date(layout.timestamp).toLocaleString(),
+      layout,
+    }));
+
+    vscode.window
+      .showQuickPick(items, {
+        placeHolder: 'Select a layout to load',
+      })
+      .then(selected => {
+        if (selected) {
+          // Apply the saved layout
+          selected.layout.panels.forEach(panel => {
+            this.panelManager.updatePanel(panel.id, panel);
+          });
+          this.updateWebview();
+          vscode.window.showInformationMessage(`Layout '${selected.label}' loaded`);
+        }
+      });
   }
 }

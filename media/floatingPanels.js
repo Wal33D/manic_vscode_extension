@@ -14,35 +14,105 @@
   // Panel visibility management
   let activeDropdown = null;
   
-  // Initialize dropdown functionality after DOM is ready
-  function initializeDropdowns() {
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.toolbar-dropdown')) {
-        closeAllDropdowns();
-      }
-    });
+  // Initialize all event handlers using delegation
+  function initializeEventHandlers() {
+    // Main document click handler for all interactions
+    document.addEventListener('click', handleDocumentClick);
+    document.addEventListener('mousedown', handleMouseDown);
     
-    // Handle toolbar dropdown clicks
-    document.querySelectorAll('.toolbar-dropdown').forEach(dropdown => {
-      const button = dropdown.querySelector('.toolbar-button');
-      const menu = dropdown.querySelector('.dropdown-menu');
-      
-      if (button && menu) {
-        button.addEventListener('click', (e) => {
+    // Initialize dropdowns
+    initializeDropdowns();
+    
+    // Initialize panel interactions
+    initializePanelInteractions();
+  }
+  
+  function handleDocumentClick(e) {
+    const target = e.target;
+    
+    // Close dropdowns when clicking outside
+    if (!target.closest('.toolbar-dropdown')) {
+      closeAllDropdowns();
+    }
+    
+    // Handle toolbar action buttons
+    const actionBtn = target.closest('.toolbar-action-btn');
+    if (actionBtn) {
+      const action = actionBtn.getAttribute('data-action');
+      if (action === 'showPanel') {
+        const panelId = actionBtn.getAttribute('data-panel');
+        showPanel(panelId);
+      } else if (action === 'resetLayout') {
+        resetLayout();
+      } else if (action === 'saveLayout') {
+        saveLayout();
+      } else if (action === 'loadLayout') {
+        loadLayout();
+      }
+    }
+    
+    // Handle panel control buttons
+    if (target.matches('.panel-btn')) {
+      const action = target.getAttribute('data-action');
+      const panel = target.closest('.floating-panel');
+      if (panel) {
+        const panelId = panel.getAttribute('data-panel-id');
+        if (action === 'collapse') {
+          toggleCollapse(panelId);
+        } else if (action === 'pin') {
+          togglePin(panelId);
+        } else if (action === 'close') {
+          closePanel(panelId);
+        }
+      }
+    }
+  }
+  
+  function handleMouseDown(e) {
+    const target = e.target;
+    
+    // Handle panel dragging
+    if (target.closest('.panel-header') && !target.matches('.panel-btn')) {
+      const panel = target.closest('.floating-panel');
+      if (panel) {
+        const panelId = panel.getAttribute('data-panel-id');
+        startDrag(panelId, e);
+      }
+    }
+    
+    // Handle panel resizing
+    if (target.matches('.panel-resize-handle')) {
+      const panel = target.closest('.floating-panel');
+      if (panel) {
+        const panelId = panel.getAttribute('data-panel-id');
+        startResize(panelId, e);
+      }
+    }
+  }
+  
+  // Initialize dropdown functionality
+  function initializeDropdowns() {
+    document.addEventListener('click', (e) => {
+      const dropdown = e.target.closest('.toolbar-dropdown');
+      if (dropdown) {
+        const button = dropdown.querySelector('.toolbar-button');
+        const menu = dropdown.querySelector('.dropdown-menu');
+        if (e.target === button || button.contains(e.target)) {
           e.stopPropagation();
           toggleDropdown(menu);
-        });
+        }
       }
-    });
-    
-    // Handle dropdown menu item clicks
-    document.querySelectorAll('.dropdown-menu button').forEach(button => {
-      button.addEventListener('click', (e) => {
+      
+      // Handle dropdown menu items
+      if (e.target.matches('.dropdown-menu button')) {
         e.stopPropagation();
         closeAllDropdowns();
-      });
+      }
     });
+  }
+  
+  function initializePanelInteractions() {
+    // Additional panel-specific initialization if needed
   }
   
   function toggleDropdown(menu) {
@@ -128,11 +198,13 @@
   };
 
   // Drag and drop functionality
-  window.startDrag = function(panelId, event) {
-    const panelElement = document.getElementById(`panel-${panelId}`);
+  function startDrag(panelId, event) {
+    const panelElement = document.querySelector(`[data-panel-id="${panelId}"]`);
     const panel = window.panelsData.get(panelId);
     
     if (!panelElement || !panel || panel.pinned) return;
+    
+    event.preventDefault();
     
     draggedPanel = {
       id: panelId,
@@ -150,7 +222,7 @@
       zone.style.opacity = '0.3';
       zone.style.pointerEvents = 'auto';
     });
-  };
+  }
 
   // Mouse move handler for dragging
   document.addEventListener('mousemove', (event) => {
@@ -245,11 +317,12 @@
   });
 
   // Resize functionality
-  window.startResize = function(panelId, event) {
-    const panelElement = document.getElementById(`panel-${panelId}`);
+  function startResize(panelId, event) {
+    const panelElement = document.querySelector(`[data-panel-id="${panelId}"]`);
     if (!panelElement) return;
     
     event.stopPropagation();
+    event.preventDefault();
     
     const rect = panelElement.getBoundingClientRect();
     resizingPanel = {
@@ -262,7 +335,7 @@
       width: rect.width,
       height: rect.height
     };
-  };
+  }
 
   // Dock zone handlers
   window.allowDrop = function(event) {
@@ -425,25 +498,27 @@
         
         return `
           <div class="floating-panel ${dockedClass} ${collapsedClass}" 
-               id="panel-${panel.id}"
+               data-panel-id="${panel.id}"
                style="${getPanelStyle(panel)}">
-            <div class="panel-header" onmousedown="startDrag('${panel.id}', event)">
+            <div class="panel-header">
               <span class="panel-icon">${panel.icon}</span>
               <span class="panel-title">${panel.title}</span>
               <div class="panel-controls">
-                <button class="panel-btn" onclick="toggleCollapse('${panel.id}')">${
-                  panel.collapsed ? '⬆️' : '⬇️'
-                }</button>
-                <button class="panel-btn" onclick="togglePin('${panel.id}')">${
-                  panel.pinned ? '📌' : '📍'
-                }</button>
-                <button class="panel-btn" onclick="closePanel('${panel.id}')">❌</button>
+                <button class="panel-btn" data-action="collapse" title="${panel.collapsed ? 'Expand' : 'Collapse'}">
+                  <span class="panel-btn-icon">${panel.collapsed ? '▼' : '▲'}</span>
+                </button>
+                <button class="panel-btn" data-action="pin" title="${panel.pinned ? 'Unpin' : 'Pin'}">
+                  <span class="panel-btn-icon">${panel.pinned ? '📌' : '📍'}</span>
+                </button>
+                <button class="panel-btn" data-action="close" title="Close">
+                  <span class="panel-btn-icon">×</span>
+                </button>
               </div>
             </div>
             <div class="panel-content" style="display: ${panel.collapsed ? 'none' : 'block'}">
               ${panel.content}
             </div>
-            <div class="panel-resize-handle" onmousedown="startResize('${panel.id}', event)"></div>
+            <div class="panel-resize-handle"></div>
           </div>
         `;
       })
@@ -499,8 +574,10 @@
     if (event.key === 'Escape') {
       const focusedPanel = document.querySelector('.floating-panel:focus-within');
       if (focusedPanel) {
-        const panelId = focusedPanel.id.replace('panel-', '');
-        closePanel(panelId);
+        const panelId = focusedPanel.getAttribute('data-panel-id');
+        if (panelId) {
+          closePanel(panelId);
+        }
       }
     }
   });
@@ -518,9 +595,9 @@
 
   // Initialize when DOM is ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeDropdowns);
+    document.addEventListener('DOMContentLoaded', initializeEventHandlers);
   } else {
-    initializeDropdowns();
+    initializeEventHandlers();
   }
   console.log('Floating panels initialized');
 })();

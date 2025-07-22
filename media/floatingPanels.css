@@ -1,12 +1,17 @@
 /* Floating Panels Stylesheet */
 
 :root {
-  --panel-header-height: 32px;
-  --panel-border-radius: 6px;
+  --panel-header-height: 36px;
+  --panel-border-radius: 12px;
   --panel-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   --panel-border: 1px solid var(--vscode-widget-border);
-  --dock-zone-size: 50px;
-  --resize-handle-size: 8px;
+  --dock-zone-size: 60px;
+  --resize-handle-size: 12px;
+  
+  /* Fallback RGB values for backdrop effects */
+  --vscode-editorWidget-background-rgb: 30, 30, 30;
+  --vscode-dropdown-background-rgb: 40, 40, 40;
+  --vscode-focusBorder-rgb: 0, 122, 204;
 }
 
 * {
@@ -33,15 +38,46 @@ body {
 /* Dock Zones */
 .dock-zone {
   position: absolute;
-  background: var(--vscode-editorWidget-background);
+  background: linear-gradient(135deg, 
+    rgba(0, 122, 204, 0.1) 0%, 
+    rgba(0, 122, 204, 0.05) 100%);
+  backdrop-filter: blur(10px);
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
+  border: 2px solid transparent;
+}
+
+.dock-zone::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, 
+    rgba(0, 122, 204, 0.2) 0%, 
+    transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .dock-zone.drag-over {
-  opacity: 0.8;
-  border: 2px dashed var(--vscode-focusBorder);
+  opacity: 0.9;
+  border: 2px solid var(--vscode-focusBorder);
+  background: linear-gradient(135deg, 
+    rgba(0, 122, 204, 0.2) 0%, 
+    rgba(0, 122, 204, 0.1) 100%);
+  box-shadow: 
+    0 0 20px rgba(0, 122, 204, 0.4),
+    inset 0 0 20px rgba(0, 122, 204, 0.2);
+}
+
+.dock-zone.drag-over::before {
+  opacity: 1;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
 }
 
 .dock-left {
@@ -77,8 +113,25 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  font-size: 24px;
-  opacity: 0.6;
+  font-size: 20px;
+  opacity: 0;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  font-size: 13px;
+  backdrop-filter: blur(10px);
+  white-space: nowrap;
+}
+
+.dock-zone:hover .dock-indicator,
+.dock-zone.drag-over .dock-indicator {
+  opacity: 1;
 }
 
 /* Workspace Content */
@@ -92,15 +145,80 @@ body {
 
 /* Toolbar */
 .toolbar {
-  height: 40px;
-  background: var(--vscode-titleBar-activeBackground);
+  height: 48px;
+  background: linear-gradient(135deg, 
+    var(--vscode-titleBar-activeBackground) 0%, 
+    color-mix(in srgb, var(--vscode-titleBar-activeBackground) 95%, white) 100%);
   border-bottom: 1px solid var(--vscode-widget-border);
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 12px;
   position: relative;
   z-index: 100;
-  gap: 5px;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Toolbar Action Buttons */
+.toolbar-action-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--vscode-foreground);
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.toolbar-action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.toolbar-action-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.toolbar-action-btn:hover::before {
+  opacity: 1;
+}
+
+.toolbar-action-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-action-btn.active {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border-color: transparent;
+}
+
+.btn-icon {
+  font-size: 16px;
+}
+
+.btn-text {
+  font-weight: 500;
+}
+
+/* Toolbar buttons without text */
+.toolbar-action-btn:not(:has(.btn-text)) {
+  padding: 6px 8px;
 }
 
 .toolbar button {
@@ -123,9 +241,13 @@ body {
 
 .toolbar .separator {
   width: 1px;
-  height: 20px;
-  background: var(--vscode-widget-border);
-  margin: 0 5px;
+  height: 24px;
+  background: linear-gradient(to bottom, 
+    transparent, 
+    var(--vscode-widget-border) 20%, 
+    var(--vscode-widget-border) 80%, 
+    transparent);
+  margin: 0 8px;
 }
 
 /* Dropdown Menus */
@@ -147,37 +269,71 @@ body {
 
 .dropdown-menu {
   position: absolute;
-  top: 100%;
+  top: calc(100% + 4px);
   left: 0;
-  background: var(--vscode-dropdown-background);
-  border: 1px solid var(--vscode-dropdown-border);
-  border-radius: 4px;
-  box-shadow: var(--panel-shadow);
-  min-width: 150px;
-  padding: 4px 0;
+  background: rgba(40, 40, 40, 0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.2),
+    0 2px 8px rgba(0, 0, 0, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  min-width: 180px;
+  padding: 6px;
   z-index: 1000;
-  display: none;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dropdown-menu.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
 }
 
 .dropdown-menu button {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   text-align: left;
-  padding: 4px 12px;
-  background: none;
+  padding: 8px 12px;
+  background: transparent;
   border: none;
+  border-radius: 6px;
   color: var(--vscode-foreground);
   cursor: pointer;
   font-size: 13px;
+  transition: all 0.15s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdown-menu button::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .dropdown-menu button:hover {
-  background: var(--vscode-list-hoverBackground);
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(2px);
 }
 
-/* Dropdown menu states */
-.dropdown-menu.show {
-  display: block;
+.dropdown-menu button:hover::before {
+  opacity: 1;
+}
+
+.dropdown-menu button:active {
+  transform: translateX(0);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 /* Floating Panels Workspace */
@@ -190,26 +346,51 @@ body {
 /* Floating Panel */
 .floating-panel {
   position: absolute;
-  background: var(--vscode-editorWidget-background);
-  border: var(--panel-border);
-  border-radius: var(--panel-border-radius);
-  box-shadow: var(--panel-shadow);
-  min-width: 150px;
-  min-height: 100px;
+  background: rgba(30, 30, 30, 0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.1),
+    0 2px 8px rgba(0, 0, 0, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  min-width: 200px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
-  transition: box-shadow 0.2s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 10;
+  overflow: hidden;
+}
+
+.floating-panel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.05) 0%, 
+    transparent 50%,
+    rgba(255, 255, 255, 0.02) 100%);
+  pointer-events: none;
 }
 
 .floating-panel:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 
+    0 12px 48px rgba(0, 0, 0, 0.15),
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
   z-index: 11;
 }
 
 .floating-panel.dragging {
-  opacity: 0.8;
+  opacity: 0.85;
   z-index: 1000;
+  transform: scale(0.98);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 /* Docked Panels */
@@ -243,25 +424,47 @@ body {
 
 /* Panel Header */
 .panel-header {
-  height: var(--panel-header-height);
-  background: var(--vscode-titleBar-activeBackground);
-  border-bottom: 1px solid var(--vscode-widget-border);
-  border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
+  height: 36px;
+  background: linear-gradient(135deg, 
+    rgba(255, 255, 255, 0.08) 0%, 
+    rgba(255, 255, 255, 0.04) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px 12px 0 0;
   display: flex;
   align-items: center;
-  padding: 0 10px;
+  padding: 0 12px;
   cursor: move;
+  position: relative;
+  z-index: 1;
+}
+
+.panel-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent, 
+    rgba(255, 255, 255, 0.2) 20%, 
+    rgba(255, 255, 255, 0.2) 80%, 
+    transparent);
 }
 
 .panel-icon {
   font-size: 16px;
   margin-right: 8px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
 }
 
 .panel-title {
   flex: 1;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 13px;
   color: var(--vscode-titleBar-activeForeground);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  letter-spacing: 0.3px;
 }
 
 .panel-controls {
@@ -270,17 +473,49 @@ body {
 }
 
 .panel-btn {
-  background: transparent;
-  border: none;
-  padding: 2px 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px;
   cursor: pointer;
   font-size: 12px;
-  opacity: 0.7;
-  transition: opacity 0.2s;
+  opacity: 0.8;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.panel-btn::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .panel-btn:hover {
   opacity: 1;
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.panel-btn:hover::before {
+  opacity: 1;
+}
+
+.panel-btn:active {
+  transform: scale(0.95);
+}
+
+.panel-btn-icon {
+  font-size: 14px;
+  line-height: 1;
 }
 
 /* Panel Content */
@@ -308,17 +543,45 @@ body {
   height: var(--resize-handle-size);
   cursor: nwse-resize;
   background: transparent;
+  transition: all 0.2s ease;
+  z-index: 2;
+}
+
+.panel-resize-handle::before {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: radial-gradient(circle at center, 
+    rgba(255, 255, 255, 0.3) 0%, 
+    rgba(255, 255, 255, 0.1) 100%);
+  border-radius: 2px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
 .panel-resize-handle::after {
   content: '';
   position: absolute;
-  bottom: 2px;
-  right: 2px;
-  width: 4px;
-  height: 4px;
-  border-right: 2px solid var(--vscode-widget-border);
-  border-bottom: 2px solid var(--vscode-widget-border);
+  bottom: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-right: 2px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+  border-radius: 0 0 2px 0;
+  transition: all 0.2s ease;
+}
+
+.floating-panel:hover .panel-resize-handle::before {
+  opacity: 1;
+}
+
+.floating-panel:hover .panel-resize-handle::after {
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: scale(1.2);
 }
 
 /* Tool Panel Styles */
