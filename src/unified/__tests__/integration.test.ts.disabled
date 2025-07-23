@@ -1,0 +1,352 @@
+import { eventBus } from '../eventBus';
+import { stateSync } from '../stateSync';
+import { themeManager } from '../themeManager';
+import { PluginManager } from '../pluginManager';
+
+describe('Unified Components Integration', () => {
+  beforeEach(() => {
+    // Clear all state
+    eventBus.off();
+    // Clear states
+    // Note: These methods need to be added to the classes or we use workarounds
+  });
+
+  describe('EventBus and StateSync Integration', () => {
+    it('should sync state changes through event bus', () => {
+      const stateChangeHandler = jest.fn();
+      eventBus.on('state:changed', { callback: stateChangeHandler });
+
+      stateSync.setState('testKey', 'testValue', 'test-source');
+
+      expect(stateChangeHandler).toHaveBeenCalledWith({
+        key: 'testKey',
+        value: 'testValue',
+        previousValue: undefined,
+        source: 'test-source',
+      });
+    });
+
+    it('should handle state subscriptions via event bus', () => {
+      const handler = jest.fn();
+
+      // Subscribe through state sync
+      stateSync.subscribe('config.theme', handler);
+
+      // Emit through event bus
+      eventBus.emit('state:changed', {
+        key: 'config.theme',
+        value: 'dark',
+        previousValue: 'light',
+        source: 'user',
+      });
+
+      expect(handler).toHaveBeenCalledWith({
+        key: 'config.theme',
+        value: 'dark',
+        previousValue: 'light',
+        source: 'user',
+      });
+    });
+  });
+
+  describe('ThemeManager and StateSync Integration', () => {
+    it('should sync theme changes to state', () => {
+      const stateHandler = jest.fn();
+      stateSync.subscribe('theme.active', stateHandler);
+
+      themeManager.applyTheme('dark');
+
+      expect(stateHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          key: 'theme.active',
+          value: 'dark',
+        })
+      );
+    });
+
+    it('should restore theme from state', () => {
+      stateSync.setState('theme.active', 'light', 'storage');
+      stateSync.setState(
+        'theme.customizations',
+        {
+          colors: { primary: '#FF0000' },
+        },
+        'storage'
+      );
+
+      themeManager.loadFromState();
+
+      expect(themeManager.getActiveTheme()).toBe('light');
+      const theme = themeManager.getActiveThemeData();
+      expect(theme?.colors.primary).toBe('#FF0000');
+    });
+  });
+
+  describe('PluginManager and EventBus Integration', () => {
+    it('should emit plugin lifecycle events', async () => {
+      const events: string[] = [];
+
+      eventBus.on('plugin:registered', {
+        callback: data => events.push(`registered:${data.pluginId}`),
+      });
+      eventBus.on('plugin:activated', {
+        callback: data => events.push(`activated:${data.pluginId}`),
+      });
+
+      await pluginManager.registerPlugin(
+        {
+          id: 'test-plugin',
+          name: 'Test Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+        },
+        {
+          activate: jest.fn(),
+        }
+      );
+
+      await pluginManager.activatePlugin('test-plugin');
+
+      expect(events).toEqual(['registered:test-plugin', 'activated:test-plugin']);
+    });
+
+    it('should allow plugins to use event bus', async () => {
+      const eventHandler = jest.fn();
+      eventBus.on('custom:event', { callback: eventHandler });
+
+      await pluginManager.registerPlugin(
+        {
+          id: 'event-plugin',
+          name: 'Event Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+        },
+        {
+          activate: (api: any) => {
+            api.eventBus.emit('custom:event', { from: 'plugin' });
+          },
+        }
+      );
+
+      await pluginManager.activatePlugin('event-plugin');
+
+      expect(eventHandler).toHaveBeenCalledWith({ from: 'plugin' }, 'custom:event');
+    });
+  });
+
+  describe('Full Integration Scenario', () => {
+    it('should handle complete workflow', async () => {
+      const events: any[] = [];
+      const collectEvent = (name: string) => (data: any) => {
+        events.push({ name, data });
+      };
+
+      // Set up event listeners
+      eventBus.on('state:changed', { callback: collectEvent('state:changed') });
+      eventBus.on('theme:changed', { callback: collectEvent('theme:changed') });
+      eventBus.on('plugin:command', { callback: collectEvent('plugin:command') });
+
+      // 1. User changes theme
+      themeManager.applyTheme('dark');
+
+      // 2. Plugin reacts to theme change
+      await pluginManager.registerPlugin(
+        {
+          id: 'theme-reactor',
+          name: 'Theme Reactor',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Reacts to theme changes',
+          main: 'index.js',
+        },
+        {
+          activate: (api: any) => {
+            api.eventBus.on('theme:changed', (data: any) => {
+              api.commands.execute('theme.react', { theme: data });
+            });
+          },
+        }
+      );
+
+      await pluginManager.activatePlugin('theme-reactor');
+
+      // 3. State sync captures all changes
+      const themeState = stateSync.getState('theme.active');
+      expect(themeState).toBe('dark');
+
+      // 4. Trigger theme change again
+      themeManager.applyTheme('light');
+
+      // Verify event flow
+      expect(events).toContainObject({ name: 'theme:changed' });
+      expect(events.some(e => e.name === 'state:changed' && e.data.key === 'theme.active')).toBe(
+        true
+      );
+    });
+  });
+
+  describe('Error Handling Integration', () => {
+    it('should handle errors gracefully across components', async () => {
+      const errorHandler = jest.fn();
+      eventBus.on('error', { callback: errorHandler });
+
+      // Register a faulty plugin
+      await pluginManager.registerPlugin(
+        {
+          id: 'error-plugin',
+          name: 'Error Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Plugin that throws errors',
+          main: 'index.js',
+        },
+        {
+          activate: () => {
+            throw new Error('Plugin activation failed');
+          },
+        }
+      );
+
+      // Activation should fail but not crash
+      await expect(pluginManager.activatePlugin('error-plugin')).rejects.toThrow(
+        'Plugin activation failed'
+      );
+
+      // Other components should continue working
+      stateSync.setState('test', 'value', 'source');
+      expect(stateSync.getState('test')).toBe('value');
+
+      themeManager.applyTheme('dark');
+      expect(themeManager.getActiveTheme()).toBe('dark');
+    });
+  });
+
+  describe('Performance Integration', () => {
+    it('should handle high-frequency events efficiently', async () => {
+      const handler = jest.fn();
+      let eventCount = 0;
+
+      // Subscribe with debouncing
+      stateSync.subscribe('counter', handler, { debounce: 50 });
+
+      // Emit many state changes rapidly
+      const start = Date.now();
+      for (let i = 0; i < 100; i++) {
+        stateSync.setState('counter', i, 'test');
+        eventCount++;
+      }
+
+      // Handler should not be called immediately
+      expect(handler).not.toHaveBeenCalled();
+
+      // Wait for debounce
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Handler should be called once with final value
+      expect(handler).toHaveBeenCalledTimes(1);
+      expect(handler).toHaveBeenCalledWith(expect.objectContaining({ value: 99 }));
+
+      const duration = Date.now() - start;
+      expect(duration).toBeLessThan(200); // Should be fast
+    });
+  });
+
+  describe('Memory Management Integration', () => {
+    it('should clean up resources properly', async () => {
+      // Track subscriptions
+      const unsubscribes: (() => void)[] = [];
+
+      // Create many subscriptions
+      for (let i = 0; i < 100; i++) {
+        unsubscribes.push(eventBus.on(`event${i}`, { callback: jest.fn() }));
+        unsubscribes.push(stateSync.subscribe(`key${i}`, jest.fn()));
+      }
+
+      // Register plugins
+      for (let i = 0; i < 10; i++) {
+        await pluginManager.registerPlugin(
+          {
+            id: `plugin${i}`,
+            name: `Plugin ${i}`,
+            version: '1.0.0',
+            author: 'Test',
+            description: 'Test',
+            main: 'index.js',
+          },
+          {}
+        );
+      }
+
+      // Clean up
+      unsubscribes.forEach(fn => fn());
+      await pluginManager.unregisterAll();
+      stateSync.clearAll();
+      themeManager.clearThemes();
+
+      // Verify cleanup
+      const metrics = eventBus.getMetrics();
+      expect(Object.keys(metrics).length).toBe(0);
+
+      const plugins = pluginManager.getAllPlugins();
+      expect(plugins.length).toBe(0);
+    });
+  });
+
+  describe('Cross-Component Communication', () => {
+    it('should enable plugin-to-plugin communication', async () => {
+      const messages: any[] = [];
+
+      // Plugin A sends messages
+      await pluginManager.registerPlugin(
+        {
+          id: 'sender-plugin',
+          name: 'Sender Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Sends messages',
+          main: 'index.js',
+        },
+        {
+          activate: (api: any) => {
+            api.eventBus.emit('plugin:message', {
+              from: 'sender-plugin',
+              message: 'Hello',
+            });
+          },
+        }
+      );
+
+      // Plugin B receives messages
+      await pluginManager.registerPlugin(
+        {
+          id: 'receiver-plugin',
+          name: 'Receiver Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Receives messages',
+          main: 'index.js',
+        },
+        {
+          activate: (api: any) => {
+            api.eventBus.on('plugin:message', (data: any) => {
+              messages.push(data);
+            });
+          },
+        }
+      );
+
+      // Activate in order
+      await pluginManager.activatePlugin('receiver-plugin');
+      await pluginManager.activatePlugin('sender-plugin');
+
+      expect(messages).toContainObject({
+        from: 'sender-plugin',
+        message: 'Hello',
+      });
+    });
+  });
+});

@@ -35,18 +35,21 @@ import { WelcomePageProvider } from './welcomePage';
 import { registerScriptPatternCommands } from './commands/scriptPatternCommands';
 import { registerMapEditorCommands } from './mapEditor/mapEditorCommands';
 import { MapEditorProvider } from './mapEditor/mapEditorProvider';
+import { EnhancedMapEditorProvider } from './mapEditor/enhancedMapEditor.js';
 import { MapsExplorerProvider } from './views/mapsExplorerProvider';
 import { TilePaletteProvider } from './views/tilePaletteProvider';
 import { ScriptSnippetsProvider } from './views/scriptSnippetsProvider';
 import { ValidationProvider } from './views/validationProvider';
 import { DashboardProvider } from './views/dashboardProvider';
+import { EnhancedDashboardProvider } from './views/enhancedDashboard.js';
 import { StatusBarManager } from './statusBar/statusBarManager';
 import { CommandPaletteProvider } from './commands/commandPaletteProvider';
 import { CommandTipsProvider } from './commands/commandTipsProvider';
 import { KeyboardShortcutManager } from './keyboard/keyboardShortcuts';
 import { KeyboardShortcutsPanel } from './keyboard/keyboardShortcutsPanel';
-import { FloatingPanelProvider } from './panels/floatingPanelProvider';
+import { WorkspaceKeyboardShortcuts } from './workspace/keyboardShortcuts.js';
 import { registerContextMenuCommands } from './contextMenus/contextMenuCommands';
+import { registerDocumentationCommands } from './documentation/docCommands.js';
 
 export async function activate(context: vscode.ExtensionContext) {
   // Store context globally for accessibility manager
@@ -269,6 +272,9 @@ script{
   // Register Map Editor Provider
   context.subscriptions.push(MapEditorProvider.register(context));
 
+  // Register Enhanced Map Editor Provider
+  context.subscriptions.push(EnhancedMapEditorProvider.register(context));
+
   // Register Objective Builder Provider
   const objectiveBuilderProvider = new ObjectiveBuilderProvider(context.extensionUri);
   context.subscriptions.push(
@@ -383,11 +389,23 @@ script{
   // Register Dashboard Provider
   context.subscriptions.push(DashboardProvider.register(context));
 
+  // Register Enhanced Dashboard Provider
+  context.subscriptions.push(EnhancedDashboardProvider.register(context));
+
   // Register dashboard command
   const showDashboardCommand = vscode.commands.registerCommand('manicMiners.showDashboard', () => {
     vscode.commands.executeCommand('manicMiners.dashboard.focus');
   });
   context.subscriptions.push(showDashboardCommand);
+
+  // Register enhanced dashboard command
+  const showCommandCenterCmd = vscode.commands.registerCommand(
+    'manicMiners.showCommandCenter',
+    () => {
+      vscode.commands.executeCommand('manicMiners.enhancedDashboard.focus');
+    }
+  );
+  context.subscriptions.push(showCommandCenterCmd);
 
   // Initialize Status Bar Manager
   const statusBarManager = new StatusBarManager();
@@ -441,6 +459,9 @@ script{
   const keyboardShortcutManager = new KeyboardShortcutManager(context);
   keyboardShortcutManager.initializeDefaultShortcuts();
 
+  // Register Workspace Keyboard Shortcuts
+  WorkspaceKeyboardShortcuts.register(context);
+
   // Register keyboard shortcuts panel command
   const showKeyboardShortcutsCmd = vscode.commands.registerCommand(
     'manicMiners.showKeyboardShortcuts',
@@ -450,37 +471,75 @@ script{
   );
   context.subscriptions.push(showKeyboardShortcutsCmd);
 
-  // Register Floating Panels Provider
-  const floatingPanelProvider = new FloatingPanelProvider(context.extensionUri, context);
+  // Register Workspace Provider (replaces floating panels)
+  const { WorkspaceProvider } = await import('./workspace/workspaceProvider.js');
+  const workspaceProvider = new WorkspaceProvider(context.extensionUri, context);
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider(FloatingPanelProvider.viewType, floatingPanelProvider)
+    vscode.window.registerWebviewViewProvider(WorkspaceProvider.viewType, workspaceProvider)
   );
 
-  // Register floating panels commands
-  const showFloatingPanelsCmd = vscode.commands.registerCommand(
-    'manicMiners.showFloatingPanels',
-    () => {
-      vscode.commands.executeCommand('manicMiners.floatingPanels.focus');
+  // Register workspace command handler
+  const workspaceCommandHandler = vscode.commands.registerCommand(
+    'manicMiners.workspace.command',
+    (command: string, args?: any) => {
+      workspaceProvider.executeWorkspaceCommand(command, args);
     }
   );
-  context.subscriptions.push(showFloatingPanelsCmd);
+  context.subscriptions.push(workspaceCommandHandler);
 
-  const resetFloatingPanelsCmd = vscode.commands.registerCommand(
-    'manicMiners.resetFloatingPanels',
-    () => {
-      floatingPanelProvider.resetLayout();
+  // Register workspace focus panel command
+  const focusPanelCommand = vscode.commands.registerCommand(
+    'manicMiners.workspace.focusPanel',
+    (panelId: string) => {
+      workspaceProvider.focusPanel(panelId);
     }
   );
-  context.subscriptions.push(resetFloatingPanelsCmd);
+  context.subscriptions.push(focusPanelCommand);
+
+  // Register workspace select tool command
+  const selectToolCommand = vscode.commands.registerCommand(
+    'manicMiners.workspace.selectTool',
+    (tool: string) => {
+      workspaceProvider.selectTool(tool);
+    }
+  );
+  context.subscriptions.push(selectToolCommand);
+
+  // Register workspace preset command
+  const applyPresetCommand = vscode.commands.registerCommand(
+    'manicMiners.workspace.applyPreset',
+    (presetId: string) => {
+      workspaceProvider.applyPresetLayout(presetId);
+    }
+  );
+  context.subscriptions.push(applyPresetCommand);
+
+  // Register workspace commands
+  const showWorkspaceCmd = vscode.commands.registerCommand('manicMiners.showWorkspace', () => {
+    vscode.commands.executeCommand('manicMiners.workspace.focus');
+  });
+  context.subscriptions.push(showWorkspaceCmd);
+
+  const resetWorkspaceCmd = vscode.commands.registerCommand('manicMiners.resetWorkspace', () => {
+    vscode.window
+      .showWarningMessage('Reset workspace to default layout?', 'Yes', 'No')
+      .then(answer => {
+        if (answer === 'Yes') {
+          workspaceProvider.dispose();
+          vscode.commands.executeCommand('manicMiners.workspace.focus');
+        }
+      });
+  });
+  context.subscriptions.push(resetWorkspaceCmd);
 
   // Register tool selection command
   const selectToolCmd = vscode.commands.registerCommand(
     'manicMiners.selectTool',
     (tool: string) => {
-      // Update selected tool in tile palette
-      vscode.commands.executeCommand('manicMiners.updateStatusBar', {
-        selectedTile: `Tool: ${tool}`,
-      });
+      // Update selected tool in workspace
+      statusBarManager.updateStatusBarItem({ selectedTile: `Tool: ${tool}` });
+      // Show notification for demo
+      vscode.window.showInformationMessage(`Selected tool: ${tool}`);
     }
   );
   context.subscriptions.push(selectToolCmd);
@@ -513,6 +572,9 @@ script{
 
   // Register context menu commands
   registerContextMenuCommands(context);
+
+  // Register documentation commands
+  registerDocumentationCommands(context);
 
   // Set extension active context
   vscode.commands.executeCommand('setContext', 'manicMiners.extensionActive', true);

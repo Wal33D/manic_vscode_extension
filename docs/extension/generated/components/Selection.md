@@ -1,0 +1,6 @@
+# Selection
+
+## Inheritance
+
+- Extends: `Range`
+

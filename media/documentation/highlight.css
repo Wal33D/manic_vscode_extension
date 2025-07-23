@@ -1,0 +1,173 @@
+/* Highlight.js theme for VS Code documentation */
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  padding: 0.5em;
+  background: var(--vscode-textBlockQuote-background);
+  color: var(--vscode-editor-foreground);
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--vscode-comments-foreground, #6A9955);
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-addition {
+  color: var(--vscode-keyword-foreground, #569CD6);
+}
+
+.hljs-number,
+.hljs-string,
+.hljs-meta .hljs-meta-string,
+.hljs-literal,
+.hljs-doctag,
+.hljs-regexp {
+  color: var(--vscode-string-foreground, #CE9178);
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: var(--vscode-function-foreground, #DCDCAA);
+}
+
+.hljs-attribute,
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-class .hljs-title,
+.hljs-type {
+  color: var(--vscode-variable-foreground, #9CDCFE);
+}
+
+.hljs-symbol,
+.hljs-bullet,
+.hljs-subst,
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-link {
+  color: var(--vscode-constant-foreground, #4EC9B0);
+}
+
+.hljs-built_in,
+.hljs-deletion {
+  color: var(--vscode-support-foreground, #CE9178);
+}
+
+.hljs-params {
+  color: var(--vscode-parameter-foreground, #9CDCFE);
+}
+
+.hljs-formula {
+  background-color: var(--vscode-textBlockQuote-background);
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+/* Language-specific styles */
+
+/* TypeScript/JavaScript */
+.language-typescript .hljs-keyword,
+.language-javascript .hljs-keyword {
+  color: #569CD6;
+}
+
+.language-typescript .hljs-built_in,
+.language-javascript .hljs-built_in {
+  color: #4EC9B0;
+}
+
+.language-typescript .hljs-type,
+.language-javascript .hljs-type {
+  color: #4EC9B0;
+}
+
+/* JSON */
+.language-json .hljs-attr {
+  color: #9CDCFE;
+}
+
+/* CSS */
+.language-css .hljs-selector-class {
+  color: #D7BA7D;
+}
+
+.language-css .hljs-attribute {
+  color: #9CDCFE;
+}
+
+/* HTML/XML */
+.language-html .hljs-tag,
+.language-xml .hljs-tag {
+  color: #808080;
+}
+
+.language-html .hljs-name,
+.language-xml .hljs-name {
+  color: #569CD6;
+}
+
+.language-html .hljs-attr,
+.language-xml .hljs-attr {
+  color: #9CDCFE;
+}
+
+/* Markdown */
+.language-markdown .hljs-section {
+  color: #569CD6;
+}
+
+.language-markdown .hljs-quote {
+  color: #6A9955;
+  font-style: italic;
+}
+
+/* Bash/Shell */
+.language-bash .hljs-variable,
+.language-shell .hljs-variable {
+  color: #9CDCFE;
+}
+
+.language-bash .hljs-built_in,
+.language-shell .hljs-built_in {
+  color: #DCDCAA;
+}
+
+/* Line numbers (if enabled) */
+.hljs-ln-numbers {
+  user-select: none;
+  color: var(--vscode-editorLineNumber-foreground, #858585);
+  border-right: 1px solid var(--vscode-panel-border);
+  padding-right: 1em;
+  margin-right: 1em;
+}
+
+.hljs-ln-code {
+  padding-left: 1em;
+}
+
+/* Selection */
+.hljs::selection,
+.hljs ::selection {
+  background-color: var(--vscode-editor-selectionBackground);
+}
+
+/* Focus */
+.hljs:focus {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}

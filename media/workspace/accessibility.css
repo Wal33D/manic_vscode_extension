@@ -1,0 +1,580 @@
+/**
+ * Accessibility styles for Manic Miners workspace
+ */
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip navigation links */
+.skip-links {
+  position: absolute;
+  top: -100px;
+  left: 0;
+  z-index: 10000;
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-focusBorder);
+}
+
+.skip-link {
+  padding: 8px 16px;
+  color: var(--vscode-textLink-foreground);
+  text-decoration: none;
+  background: var(--vscode-button-background);
+  border-radius: 3px;
+  display: inline-block;
+}
+
+.skip-link:focus {
+  position: absolute;
+  top: 100px;
+  outline: 3px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* Enhanced focus indicators */
+.keyboard-navigation *:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* Remove focus outline for mouse users */
+:focus:not(.keyboard-navigation *:focus) {
+  outline: none;
+}
+
+/* Focus visible polyfill */
+.focus-visible:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* High contrast mode enhancements */
+.high-contrast {
+  --vscode-focusBorder: CanvasText;
+}
+
+.high-contrast *:focus {
+  outline: 3px solid CanvasText !important;
+  outline-offset: 2px !important;
+}
+
+.high-contrast .workspace-panel {
+  border: 2px solid CanvasText;
+}
+
+.high-contrast .panel-header {
+  border-bottom: 2px solid CanvasText;
+}
+
+.high-contrast button,
+.high-contrast input,
+.high-contrast select,
+.high-contrast textarea {
+  border: 1px solid CanvasText;
+}
+
+.high-contrast .tool-btn.active,
+.high-contrast .tile-item.selected {
+  outline: 3px solid CanvasText;
+  outline-offset: -3px;
+}
+
+/* Accessible tooltips */
+.accessible-tooltip {
+  position: absolute;
+  z-index: 10000;
+  padding: 6px 10px;
+  background: var(--vscode-tooltip-background);
+  color: var(--vscode-tooltip-foreground);
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: 3px;
+  font-size: 12px;
+  line-height: 1.4;
+  max-width: 300px;
+  word-wrap: break-word;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.accessible-tooltip.visible {
+  opacity: 1;
+}
+
+/* Arrow for tooltips */
+.accessible-tooltip::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+}
+
+.accessible-tooltip.tooltip-top::after {
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-top-color: var(--vscode-widget-border);
+}
+
+.accessible-tooltip.tooltip-bottom::after {
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-color: var(--vscode-widget-border);
+}
+
+.accessible-tooltip.tooltip-left::after {
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-left-color: var(--vscode-widget-border);
+}
+
+.accessible-tooltip.tooltip-right::after {
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border-right-color: var(--vscode-widget-border);
+}
+
+/* Focus indicators for interactive elements */
+.tool-btn:focus,
+.tile-item:focus,
+.pattern-item:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Roving tabindex indicators */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+[tabindex="0"]:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* Panel focus indicators */
+.workspace-panel:focus-within {
+  box-shadow: 0 0 0 1px var(--vscode-focusBorder);
+}
+
+.workspace-panel.panel-focused {
+  box-shadow: 0 0 0 2px var(--vscode-focusBorder);
+}
+
+/* Button focus states */
+button:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* Input focus states */
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+}
+
+/* Layer visibility indicators for screen readers */
+.layer-item input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.layer-item input[type="checkbox"]:focus + .layer-icon {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* Validation issue indicators */
+.validation-stat[aria-label] {
+  cursor: help;
+}
+
+/* History item focus */
+.history-item:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+  background: var(--vscode-list-hoverBackground);
+}
+
+/* Tab navigation indicators */
+.tab-button:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+}
+
+/* Splitter focus */
+.splitter:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+  background: var(--vscode-focusBorder);
+}
+
+/* Modal focus trap styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-widget-border);
+  border-radius: 4px;
+  padding: 20px;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: auto;
+  position: relative;
+}
+
+.modal-content:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* Loading states for screen readers */
+.loading-container[aria-busy="true"]::before {
+  content: attr(aria-label);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Dragging states */
+.dragging {
+  cursor: grabbing;
+}
+
+.drag-over {
+  outline: 2px dashed var(--vscode-focusBorder);
+  outline-offset: -2px;
+  background: var(--vscode-list-hoverBackground);
+}
+
+/* Resize ghost accessibility */
+.resize-ghost {
+  border: 2px dashed var(--vscode-focusBorder);
+  background: transparent;
+}
+
+/* Notification accessibility */
+.notification[role="alert"] {
+  position: relative;
+}
+
+.notification-close:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+}
+
+/* Status bar accessibility */
+#workspace-status [aria-label] {
+  cursor: help;
+}
+
+/* Search input clear button */
+.search-clear {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--vscode-foreground);
+  opacity: 0.5;
+}
+
+.search-clear:hover {
+  opacity: 1;
+}
+
+.search-clear:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+  opacity: 1;
+}
+
+/* Ensure interactive elements are keyboard accessible */
+[role="button"],
+[role="tab"],
+[role="menuitem"] {
+  cursor: pointer;
+}
+
+[role="button"]:focus,
+[role="tab"]:focus,
+[role="menuitem"]:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* Disabled state indicators */
+[aria-disabled="true"],
+[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Live region visibility */
+[aria-live] {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+/* Ensure color contrast for text */
+@media (prefers-contrast: high) {
+  body {
+    --vscode-foreground: CanvasText;
+    --vscode-editor-background: Canvas;
+    --vscode-focusBorder: CanvasText;
+  }
+  
+  .workspace-panel,
+  .panel-header,
+  button,
+  input,
+  select {
+    border-color: CanvasText !important;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Keyboard navigation indicator ring */
+.focus-indicator-ring {
+  position: fixed;
+  pointer-events: none;
+  border: 3px solid var(--vscode-focusBorder);
+  border-radius: 4px;
+  z-index: 10001;
+  animation: focus-pulse 1s ease-in-out infinite;
+}
+
+@keyframes focus-pulse {
+  0%, 100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+/* Enhanced keyboard focus states */
+.keyboard-navigation .keyboard-focus {
+  position: relative;
+  z-index: 1;
+}
+
+.keyboard-navigation .keyboard-focus::after {
+  content: '';
+  position: absolute;
+  top: -4px;
+  left: -4px;
+  right: -4px;
+  bottom: -4px;
+  border: 3px solid var(--vscode-focusBorder);
+  border-radius: 4px;
+  pointer-events: none;
+  animation: focus-fade-in 0.2s ease-out;
+}
+
+@keyframes focus-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Panel focus indicators */
+.workspace-panel.panel-focused {
+  position: relative;
+}
+
+.workspace-panel.panel-focused::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border: 2px solid var(--vscode-focusBorder);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Roving tabindex visual feedback */
+[tabindex="0"] {
+  position: relative;
+}
+
+.keyboard-navigation [tabindex="0"]:focus::before {
+  content: '';
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  right: -3px;
+  bottom: -3px;
+  border: 2px dashed var(--vscode-focusBorder);
+  border-radius: 3px;
+  opacity: 0.6;
+}
+
+/* Skip links enhanced visibility */
+.skip-links:focus-within {
+  top: 0 !important;
+  opacity: 1;
+  transform: translateY(0);
+  transition: all 0.2s ease-out;
+}
+
+/* Keyboard navigation mode indicator */
+.keyboard-navigation::after {
+  content: 'Keyboard Navigation Mode';
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 4px 8px;
+  background: var(--vscode-notifications-background);
+  color: var(--vscode-notifications-foreground);
+  border: 1px solid var(--vscode-notifications-border);
+  border-radius: 3px;
+  font-size: 11px;
+  opacity: 0.8;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* Focus trap overlay */
+.focus-trap-active {
+  position: relative;
+}
+
+.focus-trap-active::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 9998;
+}
+
+.focus-trap-active > * {
+  position: relative;
+  z-index: 9999;
+}
+
+/* Navigation breadcrumb for screen readers */
+.navigation-breadcrumb {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.navigation-breadcrumb:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 8px;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-widget-border);
+}
+
+/* Directional navigation indicators */
+.arrow-navigation-hint {
+  position: absolute;
+  font-size: 10px;
+  color: var(--vscode-descriptionForeground);
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+
+.keyboard-navigation [role="tablist"]:focus-within .arrow-navigation-hint,
+.keyboard-navigation [role="menu"]:focus-within .arrow-navigation-hint,
+.keyboard-navigation .tool-grid:focus-within .arrow-navigation-hint {
+  opacity: 0.7;
+}
+
+.arrow-navigation-hint.hint-left {
+  left: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.arrow-navigation-hint.hint-right {
+  right: -20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.arrow-navigation-hint.hint-up {
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.arrow-navigation-hint.hint-down {
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+}

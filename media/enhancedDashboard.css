@@ -1,0 +1,708 @@
+/* Enhanced Dashboard - Command Center Styles */
+
+/* Base Variables */
+:root {
+  --header-height: 60px;
+  --section-gap: 24px;
+  --card-padding: 20px;
+  --animation-speed: 0.3s;
+  
+  /* Glass effect variables */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  
+  /* Status colors */
+  --health-valid: #4ec9b0;
+  --health-warning: #dcdcaa;
+  --health-error: #f48771;
+}
+
+/* Command Center Container */
+#command-center {
+  height: 100vh;
+  overflow-y: auto;
+  padding: 0;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
+  font-family: var(--vscode-font-family);
+}
+
+/* Header */
+.command-header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: var(--header-height);
+  background: var(--vscode-titleBar-activeBackground);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  backdrop-filter: blur(10px);
+}
+
+.command-header h1 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.icon-button {
+  background: transparent;
+  border: none;
+  color: var(--vscode-foreground);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 4px;
+  transition: all var(--animation-speed) ease;
+  font-size: 16px;
+}
+
+.icon-button:hover {
+  background: var(--vscode-toolbar-hoverBackground);
+}
+
+/* Sections */
+section {
+  padding: 24px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+section:last-child {
+  border-bottom: none;
+}
+
+section h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  color: var(--vscode-foreground);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+section h3 {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 12px 0 8px 0;
+  color: var(--vscode-descriptionForeground);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Workspace Presets */
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.preset-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--animation-speed) ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.preset-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, transparent 0%, var(--vscode-button-background) 100%);
+  opacity: 0;
+  transition: opacity var(--animation-speed) ease;
+}
+
+.preset-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--glass-shadow);
+}
+
+.preset-card:hover::before {
+  opacity: 0.1;
+}
+
+.preset-card.active {
+  border-color: var(--vscode-focusBorder);
+  background: var(--vscode-list-activeSelectionBackground);
+}
+
+.preset-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.preset-name {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--vscode-foreground);
+}
+
+.preset-description {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  line-height: 1.4;
+}
+
+.create-preset-btn {
+  width: 100%;
+  padding: 12px;
+  background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  border: 1px solid var(--vscode-button-border);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 13px;
+  transition: all var(--animation-speed) ease;
+}
+
+.create-preset-btn:hover {
+  background: var(--vscode-button-secondaryHoverBackground);
+}
+
+/* Project Overview */
+.overview-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: all var(--animation-speed) ease;
+}
+
+.stat-card:hover {
+  transform: scale(1.02);
+  box-shadow: var(--glass-shadow);
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--vscode-foreground);
+}
+
+.stat-label {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Health status cards */
+.health-valid .stat-value {
+  color: var(--health-valid);
+}
+
+.health-warning .stat-value {
+  color: var(--health-warning);
+}
+
+.health-error .stat-value {
+  color: var(--health-error);
+}
+
+/* Map Categories */
+.map-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.category-tag {
+  background: var(--vscode-badge-background);
+  color: var(--vscode-badge-foreground);
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.category-count {
+  font-weight: 600;
+}
+
+/* Quick Access Tools */
+.pinned-tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tool-button {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--animation-speed) ease;
+  position: relative;
+}
+
+.tool-button:hover {
+  background: var(--vscode-button-hoverBackground);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.tool-icon {
+  font-size: 24px;
+}
+
+.tool-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.pin-indicator {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 12px;
+  opacity: 0.5;
+}
+
+/* Recent Commands */
+.recent-commands {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 16px;
+  backdrop-filter: blur(10px);
+}
+
+.command-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.command-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--vscode-list-inactiveSelectionBackground);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all var(--animation-speed) ease;
+}
+
+.command-item:hover {
+  background: var(--vscode-list-hoverBackground);
+  transform: translateX(4px);
+}
+
+.command-icon {
+  font-size: 16px;
+}
+
+.command-info {
+  flex: 1;
+}
+
+.command-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--vscode-foreground);
+}
+
+.command-time {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* Suggestions */
+.suggestion-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.suggestion-card {
+  background: linear-gradient(135deg, var(--glass-bg), transparent);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all var(--animation-speed) ease;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.suggestion-card::before {
+  content: '💡';
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  font-size: 20px;
+  opacity: 0.2;
+}
+
+.suggestion-card:hover {
+  transform: translateX(8px);
+  border-color: var(--vscode-focusBorder);
+}
+
+.suggestion-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--vscode-foreground);
+}
+
+.suggestion-desc {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  line-height: 1.4;
+}
+
+/* Workflow Progress */
+.workflow-content {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.workflow-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.workflow-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--vscode-foreground);
+}
+
+.workflow-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.workflow-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: var(--vscode-list-inactiveSelectionBackground);
+  border-radius: 4px;
+  transition: all var(--animation-speed) ease;
+}
+
+.workflow-step.active {
+  background: var(--vscode-list-activeSelectionBackground);
+  border: 1px solid var(--vscode-focusBorder);
+}
+
+.workflow-step.completed {
+  opacity: 0.7;
+}
+
+.step-indicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--vscode-button-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  background: var(--vscode-editor-background);
+}
+
+.step-indicator.completed {
+  background: var(--health-valid);
+  border-color: var(--health-valid);
+  color: white;
+}
+
+.step-indicator.active {
+  background: var(--vscode-button-background);
+  border-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.step-info {
+  flex: 1;
+}
+
+.step-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--vscode-foreground);
+}
+
+.step-optional {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  font-style: italic;
+}
+
+/* Activity Timeline */
+.activity-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  background: var(--glass-bg);
+  border-radius: 4px;
+  transition: all var(--animation-speed) ease;
+  position: relative;
+  padding-left: 32px;
+}
+
+.activity-item::before {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vscode-button-background);
+}
+
+.activity-item:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.activity-type-icon {
+  font-size: 16px;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--vscode-foreground);
+  margin-bottom: 2px;
+}
+
+.activity-details {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.activity-time {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  white-space: nowrap;
+}
+
+/* Workflow Grid */
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.workflow-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  padding: 20px;
+  cursor: pointer;
+  transition: all var(--animation-speed) ease;
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  color: var(--vscode-foreground);
+}
+
+.workflow-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--glass-shadow);
+  border-color: var(--vscode-focusBorder);
+}
+
+.workflow-icon {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.workflow-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.workflow-desc {
+  font-size: 12px;
+  color: var(--vscode-descriptionForeground);
+  line-height: 1.4;
+}
+
+/* Scrollbar Styling */
+#command-center::-webkit-scrollbar {
+  width: 10px;
+}
+
+#command-center::-webkit-scrollbar-track {
+  background: var(--vscode-editor-background);
+}
+
+#command-center::-webkit-scrollbar-thumb {
+  background: var(--vscode-scrollbarSlider-background);
+  border-radius: 5px;
+}
+
+#command-center::-webkit-scrollbar-thumb:hover {
+  background: var(--vscode-scrollbarSlider-hoverBackground);
+}
+
+/* Loading State */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid var(--vscode-progressBar-background);
+  border-top-color: var(--vscode-button-background);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+  .preset-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .overview-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .workflow-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .pinned-tools {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Animations */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.preset-card,
+.stat-card,
+.suggestion-card,
+.activity-item {
+  animation: slideIn 0.3s ease-out backwards;
+}
+
+.preset-card:nth-child(1) { animation-delay: 0.05s; }
+.preset-card:nth-child(2) { animation-delay: 0.1s; }
+.preset-card:nth-child(3) { animation-delay: 0.15s; }
+.preset-card:nth-child(4) { animation-delay: 0.2s; }
+
+/* Focus States */
+button:focus,
+.preset-card:focus,
+.suggestion-card:focus {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+/* Empty States */
+.empty-state {
+  text-align: center;
+  padding: 40px;
+  color: var(--vscode-descriptionForeground);
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  opacity: 0.3;
+  margin-bottom: 16px;
+}
+
+.empty-state-text {
+  font-size: 14px;
+}

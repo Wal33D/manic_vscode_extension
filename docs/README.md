@@ -19,6 +19,9 @@ Documentation for the Manic Miners VSCode Extension.
 - [Developer Guide](extension/DEVELOPER_GUIDE.md) - Contributing to the extension
 - [Troubleshooting](extension/TROUBLESHOOTING.md) - Common issues and solutions
 - [Development Phases](extension/DEVELOPMENT_PHASES.md) - Project history and roadmap
+- [Generated API Docs](extension/generated/) - Auto-generated component documentation
+- [Map Editor Guide](extension/map-editor-guide.md) - Visual map editor documentation
+- [Map Rendering Guide](extension/map-rendering-guide.md) - Map visualization details
 
 ### ⚡ Quick Reference
 Fast access to commonly needed information.
@@ -54,7 +57,10 @@ docs/
 ├── extension/             # VSCode extension documentation
 │   ├── USER_GUIDE         # For extension users
 │   ├── DEVELOPER_GUIDE    # For contributors
-│   └── TROUBLESHOOTING    # Common issues
+│   ├── TROUBLESHOOTING    # Common issues
+│   ├── generated/         # Auto-generated API docs
+│   ├── map-editor-guide   # Visual editor documentation
+│   └── archive/           # Historical documentation
 │
 ├── quick-reference/       # Quick lookup guides
 │   ├── script-commands    # Command reference

@@ -83,6 +83,12 @@
         "icon": "$(dashboard)"
       },
       {
+        "command": "manicMiners.showCommandCenter",
+        "title": "Show Command Center",
+        "category": "Manic Miners",
+        "icon": "$(remote-explorer)"
+      },
+      {
         "command": "manicMiners.showEnhancedCommandPalette",
         "title": "Show Enhanced Command Palette",
         "category": "Manic Miners",
@@ -350,14 +356,14 @@
         "icon": "$(code)"
       },
       {
-        "command": "manicMiners.showFloatingPanels",
-        "title": "Show Floating Panels",
+        "command": "manicMiners.showWorkspace",
+        "title": "Show Workspace",
         "category": "Manic Miners",
         "icon": "$(layout)"
       },
       {
-        "command": "manicMiners.resetFloatingPanels",
-        "title": "Reset Floating Panels Layout",
+        "command": "manicMiners.resetWorkspace",
+        "title": "Reset Workspace Layout",
         "category": "Manic Miners",
         "icon": "$(refresh)"
       },
@@ -416,6 +422,30 @@
         "title": "Show Quick Actions",
         "category": "Manic Miners",
         "icon": "$(lightbulb)"
+      },
+      {
+        "command": "manicMiners.generateDocs",
+        "title": "Generate Documentation",
+        "category": "Manic Miners",
+        "icon": "$(book)"
+      },
+      {
+        "command": "manicMiners.openDocs",
+        "title": "Open Documentation",
+        "category": "Manic Miners",
+        "icon": "$(book)"
+      },
+      {
+        "command": "manicMiners.searchDocs",
+        "title": "Search Documentation",
+        "category": "Manic Miners",
+        "icon": "$(search)"
+      },
+      {
+        "command": "manicMiners.exportDocs",
+        "title": "Export Documentation",
+        "category": "Manic Miners",
+        "icon": "$(export)"
       }
     ],
     "hoverProviders": [
@@ -440,6 +470,13 @@
           "name": "Dashboard",
           "icon": "$(dashboard)",
           "contextualTitle": "Manic Miners Dashboard"
+        },
+        {
+          "type": "webview",
+          "id": "manicMiners.enhancedDashboard",
+          "name": "Command Center",
+          "icon": "$(remote-explorer)",
+          "contextualTitle": "Command Center"
         },
         {
           "id": "manicMiners.explorer",
@@ -502,10 +539,17 @@
         },
         {
           "type": "webview",
-          "id": "manicMiners.floatingPanels",
-          "name": "Floating Panels",
+          "id": "manicMiners.workspace",
+          "name": "Workspace",
           "icon": "$(layout)",
-          "contextualTitle": "Manic Miners Floating Panels"
+          "contextualTitle": "Manic Miners Workspace"
+        },
+        {
+          "type": "webview",
+          "id": "manicMiners.docViewer",
+          "name": "Documentation",
+          "icon": "$(book)",
+          "contextualTitle": "Manic Miners Documentation"
         }
       ]
     },
@@ -523,6 +567,16 @@
       {
         "viewType": "manicMiners.mapEditor",
         "displayName": "Map Editor",
+        "selector": [
+          {
+            "filenamePattern": "*.dat"
+          }
+        ],
+        "priority": "option"
+      },
+      {
+        "viewType": "manicMiners.enhancedMapEditor",
+        "displayName": "Enhanced Map Editor",
         "selector": [
           {
             "filenamePattern": "*.dat"
@@ -709,6 +763,81 @@
         "when": "manicMiners.extensionActive"
       },
       {
+        "command": "manicMiners.focusPanel.tools",
+        "key": "ctrl+1",
+        "mac": "cmd+1",
+        "when": "manicMiners.workspaceActive"
+      },
+      {
+        "command": "manicMiners.focusPanel.layers",
+        "key": "ctrl+2",
+        "mac": "cmd+2",
+        "when": "manicMiners.workspaceActive"
+      },
+      {
+        "command": "manicMiners.focusPanel.properties",
+        "key": "ctrl+3",
+        "mac": "cmd+3",
+        "when": "manicMiners.workspaceActive"
+      },
+      {
+        "command": "manicMiners.focusPanel.tilePalette",
+        "key": "ctrl+4",
+        "mac": "cmd+4",
+        "when": "manicMiners.workspaceActive"
+      },
+      {
+        "command": "manicMiners.closeActivePanel",
+        "key": "ctrl+w",
+        "mac": "cmd+w",
+        "when": "manicMiners.panelFocused"
+      },
+      {
+        "command": "manicMiners.applyPreset.mapping",
+        "key": "ctrl+shift+1",
+        "mac": "cmd+shift+1",
+        "when": "manicMiners.workspaceActive"
+      },
+      {
+        "command": "manicMiners.applyPreset.scripting",
+        "key": "ctrl+shift+2",
+        "mac": "cmd+shift+2",
+        "when": "manicMiners.workspaceActive"
+      },
+      {
+        "command": "manicMiners.applyPreset.analysis",
+        "key": "ctrl+shift+3",
+        "mac": "cmd+shift+3",
+        "when": "manicMiners.workspaceActive"
+      },
+      {
+        "command": "manicMiners.selectTool.paint",
+        "key": "p",
+        "when": "manicMiners.mapEditorFocus && !inputFocus"
+      },
+      {
+        "command": "manicMiners.selectTool.fill",
+        "key": "f",
+        "when": "manicMiners.mapEditorFocus && !inputFocus"
+      },
+      {
+        "command": "manicMiners.selectTool.eraser",
+        "key": "e",
+        "when": "manicMiners.mapEditorFocus && !inputFocus"
+      },
+      {
+        "command": "manicMiners.zoomIn",
+        "key": "ctrl+=",
+        "mac": "cmd+=",
+        "when": "manicMiners.canvasActive"
+      },
+      {
+        "command": "manicMiners.zoomOut",
+        "key": "ctrl+-",
+        "mac": "cmd+-",
+        "when": "manicMiners.canvasActive"
+      },
+      {
         "command": "manicMiners.insertTemplate",
         "key": "ctrl+shift+t",
         "mac": "cmd+shift+t",
@@ -849,9 +978,15 @@
     "package": "vsce package --no-dependencies",
     "publish": "vsce publish"
   },
+  "dependencies": {
+    "highlight.js": "^11.10.0",
+    "marked": "^14.1.4"
+  },
   "devDependencies": {
     "@jest/globals": "^30.0.4",
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/jest": "^30.0.0",
+    "@types/marked": "^6.0.0",
     "@types/node": "18.x",
     "@types/vscode": "^1.89.0",
     "@typescript-eslint/eslint-plugin": "^7.7.1",
