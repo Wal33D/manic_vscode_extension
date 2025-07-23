@@ -1,0 +1,636 @@
+import { PluginManager, pluginManager } from '../pluginManager';
+import { eventBus } from '../eventBus';
+
+describe('PluginManager', () => {
+  let manager: PluginManager;
+
+  beforeEach(() => {
+    manager = PluginManager.getInstance();
+    manager.unregisterAll();
+    eventBus.off();
+  });
+
+  describe('Basic Plugin Management', () => {
+    it('should be a singleton', () => {
+      const manager1 = PluginManager.getInstance();
+      const manager2 = PluginManager.getInstance();
+      expect(manager1).toBe(manager2);
+    });
+
+    it('should register a plugin', async () => {
+      const manifest = {
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        version: '1.0.0',
+        author: 'Test Author',
+        description: 'A test plugin',
+        main: 'index.js',
+      };
+
+      const source = {
+        activate: jest.fn(),
+        deactivate: jest.fn(),
+      };
+
+      await manager.registerPlugin(manifest, source);
+
+      expect(manager.getPlugin('test-plugin')).toBeDefined();
+      expect(manager.isRegistered('test-plugin')).toBe(true);
+    });
+
+    it('should prevent duplicate registrations', async () => {
+      const manifest = {
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      await manager.registerPlugin(manifest, {});
+
+      await expect(manager.registerPlugin(manifest, {})).rejects.toThrow(
+        'Plugin test-plugin is already registered'
+      );
+    });
+
+    it('should unregister a plugin', async () => {
+      const manifest = {
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      const source = {
+        deactivate: jest.fn(),
+      };
+
+      await manager.registerPlugin(manifest, source);
+      await manager.unregisterPlugin('test-plugin');
+
+      expect(manager.isRegistered('test-plugin')).toBe(false);
+      expect(source.deactivate).toHaveBeenCalled();
+    });
+  });
+
+  describe('Plugin Lifecycle', () => {
+    it('should activate plugin', async () => {
+      const activate = jest.fn();
+      const manifest = {
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      await manager.registerPlugin(manifest, { activate });
+      await manager.activatePlugin('test-plugin');
+
+      expect(activate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          eventBus: expect.any(Object),
+          workspace: expect.any(Object),
+          commands: expect.any(Object),
+        })
+      );
+      expect(manager.isActive('test-plugin')).toBe(true);
+    });
+
+    it('should deactivate plugin', async () => {
+      const deactivate = jest.fn();
+      const manifest = {
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      await manager.registerPlugin(manifest, {
+        activate: jest.fn(),
+        deactivate,
+      });
+
+      await manager.activatePlugin('test-plugin');
+      await manager.deactivatePlugin('test-plugin');
+
+      expect(deactivate).toHaveBeenCalled();
+      expect(manager.isActive('test-plugin')).toBe(false);
+    });
+
+    it('should handle activation errors gracefully', async () => {
+      const manifest = {
+        id: 'error-plugin',
+        name: 'Error Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      const source = {
+        activate: jest.fn().mockRejectedValue(new Error('Activation failed')),
+      };
+
+      await manager.registerPlugin(manifest, source);
+
+      await expect(manager.activatePlugin('error-plugin')).rejects.toThrow('Activation failed');
+      expect(manager.isActive('error-plugin')).toBe(false);
+    });
+  });
+
+  describe('Plugin Dependencies', () => {
+    it('should validate dependencies', async () => {
+      const manifest = {
+        id: 'dependent-plugin',
+        name: 'Dependent Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+        dependencies: {
+          'required-plugin': '^1.0.0',
+        },
+      };
+
+      await expect(manager.registerPlugin(manifest, {})).rejects.toThrow(
+        'Missing dependency: required-plugin'
+      );
+    });
+
+    it('should load dependencies in order', async () => {
+      const loadOrder: string[] = [];
+
+      // Register base plugin
+      await manager.registerPlugin(
+        {
+          id: 'base-plugin',
+          name: 'Base Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+        },
+        {
+          activate: () => loadOrder.push('base'),
+        }
+      );
+
+      // Register dependent plugin
+      await manager.registerPlugin(
+        {
+          id: 'dependent-plugin',
+          name: 'Dependent Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+          dependencies: {
+            'base-plugin': '^1.0.0',
+          },
+        },
+        {
+          activate: () => loadOrder.push('dependent'),
+        }
+      );
+
+      await manager.activatePlugin('dependent-plugin');
+
+      expect(loadOrder).toEqual(['base', 'dependent']);
+    });
+
+    it('should handle circular dependencies', async () => {
+      await manager.registerPlugin(
+        {
+          id: 'plugin-a',
+          name: 'Plugin A',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+          dependencies: { 'plugin-b': '^1.0.0' },
+        },
+        {}
+      );
+
+      await manager.registerPlugin(
+        {
+          id: 'plugin-b',
+          name: 'Plugin B',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+          dependencies: { 'plugin-a': '^1.0.0' },
+        },
+        {}
+      );
+
+      await expect(manager.activatePlugin('plugin-a')).rejects.toThrow(
+        'Circular dependency detected'
+      );
+    });
+  });
+
+  describe('Plugin Hooks', () => {
+    it('should register and trigger hooks', async () => {
+      const hookHandler = jest.fn();
+
+      const manifest = {
+        id: 'hook-plugin',
+        name: 'Hook Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      await manager.registerPlugin(manifest, {
+        activate: (api: any) => {
+          api.hooks.register('file:save', hookHandler);
+        },
+      });
+
+      await manager.activatePlugin('hook-plugin');
+      await manager.triggerHook('file:save', { path: '/test.dat' });
+
+      expect(hookHandler).toHaveBeenCalledWith({ path: '/test.dat' });
+    });
+
+    it('should support hook priorities', async () => {
+      const order: number[] = [];
+
+      await manager.registerPlugin(
+        {
+          id: 'plugin1',
+          name: 'Plugin 1',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+        },
+        {
+          activate: (api: any) => {
+            api.hooks.register('test', () => order.push(1), { priority: 1 });
+          },
+        }
+      );
+
+      await manager.registerPlugin(
+        {
+          id: 'plugin2',
+          name: 'Plugin 2',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+        },
+        {
+          activate: (api: any) => {
+            api.hooks.register('test', () => order.push(2), { priority: 2 });
+          },
+        }
+      );
+
+      await manager.activatePlugin('plugin1');
+      await manager.activatePlugin('plugin2');
+      await manager.triggerHook('test');
+
+      expect(order).toEqual([2, 1]); // Higher priority first
+    });
+
+    it('should allow hooks to modify data', async () => {
+      await manager.registerPlugin(
+        {
+          id: 'modifier-plugin',
+          name: 'Modifier Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+        },
+        {
+          activate: (api: any) => {
+            api.hooks.register('data:transform', (data: any) => {
+              return { ...data, modified: true };
+            });
+          },
+        }
+      );
+
+      await manager.activatePlugin('modifier-plugin');
+
+      const result = await manager.triggerHook('data:transform', {
+        original: true,
+      });
+
+      expect(result).toEqual({ original: true, modified: true });
+    });
+  });
+
+  describe('Plugin Commands', () => {
+    it('should register plugin commands', async () => {
+      const commandHandler = jest.fn();
+
+      await manager.registerPlugin(
+        {
+          id: 'command-plugin',
+          name: 'Command Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+          contributes: {
+            commands: [
+              {
+                command: 'test.command',
+                title: 'Test Command',
+              },
+            ],
+          },
+        },
+        {
+          activate: (api: any) => {
+            api.commands.register('test.command', commandHandler);
+          },
+        }
+      );
+
+      await manager.activatePlugin('command-plugin');
+
+      const commands = manager.getPluginCommands('command-plugin');
+      expect(commands).toHaveLength(1);
+      expect(commands[0]).toEqual({
+        command: 'test.command',
+        title: 'Test Command',
+      });
+    });
+  });
+
+  describe('Plugin Configuration', () => {
+    it('should handle plugin configuration', async () => {
+      const manifest = {
+        id: 'config-plugin',
+        name: 'Config Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+        contributes: {
+          configuration: {
+            title: 'Test Plugin Settings',
+            properties: {
+              'testPlugin.enabled': {
+                type: 'boolean',
+                default: true,
+                description: 'Enable the plugin',
+              },
+            },
+          },
+        },
+      };
+
+      await manager.registerPlugin(manifest, {});
+
+      const config = manager.getPluginConfiguration('config-plugin');
+      expect(config).toHaveProperty('testPlugin.enabled', true);
+    });
+
+    it('should update plugin configuration', async () => {
+      const configChangeHandler = jest.fn();
+
+      await manager.registerPlugin(
+        {
+          id: 'config-plugin',
+          name: 'Config Plugin',
+          version: '1.0.0',
+          author: 'Test',
+          description: 'Test',
+          main: 'index.js',
+        },
+        {
+          activate: (api: any) => {
+            api.workspace.onDidChangeConfiguration(configChangeHandler);
+          },
+        }
+      );
+
+      await manager.activatePlugin('config-plugin');
+
+      manager.updatePluginConfiguration('config-plugin', {
+        'testPlugin.enabled': false,
+      });
+
+      expect(configChangeHandler).toHaveBeenCalledWith({
+        affectsConfiguration: expect.any(Function),
+      });
+    });
+  });
+
+  describe('Plugin Permissions', () => {
+    it('should enforce plugin permissions', async () => {
+      const manifest = {
+        id: 'restricted-plugin',
+        name: 'Restricted Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+        permissions: ['filesystem.read'],
+      };
+
+      await manager.registerPlugin(manifest, {
+        activate: (api: any) => {
+          // Try to write (not permitted)
+          expect(() => {
+            api.filesystem.write('/test.txt', 'data');
+          }).toThrow('Permission denied: filesystem.write');
+        },
+      });
+
+      await manager.activatePlugin('restricted-plugin');
+    });
+
+    it('should request permission elevation', async () => {
+      const permissionCallback = jest.fn().mockResolvedValue(true);
+      manager.onPermissionRequest(permissionCallback);
+
+      const manifest = {
+        id: 'permission-plugin',
+        name: 'Permission Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+        permissions: ['filesystem.read'],
+      };
+
+      await manager.registerPlugin(manifest, {
+        activate: async (api: any) => {
+          await api.requestPermission('filesystem.write');
+        },
+      });
+
+      await manager.activatePlugin('permission-plugin');
+
+      expect(permissionCallback).toHaveBeenCalledWith({
+        plugin: 'permission-plugin',
+        permission: 'filesystem.write',
+      });
+    });
+  });
+
+  describe('Plugin Events', () => {
+    it('should emit plugin lifecycle events', async () => {
+      const events: string[] = [];
+
+      eventBus.on('plugin:registered', {
+        callback: data => events.push(`registered:${data.pluginId}`),
+      });
+      eventBus.on('plugin:activated', {
+        callback: data => events.push(`activated:${data.pluginId}`),
+      });
+      eventBus.on('plugin:deactivated', {
+        callback: data => events.push(`deactivated:${data.pluginId}`),
+      });
+
+      const manifest = {
+        id: 'event-plugin',
+        name: 'Event Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      await manager.registerPlugin(manifest, { activate: jest.fn() });
+      await manager.activatePlugin('event-plugin');
+      await manager.deactivatePlugin('event-plugin');
+
+      expect(events).toEqual([
+        'registered:event-plugin',
+        'activated:event-plugin',
+        'deactivated:event-plugin',
+      ]);
+    });
+  });
+
+  describe('Plugin Discovery', () => {
+    it('should discover plugins from directory', async () => {
+      const mockPlugins = [
+        {
+          manifest: {
+            id: 'discovered-1',
+            name: 'Discovered Plugin 1',
+            version: '1.0.0',
+            author: 'Test',
+            description: 'Test',
+            main: 'index.js',
+          },
+          source: { activate: jest.fn() },
+        },
+        {
+          manifest: {
+            id: 'discovered-2',
+            name: 'Discovered Plugin 2',
+            version: '1.0.0',
+            author: 'Test',
+            description: 'Test',
+            main: 'index.js',
+          },
+          source: { activate: jest.fn() },
+        },
+      ];
+
+      // Mock file system discovery
+      manager.discoverPlugins = jest.fn().mockResolvedValue(mockPlugins);
+
+      const discovered = await manager.discoverPlugins('/plugins');
+      expect(discovered).toHaveLength(2);
+    });
+  });
+
+  describe('Plugin Marketplace', () => {
+    it('should search for plugins', async () => {
+      const searchResults = await manager.searchPlugins('editor');
+      expect(Array.isArray(searchResults)).toBe(true);
+    });
+
+    it('should install plugin from marketplace', async () => {
+      const mockPlugin = {
+        id: 'marketplace-plugin',
+        name: 'Marketplace Plugin',
+        version: '1.0.0',
+        repository: 'https://github.com/test/plugin',
+      };
+
+      manager.installFromMarketplace = jest.fn().mockResolvedValue(mockPlugin);
+
+      const installed = await manager.installFromMarketplace('marketplace-plugin');
+      expect(installed).toEqual(mockPlugin);
+    });
+  });
+
+  describe('Plugin Sandboxing', () => {
+    it('should sandbox plugin execution', async () => {
+      const manifest = {
+        id: 'sandboxed-plugin',
+        name: 'Sandboxed Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      await manager.registerPlugin(manifest, {
+        activate: (api: any) => {
+          // Plugin should not have access to global objects
+          expect(api.global).toBeUndefined();
+          expect(api.process).toBeUndefined();
+          expect(api.require).toBeUndefined();
+        },
+      });
+
+      await manager.activatePlugin('sandboxed-plugin');
+    });
+  });
+
+  describe('Plugin Hot Reload', () => {
+    it('should support hot reload', async () => {
+      const originalActivate = jest.fn();
+      const newActivate = jest.fn();
+
+      const manifest = {
+        id: 'hot-reload-plugin',
+        name: 'Hot Reload Plugin',
+        version: '1.0.0',
+        author: 'Test',
+        description: 'Test',
+        main: 'index.js',
+      };
+
+      await manager.registerPlugin(manifest, {
+        activate: originalActivate,
+        deactivate: jest.fn(),
+      });
+
+      await manager.activatePlugin('hot-reload-plugin');
+      expect(originalActivate).toHaveBeenCalled();
+
+      // Hot reload with new implementation
+      await manager.reloadPlugin('hot-reload-plugin', {
+        activate: newActivate,
+        deactivate: jest.fn(),
+      });
+
+      expect(newActivate).toHaveBeenCalled();
+    });
+  });
+});

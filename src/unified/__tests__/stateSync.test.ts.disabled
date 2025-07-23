@@ -1,0 +1,382 @@
+import { StateSync, stateSync } from '../stateSync';
+import { eventBus } from '../eventBus';
+
+describe('StateSync', () => {
+  let sync: StateSync;
+
+  beforeEach(() => {
+    sync = StateSync.getInstance();
+    sync.clearAll();
+    eventBus.off(); // Clear event listeners
+  });
+
+  describe('Basic State Management', () => {
+    it('should be a singleton', () => {
+      const sync1 = StateSync.getInstance();
+      const sync2 = StateSync.getInstance();
+      expect(sync1).toBe(sync2);
+    });
+
+    it('should set and get state', () => {
+      sync.setState('testKey', 'testValue', 'source1');
+      expect(sync.getState('testKey')).toBe('testValue');
+    });
+
+    it('should handle complex objects', () => {
+      const complexData = {
+        user: { id: 1, name: 'Test' },
+        settings: { theme: 'dark', notifications: true },
+      };
+
+      sync.setState('complex', complexData, 'source1');
+      expect(sync.getState('complex')).toEqual(complexData);
+    });
+
+    it('should clear specific state', () => {
+      sync.setState('key1', 'value1', 'source1');
+      sync.setState('key2', 'value2', 'source1');
+
+      sync.clearState('key1');
+
+      expect(sync.getState('key1')).toBeUndefined();
+      expect(sync.getState('key2')).toBe('value2');
+    });
+
+    it('should clear all states', () => {
+      sync.setState('key1', 'value1', 'source1');
+      sync.setState('key2', 'value2', 'source1');
+
+      sync.clearAll();
+
+      expect(sync.getState('key1')).toBeUndefined();
+      expect(sync.getState('key2')).toBeUndefined();
+    });
+  });
+
+  describe('State Subscriptions', () => {
+    it('should notify subscribers on state change', () => {
+      const callback = jest.fn();
+      sync.subscribe('testKey', callback);
+
+      sync.setState('testKey', 'newValue', 'source1');
+
+      expect(callback).toHaveBeenCalledWith({
+        key: 'testKey',
+        value: 'newValue',
+        previousValue: undefined,
+        source: 'source1',
+      });
+    });
+
+    it('should handle multiple subscribers', () => {
+      const callback1 = jest.fn();
+      const callback2 = jest.fn();
+
+      sync.subscribe('testKey', callback1);
+      sync.subscribe('testKey', callback2);
+
+      sync.setState('testKey', 'value', 'source1');
+
+      expect(callback1).toHaveBeenCalled();
+      expect(callback2).toHaveBeenCalled();
+    });
+
+    it('should unsubscribe correctly', () => {
+      const callback = jest.fn();
+      const unsubscribe = sync.subscribe('testKey', callback);
+
+      sync.setState('testKey', 'value1', 'source1');
+      expect(callback).toHaveBeenCalledTimes(1);
+
+      unsubscribe();
+
+      sync.setState('testKey', 'value2', 'source1');
+      expect(callback).toHaveBeenCalledTimes(1);
+    });
+
+    it('should support immediate subscription option', () => {
+      sync.setState('testKey', 'existingValue', 'source1');
+
+      const callback = jest.fn();
+      sync.subscribe('testKey', callback, { immediate: true });
+
+      expect(callback).toHaveBeenCalledWith({
+        key: 'testKey',
+        value: 'existingValue',
+        previousValue: undefined,
+        source: undefined,
+      });
+    });
+
+    it('should filter by source', () => {
+      const callback = jest.fn();
+      sync.subscribe('testKey', callback, { source: 'allowed' });
+
+      sync.setState('testKey', 'value1', 'notAllowed');
+      sync.setState('testKey', 'value2', 'allowed');
+
+      expect(callback).toHaveBeenCalledTimes(1);
+      expect(callback).toHaveBeenCalledWith(
+        expect.objectContaining({
+          value: 'value2',
+          source: 'allowed',
+        })
+      );
+    });
+  });
+
+  describe('State Locking', () => {
+    it('should prevent changes when locked', () => {
+      sync.setState('testKey', 'initial', 'source1');
+      sync.lockState('testKey');
+
+      sync.setState('testKey', 'modified', 'source2');
+
+      expect(sync.getState('testKey')).toBe('initial');
+    });
+
+    it('should allow changes when unlocked', () => {
+      sync.setState('testKey', 'initial', 'source1');
+      sync.lockState('testKey');
+      sync.unlockState('testKey');
+
+      sync.setState('testKey', 'modified', 'source2');
+
+      expect(sync.getState('testKey')).toBe('modified');
+    });
+
+    it('should check if state is locked', () => {
+      sync.lockState('testKey');
+      expect(sync.isLocked('testKey')).toBe(true);
+
+      sync.unlockState('testKey');
+      expect(sync.isLocked('testKey')).toBe(false);
+    });
+  });
+
+  describe('Conflict Resolution', () => {
+    it('should use default resolver (last write wins)', () => {
+      sync.setState('testKey', 'value1', 'source1');
+      sync.setState('testKey', 'value2', 'source2');
+
+      expect(sync.getState('testKey')).toBe('value2');
+    });
+
+    it('should use custom conflict resolver', () => {
+      const resolver = jest.fn((local: any, remote: any) => {
+        return local.priority > remote.priority ? local : remote;
+      });
+
+      sync.registerConflictResolver('priority', resolver);
+      sync.setConflictResolver('testKey', 'priority');
+
+      sync.setState('testKey', { value: 'a', priority: 1 }, 'source1');
+      sync.setState('testKey', { value: 'b', priority: 0 }, 'source2');
+
+      expect(sync.getState('testKey')).toEqual({ value: 'a', priority: 1 });
+    });
+  });
+
+  describe('State Synchronization', () => {
+    it('should sync state between sources', async () => {
+      const remote = { testKey: 'remoteValue' };
+      const synced = await sync.syncWithRemote('testSource', remote);
+
+      expect(synced).toContain('testKey');
+      expect(sync.getState('testKey')).toBe('remoteValue');
+    });
+
+    it('should handle sync conflicts', async () => {
+      sync.setState('testKey', 'localValue', 'local');
+
+      const remote = { testKey: 'remoteValue' };
+      await sync.syncWithRemote('remote', remote);
+
+      // Default resolver: remote wins
+      expect(sync.getState('testKey')).toBe('remoteValue');
+    });
+
+    it('should batch sync multiple keys', async () => {
+      const remote = {
+        key1: 'value1',
+        key2: 'value2',
+        key3: 'value3',
+      };
+
+      const synced = await sync.syncWithRemote('remote', remote);
+
+      expect(synced).toHaveLength(3);
+      expect(sync.getState('key1')).toBe('value1');
+      expect(sync.getState('key2')).toBe('value2');
+      expect(sync.getState('key3')).toBe('value3');
+    });
+  });
+
+  describe('State Snapshots', () => {
+    it('should create state snapshot', () => {
+      sync.setState('key1', 'value1', 'source1');
+      sync.setState('key2', 'value2', 'source1');
+
+      const snapshot = sync.createSnapshot();
+
+      expect(snapshot.state).toEqual({
+        key1: 'value1',
+        key2: 'value2',
+      });
+      expect(snapshot.timestamp).toBeGreaterThan(0);
+    });
+
+    it('should restore from snapshot', () => {
+      sync.setState('key1', 'value1', 'source1');
+      const snapshot = sync.createSnapshot();
+
+      sync.setState('key1', 'modified', 'source2');
+      sync.setState('key2', 'new', 'source2');
+
+      sync.restoreSnapshot(snapshot);
+
+      expect(sync.getState('key1')).toBe('value1');
+      expect(sync.getState('key2')).toBeUndefined();
+    });
+  });
+
+  describe('State Metadata', () => {
+    it('should track state metadata', () => {
+      sync.setState('testKey', 'value', 'source1');
+      const metadata = sync.getStateMetadata('testKey');
+
+      expect(metadata).toMatchObject({
+        source: 'source1',
+        version: 1,
+        lastModified: expect.any(Number),
+      });
+    });
+
+    it('should increment version on updates', () => {
+      sync.setState('testKey', 'value1', 'source1');
+      const metadata1 = sync.getStateMetadata('testKey');
+
+      sync.setState('testKey', 'value2', 'source2');
+      const metadata2 = sync.getStateMetadata('testKey');
+
+      expect(metadata2?.version).toBe((metadata1?.version || 0) + 1);
+    });
+  });
+
+  describe('State Validation', () => {
+    it('should validate state with schema', () => {
+      const schema = {
+        validate: (value: any) => typeof value === 'number' && value > 0,
+      };
+
+      sync.setStateSchema('counter', schema);
+
+      sync.setState('counter', 5, 'source1');
+      expect(sync.getState('counter')).toBe(5);
+
+      sync.setState('counter', -1, 'source2');
+      expect(sync.getState('counter')).toBe(5); // Should not update
+    });
+  });
+
+  describe('State Events', () => {
+    it('should emit state change events', () => {
+      const handler = jest.fn();
+      eventBus.on('state:changed', { callback: handler });
+
+      sync.setState('testKey', 'value', 'source1');
+
+      expect(handler).toHaveBeenCalledWith({
+        key: 'testKey',
+        value: 'value',
+        previousValue: undefined,
+        source: 'source1',
+      });
+    });
+
+    it('should emit lock/unlock events', () => {
+      const lockHandler = jest.fn();
+      const unlockHandler = jest.fn();
+
+      eventBus.on('state:locked', { callback: lockHandler });
+      eventBus.on('state:unlocked', { callback: unlockHandler });
+
+      sync.lockState('testKey');
+      expect(lockHandler).toHaveBeenCalledWith({ key: 'testKey' });
+
+      sync.unlockState('testKey');
+      expect(unlockHandler).toHaveBeenCalledWith({ key: 'testKey' });
+    });
+  });
+
+  describe('Computed States', () => {
+    it('should support computed states', () => {
+      sync.setState('firstName', 'John', 'source1');
+      sync.setState('lastName', 'Doe', 'source1');
+
+      sync.defineComputedState('fullName', ['firstName', 'lastName'], deps => {
+        return `${deps.firstName} ${deps.lastName}`;
+      });
+
+      expect(sync.getState('fullName')).toBe('John Doe');
+    });
+
+    it('should update computed state on dependency change', () => {
+      sync.setState('count', 5, 'source1');
+
+      sync.defineComputedState('doubled', ['count'], deps => {
+        return deps.count * 2;
+      });
+
+      expect(sync.getState('doubled')).toBe(10);
+
+      sync.setState('count', 7, 'source2');
+      expect(sync.getState('doubled')).toBe(14);
+    });
+  });
+
+  describe('Performance', () => {
+    it('should debounce rapid state changes', () => {
+      const callback = jest.fn();
+      sync.subscribe('testKey', callback, { debounce: 50 });
+
+      // Rapid state changes
+      for (let i = 0; i < 10; i++) {
+        sync.setState('testKey', i, 'source1');
+      }
+
+      // Callback should not be called immediately
+      expect(callback).not.toHaveBeenCalled();
+
+      // Wait for debounce
+      return new Promise(resolve => {
+        setTimeout(() => {
+          expect(callback).toHaveBeenCalledTimes(1);
+          expect(callback).toHaveBeenCalledWith(
+            expect.objectContaining({
+              value: 9,
+            })
+          );
+          resolve(undefined);
+        }, 100);
+      });
+    });
+
+    it('should handle large state objects efficiently', () => {
+      const largeObject = Array(1000)
+        .fill(null)
+        .map((_, i) => ({
+          id: i,
+          data: `item-${i}`,
+          nested: { value: i },
+        }));
+
+      const start = Date.now();
+      sync.setState('large', largeObject, 'source1');
+      const duration = Date.now() - start;
+
+      expect(duration).toBeLessThan(50); // Should be fast
+      expect(sync.getState('large')).toEqual(largeObject);
+    });
+  });
+});

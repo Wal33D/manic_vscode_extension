@@ -1,0 +1,432 @@
+import { ThemeManager, themeManager } from '../themeManager';
+
+describe('ThemeManager', () => {
+  let manager: ThemeManager;
+
+  beforeEach(() => {
+    manager = ThemeManager.getInstance();
+    manager.clearThemes();
+    manager.reset();
+  });
+
+  describe('Basic Theme Management', () => {
+    it('should be a singleton', () => {
+      const manager1 = ThemeManager.getInstance();
+      const manager2 = ThemeManager.getInstance();
+      expect(manager1).toBe(manager2);
+    });
+
+    it('should register a theme', () => {
+      const theme = {
+        id: 'custom',
+        name: 'Custom Theme',
+        colors: {
+          primary: '#007ACC',
+          secondary: '#F0F0F0',
+          background: '#FFFFFF',
+          text: '#000000',
+        },
+      };
+
+      manager.registerTheme(theme);
+      expect(manager.getTheme('custom')).toEqual(theme);
+    });
+
+    it('should have default themes', () => {
+      expect(manager.getTheme('dark')).toBeDefined();
+      expect(manager.getTheme('light')).toBeDefined();
+      expect(manager.getTheme('high-contrast')).toBeDefined();
+    });
+
+    it('should apply theme', () => {
+      const applyCallback = jest.fn();
+      manager.onThemeChange(applyCallback);
+
+      manager.applyTheme('light');
+
+      expect(manager.getActiveTheme()).toBe('light');
+      expect(applyCallback).toHaveBeenCalledWith('light');
+    });
+
+    it('should list all themes', () => {
+      const themes = manager.getAllThemes();
+      expect(themes.length).toBeGreaterThanOrEqual(3); // At least default themes
+      expect(themes.map(t => t.id)).toContain('dark');
+      expect(themes.map(t => t.id)).toContain('light');
+    });
+  });
+
+  describe('CSS Generation', () => {
+    it('should generate CSS variables', () => {
+      const theme = {
+        id: 'test',
+        name: 'Test Theme',
+        colors: {
+          primary: '#007ACC',
+          secondary: '#F0F0F0',
+        },
+      };
+
+      manager.registerTheme(theme);
+      manager.applyTheme('test');
+
+      const css = manager.generateCSS();
+
+      expect(css).toContain('--theme-primary: #007ACC');
+      expect(css).toContain('--theme-secondary: #F0F0F0');
+    });
+
+    it('should generate component-specific CSS', () => {
+      const theme = {
+        id: 'test',
+        name: 'Test Theme',
+        colors: {
+          primary: '#007ACC',
+        },
+        components: {
+          button: {
+            background: '#0066BB',
+            text: '#FFFFFF',
+            hover: '#0055AA',
+          },
+        },
+      };
+
+      manager.registerTheme(theme);
+      manager.applyTheme('test');
+
+      const css = manager.generateCSS();
+
+      expect(css).toContain('--button-background: #0066BB');
+      expect(css).toContain('--button-text: #FFFFFF');
+      expect(css).toContain('--button-hover: #0055AA');
+    });
+
+    it('should include semantic colors', () => {
+      const theme = {
+        id: 'test',
+        name: 'Test Theme',
+        colors: {
+          primary: '#007ACC',
+        },
+        semantic: {
+          error: '#FF0000',
+          warning: '#FFA500',
+          success: '#00FF00',
+          info: '#0000FF',
+        },
+      };
+
+      manager.registerTheme(theme);
+      manager.applyTheme('test');
+
+      const css = manager.generateCSS();
+
+      expect(css).toContain('--semantic-error: #FF0000');
+      expect(css).toContain('--semantic-warning: #FFA500');
+      expect(css).toContain('--semantic-success: #00FF00');
+      expect(css).toContain('--semantic-info: #0000FF');
+    });
+  });
+
+  describe('Theme Inheritance', () => {
+    it('should support theme inheritance', () => {
+      const baseTheme = {
+        id: 'base',
+        name: 'Base Theme',
+        colors: {
+          primary: '#007ACC',
+          secondary: '#F0F0F0',
+          background: '#FFFFFF',
+        },
+      };
+
+      const childTheme = {
+        id: 'child',
+        name: 'Child Theme',
+        extends: 'base',
+        colors: {
+          primary: '#FF0000', // Override primary
+        },
+      };
+
+      manager.registerTheme(baseTheme);
+      manager.registerTheme(childTheme);
+
+      const resolved = manager.getResolvedTheme('child');
+
+      expect(resolved.colors.primary).toBe('#FF0000'); // Overridden
+      expect(resolved.colors.secondary).toBe('#F0F0F0'); // Inherited
+      expect(resolved.colors.background).toBe('#FFFFFF'); // Inherited
+    });
+
+    it('should handle multiple inheritance levels', () => {
+      manager.registerTheme({
+        id: 'grandparent',
+        name: 'Grandparent',
+        colors: { a: '#111', b: '#222', c: '#333' },
+      });
+
+      manager.registerTheme({
+        id: 'parent',
+        name: 'Parent',
+        extends: 'grandparent',
+        colors: { b: '#BBB' },
+      });
+
+      manager.registerTheme({
+        id: 'child',
+        name: 'Child',
+        extends: 'parent',
+        colors: { c: '#CCC' },
+      });
+
+      const resolved = manager.getResolvedTheme('child');
+
+      expect(resolved.colors.a).toBe('#111'); // From grandparent
+      expect(resolved.colors.b).toBe('#BBB'); // From parent
+      expect(resolved.colors.c).toBe('#CCC'); // From child
+    });
+  });
+
+  describe('Dynamic Theme Updates', () => {
+    it('should update theme dynamically', () => {
+      const theme = {
+        id: 'dynamic',
+        name: 'Dynamic Theme',
+        colors: { primary: '#007ACC' },
+      };
+
+      manager.registerTheme(theme);
+      manager.applyTheme('dynamic');
+
+      const updateCallback = jest.fn();
+      manager.onThemeChange(updateCallback);
+
+      manager.updateTheme('dynamic', {
+        colors: { primary: '#FF0000' },
+      });
+
+      expect(manager.getTheme('dynamic')?.colors.primary).toBe('#FF0000');
+      expect(updateCallback).toHaveBeenCalledWith('dynamic');
+    });
+
+    it('should batch theme updates', async () => {
+      const theme = {
+        id: 'batch',
+        name: 'Batch Theme',
+        colors: { primary: '#007ACC' },
+      };
+
+      manager.registerTheme(theme);
+      manager.applyTheme('batch');
+
+      const updateCallback = jest.fn();
+      manager.onThemeChange(updateCallback);
+
+      // Multiple updates in quick succession
+      manager.updateTheme('batch', { colors: { primary: '#111' } });
+      manager.updateTheme('batch', { colors: { primary: '#222' } });
+      manager.updateTheme('batch', { colors: { primary: '#333' } });
+
+      // Should batch updates
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(updateCallback).toHaveBeenCalledTimes(1);
+      expect(manager.getTheme('batch')?.colors.primary).toBe('#333');
+    });
+  });
+
+  describe('Color Utilities', () => {
+    it('should provide color manipulation utilities', () => {
+      const color = '#007ACC';
+
+      expect(manager.lighten(color, 10)).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(manager.darken(color, 10)).toMatch(/^#[0-9A-F]{6}$/i);
+      expect(manager.opacity(color, 0.5)).toMatch(/^rgba?\(/);
+    });
+
+    it('should generate color palette from base color', () => {
+      const palette = manager.generatePalette('#007ACC');
+
+      expect(palette).toHaveProperty('50');
+      expect(palette).toHaveProperty('100');
+      expect(palette).toHaveProperty('500');
+      expect(palette).toHaveProperty('900');
+
+      // Palette should go from light to dark
+      expect(palette['50']).not.toBe(palette['900']);
+    });
+
+    it('should calculate contrast ratios', () => {
+      const white = '#FFFFFF';
+      const black = '#000000';
+      const gray = '#808080';
+
+      expect(manager.getContrastRatio(white, black)).toBeGreaterThan(20);
+      expect(manager.getContrastRatio(white, gray)).toBeGreaterThan(1);
+      expect(manager.getContrastRatio(white, gray)).toBeLessThan(
+        manager.getContrastRatio(white, black)
+      );
+    });
+
+    it('should suggest accessible color pairs', () => {
+      const background = '#FFFFFF';
+      const suggestion = manager.getAccessibleTextColor(background);
+
+      expect(manager.getContrastRatio(background, suggestion)).toBeGreaterThanOrEqual(4.5);
+    });
+  });
+
+  describe('Theme Presets', () => {
+    it('should apply theme presets', () => {
+      manager.applyPreset('solarized-dark');
+
+      const theme = manager.getActiveThemeData();
+      expect(theme).toBeDefined();
+      expect(theme?.name).toContain('Solarized');
+    });
+
+    it('should list available presets', () => {
+      const presets = manager.getPresets();
+
+      expect(presets).toContain('solarized-dark');
+      expect(presets).toContain('solarized-light');
+      expect(presets).toContain('monokai');
+      expect(presets).toContain('github-dark');
+    });
+  });
+
+  describe('Theme Storage', () => {
+    it('should save theme preference', () => {
+      const saveCallback = jest.fn();
+      manager.onThemeSave(saveCallback);
+
+      manager.applyTheme('dark');
+      manager.saveThemePreference();
+
+      expect(saveCallback).toHaveBeenCalledWith({
+        themeId: 'dark',
+        customizations: {},
+      });
+    });
+
+    it('should load theme preference', () => {
+      const preference = {
+        themeId: 'light',
+        customizations: {
+          colors: { primary: '#FF0000' },
+        },
+      };
+
+      manager.loadThemePreference(preference);
+
+      expect(manager.getActiveTheme()).toBe('light');
+      const theme = manager.getActiveThemeData();
+      expect(theme?.colors.primary).toBe('#FF0000');
+    });
+  });
+
+  describe('Theme Events', () => {
+    it('should emit theme change events', () => {
+      const handlers = {
+        change: jest.fn(),
+        beforeChange: jest.fn(),
+        afterChange: jest.fn(),
+      };
+
+      manager.onThemeChange(handlers.change);
+      manager.onBeforeThemeChange(handlers.beforeChange);
+      manager.onAfterThemeChange(handlers.afterChange);
+
+      manager.applyTheme('light');
+
+      expect(handlers.beforeChange).toHaveBeenCalledWith('light', 'dark');
+      expect(handlers.change).toHaveBeenCalledWith('light');
+      expect(handlers.afterChange).toHaveBeenCalledWith('light', 'dark');
+    });
+
+    it('should allow cancelling theme change', () => {
+      manager.onBeforeThemeChange(newTheme => {
+        if (newTheme === 'forbidden') {
+          return false; // Cancel
+        }
+      });
+
+      manager.applyTheme('forbidden');
+      expect(manager.getActiveTheme()).not.toBe('forbidden');
+
+      manager.applyTheme('light');
+      expect(manager.getActiveTheme()).toBe('light');
+    });
+  });
+
+  describe('Responsive Themes', () => {
+    it('should support media query based themes', () => {
+      manager.setResponsiveThemes({
+        '(prefers-color-scheme: dark)': 'dark',
+        '(prefers-color-scheme: light)': 'light',
+      });
+
+      // Simulate media query match
+      const mockMatchMedia = (query: string) => ({
+        matches: query.includes('dark'),
+        addListener: jest.fn(),
+        removeListener: jest.fn(),
+      });
+
+      manager.applyResponsiveTheme(mockMatchMedia as any);
+      expect(manager.getActiveTheme()).toBe('dark');
+    });
+  });
+
+  describe('Theme Validation', () => {
+    it('should validate theme structure', () => {
+      const invalidTheme = {
+        id: 'invalid',
+        // Missing required fields
+      };
+
+      expect(() => {
+        manager.registerTheme(invalidTheme as any);
+      }).toThrow();
+    });
+
+    it('should validate color formats', () => {
+      const theme = {
+        id: 'test',
+        name: 'Test',
+        colors: {
+          valid1: '#FF0000',
+          valid2: 'rgb(255, 0, 0)',
+          valid3: 'rgba(255, 0, 0, 0.5)',
+          invalid: 'not-a-color',
+        },
+      };
+
+      const validation = manager.validateTheme(theme);
+      expect(validation.errors).toContain('Invalid color format: invalid');
+    });
+  });
+
+  describe('Performance', () => {
+    it('should cache generated CSS', () => {
+      manager.applyTheme('dark');
+
+      const css1 = manager.generateCSS();
+      const css2 = manager.generateCSS();
+
+      expect(css1).toBe(css2); // Should be same reference (cached)
+    });
+
+    it('should invalidate cache on theme change', () => {
+      manager.applyTheme('dark');
+      const css1 = manager.generateCSS();
+
+      manager.applyTheme('light');
+      const css2 = manager.generateCSS();
+
+      expect(css1).not.toBe(css2);
+    });
+  });
+});

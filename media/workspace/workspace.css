@@ -120,33 +120,7 @@ body {
   margin: 0 8px;
 }
 
-/* Tooltips */
-[data-tooltip] {
-  position: relative;
-}
-
-[data-tooltip]::after {
-  content: attr(data-tooltip);
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--vscode-editorWidget-background);
-  color: var(--text-primary);
-  padding: 4px 8px;
-  border-radius: 3px;
-  font-size: 11px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity var(--transition-speed);
-  margin-bottom: 4px;
-  z-index: 1000;
-}
-
-[data-tooltip]:hover::after {
-  opacity: 1;
-}
+/* Tooltips are defined in animations.css */
 
 /* Main Workspace Area */
 #workspace-main {
@@ -523,11 +497,7 @@ body {
   border: 3px solid var(--panel-border);
   border-top-color: var(--accent);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
+  animation: rotate 1s linear infinite; /* Using rotate from animations.css */
 }
 
 /* Glassmorphism Effects */
@@ -538,18 +508,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Animations */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+/* Panel animations are now in animations.css */
 .workspace-panel {
   animation: fadeIn 0.3s ease-out;
 }
@@ -1329,23 +1288,12 @@ body {
   color: var(--vscode-descriptionForeground);
 }
 
-/* Animations for Panel Content */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
+/* Panel content animations use slideInLeft from animations.css */
 .pattern-item,
 .history-item,
 .stat-card,
 .layer-item {
-  animation: slideIn 0.3s ease-out backwards;
+  animation: slideInLeft 0.3s ease-out backwards;
 }
 
 .pattern-item:nth-child(1) { animation-delay: 0.05s; }
@@ -1362,4 +1310,275 @@ body {
   .tools-grid {
     grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
   }
+}
+
+/* Split View Styles */
+.split-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.split-container.split-horizontal {
+  flex-direction: column;
+}
+
+.split-container.split-vertical {
+  flex-direction: row;
+}
+
+.split-pane {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-width: 200px;
+  min-height: 150px;
+}
+
+.split-container.split-horizontal .split-pane:first-child {
+  border-bottom: 1px solid var(--vscode-panel-border);
+}
+
+.split-container.split-vertical .split-pane:first-child {
+  border-right: 1px solid var(--vscode-panel-border);
+}
+
+.workspace-content-split {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  padding: 16px;
+  background: var(--vscode-editor-background);
+}
+
+.split-welcome {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.split-welcome h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+  color: var(--vscode-foreground);
+}
+
+.split-welcome p {
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: 24px;
+}
+
+.split-view-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.split-option-btn {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  padding: 12px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.split-option-btn:hover {
+  background: var(--vscode-button-hoverBackground);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Embedded view styles */
+.embedded-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}
+
+.embedded-view h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+}
+
+.embedded-view canvas {
+  flex: 1;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 4px;
+  background: var(--vscode-editor-background);
+}
+
+.script-editor {
+  width: 100%;
+  height: 100%;
+  min-height: 300px;
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  color: var(--vscode-input-foreground);
+  padding: 12px;
+  font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+  resize: none;
+  border-radius: 4px;
+}
+
+.script-editor:focus {
+  outline: none;
+  border-color: var(--vscode-focusBorder);
+}
+
+/* Splitter handle for split views */
+.splitter.horizontal {
+  height: 4px;
+  cursor: row-resize;
+  background: var(--vscode-panel-border);
+  position: relative;
+  z-index: 10;
+}
+
+.splitter.vertical {
+  width: 4px;
+  cursor: col-resize;
+  background: var(--vscode-panel-border);
+  position: relative;
+  z-index: 10;
+}
+
+.splitter:hover {
+  background: var(--vscode-focusBorder);
+}
+
+.splitter.dragging {
+  background: var(--vscode-focusBorder);
+  opacity: 0.8;
+}
+
+/* Loading States */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  min-height: 200px;
+}
+
+.loading-message {
+  margin-top: 16px;
+  color: var(--vscode-foreground);
+  opacity: 0.8;
+}
+
+.shimmer-container {
+  padding: 20px;
+}
+
+/* Notifications */
+.notification-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.notification {
+  display: flex;
+  align-items: center;
+  background: var(--vscode-notifications-background);
+  border: 1px solid var(--vscode-notifications-border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  min-width: 300px;
+  max-width: 400px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: all;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.notification-exit {
+  animation: slideOutRight 0.3s ease-out forwards;
+}
+
+.notification-icon {
+  font-size: 20px;
+  margin-right: 12px;
+}
+
+.notification-content {
+  flex: 1;
+}
+
+.notification-message {
+  margin: 0;
+  color: var(--vscode-notifications-foreground);
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: var(--vscode-foreground);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 12px;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.notification-close:hover {
+  opacity: 1;
+}
+
+.notification-success {
+  border-color: var(--vscode-notificationsSuccessIcon-foreground);
+}
+
+.notification-success .notification-icon {
+  color: var(--vscode-notificationsSuccessIcon-foreground);
+}
+
+.notification-error {
+  border-color: var(--vscode-notificationsErrorIcon-foreground);
+}
+
+.notification-error .notification-icon {
+  color: var(--vscode-notificationsErrorIcon-foreground);
+}
+
+.notification-warning {
+  border-color: var(--vscode-notificationsWarningIcon-foreground);
+}
+
+.notification-warning .notification-icon {
+  color: var(--vscode-notificationsWarningIcon-foreground);
+}
+
+.notification-info {
+  border-color: var(--vscode-notificationsInfoIcon-foreground);
+}
+
+.notification-info .notification-icon {
+  color: var(--vscode-notificationsInfoIcon-foreground);
+}
+
+/* Drag and Drop */
+.drag-ghost {
+  transition: none !important;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+.drop-zone-center {
+  border: 2px dashed transparent;
+  border-radius: 8px;
+  transition: all 0.2s ease;
 }

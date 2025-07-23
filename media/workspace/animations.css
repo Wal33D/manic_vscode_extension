@@ -1,0 +1,549 @@
+/* Workspace Animations and Transitions */
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+}
+
+@keyframes slideInTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Panel Animations */
+.workspace-panel {
+  animation: fadeIn 0.3s ease-out;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.workspace-panel.panel-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.workspace-panel.panel-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+.workspace-panel.panel-top {
+  animation: slideInTop 0.3s ease-out;
+}
+
+.workspace-panel.panel-bottom {
+  animation: slideInBottom 0.3s ease-out;
+}
+
+.workspace-panel.panel-float {
+  animation: scaleIn 0.3s ease-out;
+}
+
+/* Panel Minimize/Maximize Transitions */
+.workspace-panel.minimizing {
+  animation: minimize 0.3s ease-out forwards;
+}
+
+@keyframes minimize {
+  to {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+}
+
+.workspace-panel.maximizing {
+  animation: maximize 0.3s ease-out;
+}
+
+@keyframes maximize {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Resizer Transitions */
+.panel-resizer {
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.panel-resizer:hover {
+  background: var(--vscode-focusBorder);
+  width: 4px;
+}
+
+.panel-resizer:active {
+  background: var(--vscode-button-background);
+}
+
+/* Tab Transitions */
+.panel-tab {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.panel-tab::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.3s ease;
+}
+
+.panel-tab:hover::before {
+  left: 100%;
+}
+
+.panel-tab.active {
+  animation: tabActivate 0.2s ease;
+}
+
+@keyframes tabActivate {
+  0% {
+    transform: scale(0.98);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+/* Button Interactions */
+.workspace-button,
+.tool-btn,
+.action-btn,
+.control-btn,
+.layout-btn,
+.panel-btn {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.workspace-button::after,
+.tool-btn::after,
+.action-btn::after,
+.control-btn::after,
+.layout-btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.workspace-button:active::after,
+.tool-btn:active::after,
+.action-btn:active::after,
+.control-btn:active::after,
+.layout-btn:active::after {
+  width: 100%;
+  height: 100%;
+}
+
+/* Hover Effects */
+.workspace-button:hover,
+.tool-btn:hover,
+.action-btn:hover,
+.control-btn:hover,
+.layout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.workspace-button:active,
+.tool-btn:active,
+.action-btn:active,
+.control-btn:active,
+.layout-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* List Item Animations */
+.workspace-list-item {
+  animation: slideInLeft 0.3s ease-out backwards;
+  transition: all 0.2s ease;
+}
+
+.workspace-list-item:nth-child(1) { animation-delay: 0.05s; }
+.workspace-list-item:nth-child(2) { animation-delay: 0.1s; }
+.workspace-list-item:nth-child(3) { animation-delay: 0.15s; }
+.workspace-list-item:nth-child(4) { animation-delay: 0.2s; }
+.workspace-list-item:nth-child(5) { animation-delay: 0.25s; }
+
+.workspace-list-item:hover {
+  transform: translateX(4px);
+  background: var(--vscode-list-hoverBackground);
+}
+
+/* Loading States */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    var(--vscode-editor-background) 0%,
+    var(--vscode-editor-selectionBackground) 50%,
+    var(--vscode-editor-background) 100%
+  );
+  background-size: 1000px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.loading-spinner {
+  animation: rotate 1s linear infinite;
+}
+
+/* Progress Bars */
+.progress-bar {
+  overflow: hidden;
+  position: relative;
+  background: var(--vscode-progressBar-background);
+  border-radius: 2px;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--vscode-button-background);
+  transition: width 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  background: linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.1) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.1) 75%,
+    transparent 75%,
+    transparent
+  );
+  background-size: 30px 30px;
+  animation: progress-stripes 1s linear infinite;
+}
+
+@keyframes progress-stripes {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 30px 0;
+  }
+}
+
+/* Notification Animations */
+.notification {
+  animation: slideInTop 0.3s ease-out, slideOutTop 0.3s ease-out 3s forwards;
+}
+
+@keyframes slideOutTop {
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
+
+/* Drag and Drop Effects */
+.draggable {
+  transition: all 0.2s ease;
+  cursor: move;
+}
+
+.draggable:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.draggable.dragging {
+  opacity: 0.5;
+  transform: scale(1.05);
+  cursor: grabbing;
+}
+
+.drop-zone {
+  transition: all 0.2s ease;
+}
+
+.drop-zone.drag-over {
+  background: var(--vscode-list-dropBackground);
+  border: 2px dashed var(--vscode-focusBorder);
+  transform: scale(1.02);
+}
+
+/* Tooltip Animations */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--vscode-editorWidget-background);
+  color: var(--vscode-editorWidget-foreground);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.tooltip:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-4px);
+}
+
+/* Focus Effects */
+*:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--vscode-focusBorder);
+  transition: box-shadow 0.2s ease;
+}
+
+/* Smooth Scrolling */
+.workspace-content,
+.panel-content {
+  scroll-behavior: smooth;
+}
+
+/* Accordion Animations */
+.accordion-header {
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.accordion-header:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+}
+
+.accordion-item.expanded .accordion-content {
+  max-height: 500px;
+}
+
+.accordion-header::before {
+  content: '▶';
+  display: inline-block;
+  margin-right: 8px;
+  transition: transform 0.2s ease;
+}
+
+.accordion-item.expanded .accordion-header::before {
+  transform: rotate(90deg);
+}
+
+/* Split View Animations */
+.split-container {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.split-divider {
+  transition: all 0.2s ease;
+}
+
+.split-divider:hover {
+  background: var(--vscode-focusBorder);
+}
+
+/* Context Menu Animations */
+.context-menu {
+  animation: scaleIn 0.2s ease-out;
+  transform-origin: top left;
+}
+
+.context-menu-item {
+  transition: all 0.15s ease;
+}
+
+.context-menu-item:hover {
+  background: var(--vscode-list-hoverBackground);
+  padding-left: 12px;
+}
+
+/* Performance Optimizations */
+.will-animate {
+  will-change: transform, opacity;
+}
+
+.hardware-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .workspace-content,
+  .panel-content {
+    scroll-behavior: auto;
+  }
+}

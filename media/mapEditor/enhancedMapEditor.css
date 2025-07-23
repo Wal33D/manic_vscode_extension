@@ -1,0 +1,373 @@
+/* Enhanced Map Editor Styles */
+
+/* Main Container */
+#enhanced-map-editor {
+  display: flex;
+  flex-direction: column;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--vscode-editor-background);
+}
+
+/* Toolbar Ribbon */
+#toolbar-ribbon {
+  display: flex;
+  background: var(--vscode-titleBar-activeBackground);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding: 4px 8px;
+  gap: 16px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+
+.toolbar-section {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 8px;
+  border-right: 1px solid var(--vscode-panel-border);
+}
+
+.toolbar-section:last-child {
+  border-right: none;
+}
+
+.toolbar-section h3 {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--vscode-descriptionForeground);
+  margin: 0 8px 0 0;
+  letter-spacing: 0.5px;
+}
+
+.toolbar-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--vscode-foreground);
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 50px;
+}
+
+.toolbar-btn:hover {
+  background: var(--vscode-toolbar-hoverBackground);
+  border-color: var(--vscode-contrastBorder);
+}
+
+.toolbar-btn.active,
+.toolbar-btn.toggle.active {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+}
+
+.toolbar-btn .icon {
+  font-size: 16px;
+}
+
+.toolbar-btn span:not(.icon) {
+  font-size: 10px;
+}
+
+.toolbar-separator {
+  width: 1px;
+  height: 32px;
+  background: var(--vscode-panel-border);
+  margin: 0 4px;
+}
+
+/* Editor Workspace */
+#editor-workspace {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Panel Docks */
+.panel-dock {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+  background: var(--vscode-sideBar-background);
+  border: 1px solid var(--vscode-panel-border);
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+#left-panels {
+  width: 250px;
+  border-right: 1px solid var(--vscode-panel-border);
+}
+
+#right-panels {
+  width: 300px;
+  border-left: 1px solid var(--vscode-panel-border);
+}
+
+/* Editor Panels */
+.editor-panel {
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.editor-panel.collapsed .panel-content {
+  display: none;
+}
+
+/* Canvas Container */
+#editor-canvas-container {
+  flex: 1;
+  position: relative;
+  overflow: auto;
+  background: var(--vscode-editor-background);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#editor-canvas-container canvas {
+  position: absolute;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+#mapCanvas {
+  z-index: 1;
+  background: #1a1a1a;
+}
+
+#gridCanvas {
+  z-index: 2;
+  pointer-events: none;
+}
+
+#selectionCanvas {
+  z-index: 3;
+  pointer-events: none;
+}
+
+#previewCanvas {
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* Property Inspector */
+#property-content {
+  padding: 12px;
+}
+
+.property-group {
+  margin-bottom: 16px;
+}
+
+.property-group label {
+  display: block;
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.property-input,
+.property-select {
+  width: 100%;
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border);
+  color: var(--vscode-input-foreground);
+  padding: 6px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.property-range {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.property-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.property-checkbox input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Layers Panel */
+#layers-list {
+  padding: 8px;
+}
+
+.layer-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin-bottom: 4px;
+  background: var(--vscode-list-inactiveSelectionBackground);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.layer-item:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.layer-item.active {
+  background: var(--vscode-list-activeSelectionBackground);
+  border: 1px solid var(--vscode-focusBorder);
+}
+
+.layer-visibility {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  opacity: 0.7;
+}
+
+.layer-visibility:hover {
+  opacity: 1;
+}
+
+.layer-name {
+  flex: 1;
+  font-size: 12px;
+}
+
+.layer-opacity {
+  font-size: 11px;
+  color: var(--vscode-descriptionForeground);
+}
+
+/* Status Bar */
+#editor-status-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 22px;
+  background: var(--vscode-statusBar-background);
+  border-top: 1px solid var(--vscode-panel-border);
+  padding: 0 16px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.status-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--vscode-statusBar-foreground);
+}
+
+.status-item .icon {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+/* Tool Grid (reuse from workspace) */
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
+  padding: 8px;
+}
+
+.tool-btn {
+  aspect-ratio: 1;
+  background: var(--vscode-button-secondaryBackground);
+  border: 1px solid var(--vscode-button-border);
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  transition: all 0.2s ease;
+}
+
+.tool-btn:hover {
+  background: var(--vscode-button-hoverBackground);
+  transform: scale(1.05);
+}
+
+.tool-btn.active {
+  background: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  box-shadow: inset 0 0 0 2px var(--vscode-focusBorder);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.editor-panel {
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  #left-panels {
+    width: 200px;
+  }
+  
+  #right-panels {
+    width: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  #toolbar-ribbon {
+    flex-wrap: wrap;
+  }
+  
+  .panel-dock {
+    position: absolute;
+    z-index: 100;
+    background: var(--vscode-sideBar-background);
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  #left-panels.hidden,
+  #right-panels.hidden {
+    display: none;
+  }
+}
+
+/* Dark theme adjustments */
+.vscode-dark .editor-panel {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.vscode-dark #mapCanvas {
+  background: #0a0a0a;
+}

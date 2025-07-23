@@ -1,0 +1,6 @@
+# DatParseError
+
+## Inheritance
+
+- Extends: `Error`
+

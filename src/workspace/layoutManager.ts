@@ -78,6 +78,23 @@ export class LayoutManager {
     }
   }
 
+  public async applyLayout(layout: WorkspaceLayout): Promise<void> {
+    // This would typically communicate with the workspace provider
+    // For now, just save as last used
+    await this.context.globalState.update(LayoutManager.LAST_LAYOUT_KEY, layout);
+
+    // Trigger layout update event
+    vscode.commands.executeCommand('manicMiners.updateWorkspaceLayout', layout);
+  }
+
+  public getCurrentLayout(): WorkspaceLayout {
+    // This would get the current layout from the workspace provider
+    // For now, return a default
+    return {
+      panels: [],
+    };
+  }
+
   public getDefaultLayouts(): SavedLayout[] {
     return [
       {
